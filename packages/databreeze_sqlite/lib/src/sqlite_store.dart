@@ -96,7 +96,7 @@ class BreezeSqliteStore extends BreezeStore {
     required String table,
     BreezeModelBlueprint? blueprint,
     required BreezeFilterExpression filter,
-    BreezeSortBy? sortBy,
+    List<BreezeSortBy> sortBy = const [],
   }) async {
     final (:sql, :params) = buildSql(table, filter, sortBy);
     final result = await executeSql(sql, params);
@@ -113,7 +113,7 @@ class BreezeSqliteStore extends BreezeStore {
     required String table,
     BreezeModelBlueprint? blueprint,
     BreezeFilterExpression? filter,
-    BreezeSortBy? sortBy,
+    List<BreezeSortBy> sortBy = const [],
   }) async {
     final (:sql, :params) = buildSql(table, filter, sortBy);
     final result = await executeSql(sql, params);
@@ -184,8 +184,8 @@ class BreezeSqliteStore extends BreezeStore {
     String entity,
     BreezeAggregationOp op,
     String column, [
-    BreezeFetchOptions? options,
-    BreezeSortBy? sortBy,
+    BreezeFilterExpression? filter,
+    List<BreezeSortBy> sortBy = const [],
   ]) {
     // TODO: implement aggregate
     throw UnimplementedError();
@@ -245,7 +245,7 @@ class BreezeSqliteStore extends BreezeStore {
   ({String sql, List<dynamic> params}) buildSql(
     String table, [
     BreezeFilterExpression? filter,
-    BreezeSortBy? sortBy,
+    List<BreezeSortBy> sortBy = const [],
   ]) {
     final (whereSql, whereParams) = _buildWhere(filter);
     final whereClause = whereSql.isNotEmpty ? ' WHERE $whereSql' : '';
@@ -312,13 +312,13 @@ class BreezeSqliteStore extends BreezeStore {
     );
   }
 
-  (String, List<dynamic>) _buildOrderBy(BreezeSortBy? orderBy) {
-    final result = orderBy?.orders
+  (String, List<dynamic>) _buildOrderBy(List<BreezeSortBy> orderBy) {
+    final result = orderBy
         .map((order) => '${order.column} ${_orderDirections[order.direction]}')
         .join(
           ', ',
         );
-    return (result ?? '', []);
+    return (result, []);
   }
 }
 

@@ -30,7 +30,7 @@ class JsonStore extends BreezeStore {
     required String table,
     BreezeModelBlueprint? blueprint,
     required BreezeFilterExpression filter,
-    BreezeSortBy? sortBy,
+    List<BreezeSortBy> sortBy = const [],
   }) async {
     if (simulateLatency) {
       // Simulate latency
@@ -38,7 +38,7 @@ class JsonStore extends BreezeStore {
     }
 
     Iterable<Map<String, dynamic>> allRecords = records.values;
-    if (sortBy != null && sortBy.isNotEmpty) {
+    if (sortBy.isNotEmpty) {
       allRecords = allRecords.sorted((a, b) => applySort(a, b, sortBy));
     }
 
@@ -54,7 +54,7 @@ class JsonStore extends BreezeStore {
     required String table,
     BreezeModelBlueprint? blueprint,
     BreezeFilterExpression? filter,
-    BreezeSortBy? sortBy,
+    List<BreezeSortBy> sortBy = const [],
   }) async {
     if (simulateLatency) {
       // Simulate latency
@@ -62,7 +62,7 @@ class JsonStore extends BreezeStore {
     }
 
     Iterable<Map<String, dynamic>> allRecords = records.values;
-    if (sortBy != null && sortBy.isNotEmpty) {
+    if (sortBy.isNotEmpty) {
       allRecords = allRecords.sorted((a, b) => applySort(a, b, sortBy));
     }
 
@@ -139,8 +139,8 @@ class JsonStore extends BreezeStore {
     String entity,
     BreezeAggregationOp op,
     String column, [
-    BreezeFetchOptions? options,
-    BreezeSortBy? sortBy,
+    BreezeFilterExpression? filter,
+    List<BreezeSortBy> sortBy = const [],
   ]) {
     // TODO: implement aggregate
     throw UnimplementedError();
@@ -201,8 +201,8 @@ class JsonStore extends BreezeStore {
   }
 
   @protected
-  int applySort(Map<String, dynamic> a, Map<String, dynamic> b, BreezeSortBy sortBy) {
-    for (final order in sortBy.orders) {
+  int applySort(Map<String, dynamic> a, Map<String, dynamic> b, List<BreezeSortBy> sortBy) {
+    for (final order in sortBy) {
       int cmp = compare(a[order.column], b[order.column], inverse: order.direction == BreezeSortDir.desc);
       if (cmp != 0) return cmp;
     }

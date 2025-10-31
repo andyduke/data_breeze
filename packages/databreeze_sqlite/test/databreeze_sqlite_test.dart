@@ -144,7 +144,7 @@ Future<void> main() async {
         migrations: tasksMigration,
       );
 
-      final query = QueryAllTasks(sortBy: BreezeSortBy(TaskColumns.createdAt));
+      final query = QueryAllTasks(sortBy: [BreezeSortBy(TaskColumns.createdAt)]);
       final tasks = await query.fetch(store);
 
       expect(tasks, hasLength(2));
@@ -162,7 +162,7 @@ Future<void> main() async {
         migrations: tasksMigration,
       );
 
-      final query = QueryAllTasks(sortBy: BreezeSortBy(TaskColumns.name, BreezeSortDir.desc));
+      final query = QueryAllTasks(sortBy: [BreezeSortBy(TaskColumns.name, BreezeSortDir.desc)]);
       final tasks = await query.fetch(store);
 
       expect(tasks, hasLength(2));
@@ -186,9 +186,10 @@ Future<void> main() async {
       );
 
       final query = QueryAllTasks(
-        sortBy:
-            BreezeSortBy(TaskColumns.createdAt) //
-              ..sortBy(TaskColumns.name),
+        sortBy: [
+          BreezeSortBy(TaskColumns.createdAt),
+          BreezeSortBy(TaskColumns.name),
+        ],
       );
       final tasks = await query.fetch(store);
 

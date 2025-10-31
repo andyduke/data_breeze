@@ -38,13 +38,13 @@ class BreezeQueryById<T extends BreezeModel> extends BreezeQuery<T?> {
 
 class BreezeQueryAll<T extends BreezeModel> extends BreezeQuery<List<T>> {
   final BreezeFilterExpression? filter;
-  final BreezeSortBy? sortBy;
+  final List<BreezeSortBy> sortBy;
   final BreezeModelBlueprint<T> blueprint;
   final bool autoUpdate;
 
   const BreezeQueryAll({
     this.filter,
-    this.sortBy,
+    this.sortBy = const [],
     required this.blueprint,
     this.autoUpdate = true,
   });

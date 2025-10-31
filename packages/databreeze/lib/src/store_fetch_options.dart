@@ -1,17 +1,4 @@
-import 'package:databreeze/src/filter.dart';
-
-// TODO: Split into filter, order, pagination/limit?
-class BreezeFetchOptions {
-  final BreezeFilterExpression? filter;
-
-  const BreezeFetchOptions({
-    this.filter,
-  });
-
-  // TODO: SortOrder
-
-  // TODO: Pagination
-}
+// TODO: pagination/limit?
 
 // --- Sort
 
@@ -20,30 +7,12 @@ enum BreezeSortDir {
   desc,
 }
 
-class BreezeOrder {
+class BreezeSortBy {
   final String column;
   final BreezeSortDir direction;
 
-  const BreezeOrder(
+  const BreezeSortBy(
     this.column, [
     this.direction = BreezeSortDir.asc,
   ]);
-}
-
-class BreezeSortBy {
-  final List<BreezeOrder> orders;
-
-  factory BreezeSortBy(String column, [BreezeSortDir direction = BreezeSortDir.asc]) => BreezeSortBy.list([
-    BreezeOrder(column, direction),
-  ]);
-
-  void sortBy(String column, [BreezeSortDir direction = BreezeSortDir.asc]) {
-    orders.add(BreezeOrder(column, direction));
-  }
-
-  BreezeSortBy.list([List<BreezeOrder>? orders]) : orders = orders ?? [];
-
-  bool get isEmpty => orders.isEmpty;
-
-  bool get isNotEmpty => orders.isNotEmpty;
 }
