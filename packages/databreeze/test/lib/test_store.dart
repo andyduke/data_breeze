@@ -6,6 +6,7 @@ import 'model_types.dart';
 class TestStore extends JsonStore {
   TestStore({
     super.log,
+    super.models,
     super.records,
     super.typeConverters,
     super.simulateLatency,

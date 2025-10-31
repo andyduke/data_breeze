@@ -11,14 +11,17 @@ import 'package:meta/meta.dart';
 enum BreezeAggregationOp { count, avg, min, max }
 
 abstract class BreezeStore with BreezeStorageTypeConverters {
+  final Map<Type, BreezeModelBlueprint> blueprints;
+
   @override
   late final Set<BreezeTypeConverter> typeConverters;
 
   Set<BreezeTypeConverter> get defaultTypeConverters => {};
 
   BreezeStore({
+    Set<BreezeModelBlueprint> models = const {},
     Set<BreezeTypeConverter> typeConverters = const {},
-  }) {
+  }) : blueprints = Map.fromIterable(models, key: (b) => b.type) {
     this.typeConverters = {...defaultTypeConverters, ...typeConverters};
   }
 
@@ -35,37 +38,50 @@ abstract class BreezeStore with BreezeStorageTypeConverters {
     _changesController.sink.add(event);
   }
 
+  BreezeModelBlueprint blueprintOf(Type modelType) {
+    final blueprint = blueprints[modelType];
+    if (blueprint == null) {
+      throw BreezeBlueprintNotFoundException(modelType);
+    }
+    return blueprint;
+  }
+
   // --- API
 
   Future<M?> fetch<M extends BreezeModel>({
-    required BreezeModelBlueprint<M> blueprint,
     required BreezeFilterExpression filter,
     List<BreezeSortBy> sortBy = const [],
+    BreezeModelBlueprint<M>? blueprint,
   }) async {
+    final modelBlueprint = blueprint ?? blueprintOf(M);
+
     final record = await fetchRecord(
-      table: blueprint.name,
-      blueprint: blueprint,
+      table: modelBlueprint.name,
+      blueprint: modelBlueprint,
       filter: filter,
       sortBy: sortBy,
     );
 
-    return ((record != null) ? blueprint.fromRecord<M>(record, this) : null);
+    return ((record != null) ? modelBlueprint.fromRecord<M>(record, this) : null);
   }
 
   Future<List<M>> fetchAll<M extends BreezeModel>({
-    required BreezeModelBlueprint<M> blueprint,
     BreezeFilterExpression? filter,
     List<BreezeSortBy> sortBy = const [],
+    // TODO: Pagination/limit
+    BreezeModelBlueprint<M>? blueprint,
   }) async {
+    final modelBlueprint = blueprint ?? blueprintOf(M);
+
     final records = await fetchAllRecords(
-      table: blueprint.name,
-      blueprint: blueprint,
+      table: modelBlueprint.name,
+      blueprint: modelBlueprint,
       filter: filter,
       sortBy: sortBy,
     );
 
     return [
-      for (final record in records) blueprint.fromRecord<M>(record, this),
+      for (final record in records) modelBlueprint.fromRecord<M>(record, this),
     ];
   }
 
@@ -210,6 +226,7 @@ abstract class BreezeStore with BreezeStorageTypeConverters {
     BreezeModelBlueprint? blueprint,
     BreezeFilterExpression? filter,
     List<BreezeSortBy> sortBy = const [],
+    // TODO: Pagination/limit
   });
 
   @protected
@@ -243,4 +260,23 @@ abstract class BreezeStore with BreezeStorageTypeConverters {
     BreezeFilterExpression? filter,
     List<BreezeSortBy> sortBy = const [],
   ]);
+}
+
+/*
+class BreezeBlueprintNotFoundError extends ArgumentError {
+  BreezeBlueprintNotFoundError(Type modelType)
+    : super(
+        'The blueprint for model "$modelType" is not defined. '
+            'You most likely forgot to specify it in the `models` parameter when creating the store.',
+        'blueprint',
+      );
+}
+*/
+
+class BreezeBlueprintNotFoundException extends BreezeException {
+  const BreezeBlueprintNotFoundException(Type modelType)
+    : super(
+        'The blueprint for model "$modelType" is not defined.\n'
+        'You most likely forgot to specify it in the `models` parameter when creating the store.',
+      );
 }

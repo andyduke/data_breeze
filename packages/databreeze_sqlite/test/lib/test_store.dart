@@ -6,6 +6,7 @@ import 'model_types.dart';
 class TestStore extends BreezeSqliteStore {
   TestStore({
     super.log,
+    super.models,
     super.migrations,
     super.typeConverters,
   }) : super(onPath: () async => null);

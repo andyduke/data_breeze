@@ -18,6 +18,7 @@ class BreezeSqliteStore extends BreezeStore {
 
   BreezeSqliteStore({
     this.log,
+    super.models,
     required this.onPath,
     this.migrations,
     super.typeConverters,

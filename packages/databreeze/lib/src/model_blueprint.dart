@@ -38,6 +38,8 @@ class BreezeModelBlueprint<M extends BreezeModel> {
          for (final col in columns) col.name: col,
        };
 
+  Type get type => M;
+
   /// Create a model instance from a raw record
   T fromRecord<T>(Map<String, dynamic> record, BreezeStorageTypeConverters converters) =>
       ((T == M) ? builder(fromRaw(record, converters)) : record) as T;

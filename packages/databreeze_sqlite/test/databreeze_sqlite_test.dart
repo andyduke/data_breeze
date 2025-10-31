@@ -21,6 +21,9 @@ Future<void> main() async {
     test('Create', () async {
       final store = TestStore(
         log: log,
+        models: {
+          Task.blueprint,
+        },
         migrations: emptyTaskMigration,
       );
 
@@ -56,10 +59,14 @@ Future<void> main() async {
     test('Read', () async {
       final store = TestStore(
         log: log,
+        models: {
+          Task.blueprint,
+        },
         migrations: singleTaskMigration,
       );
 
-      final query = QueryTaskById(1);
+      // final query = QueryTaskById(1);
+      final query = BreezeQueryById<Task>(1);
       final task = await query.fetch(store);
 
       expect(task, isNotNull);
@@ -71,10 +78,14 @@ Future<void> main() async {
     test('Update', () async {
       final store = TestStore(
         log: log,
+        models: {
+          Task.blueprint,
+        },
         migrations: singleTaskMigration,
       );
 
-      final query = QueryTaskById(1);
+      // final query = QueryTaskById(1);
+      final query = BreezeQueryById<Task>(1);
       final task = await query.fetch(store);
 
       expect(task, isNotNull);
@@ -107,10 +118,14 @@ Future<void> main() async {
     test('Delete', () async {
       final store = TestStore(
         log: log,
+        models: {
+          Task.blueprint,
+        },
         migrations: tasksMigration,
       );
 
-      final query = QueryTaskById(2);
+      // final query = QueryTaskById(2);
+      final query = BreezeQueryById<Task>(2);
       final task2 = await query.fetch(store);
 
       expect(task2, isNotNull);
@@ -141,10 +156,14 @@ Future<void> main() async {
     test('Single field ASC', () async {
       final store = TestStore(
         log: log,
+        models: {
+          Task.blueprint,
+        },
         migrations: tasksMigration,
       );
 
-      final query = QueryAllTasks(sortBy: [BreezeSortBy(TaskColumns.createdAt)]);
+      // final query = QueryAllTasks(sortBy: [BreezeSortBy(TaskColumns.createdAt)]);
+      final query = BreezeQueryAll<Task>(sortBy: [BreezeSortBy(TaskColumns.createdAt)]);
       final tasks = await query.fetch(store);
 
       expect(tasks, hasLength(2));
@@ -159,10 +178,14 @@ Future<void> main() async {
     test('Single field DESC', () async {
       final store = TestStore(
         log: log,
+        models: {
+          Task.blueprint,
+        },
         migrations: tasksMigration,
       );
 
-      final query = QueryAllTasks(sortBy: [BreezeSortBy(TaskColumns.name, BreezeSortDir.desc)]);
+      // final query = QueryAllTasks(sortBy: [BreezeSortBy(TaskColumns.name, BreezeSortDir.desc)]);
+      final query = BreezeQueryAll<Task>(sortBy: [BreezeSortBy(TaskColumns.name, BreezeSortDir.desc)]);
       final tasks = await query.fetch(store);
 
       expect(tasks, hasLength(2));
@@ -177,6 +200,9 @@ Future<void> main() async {
     test('Multiple fields', () async {
       final store = TestStore(
         log: log,
+        models: {
+          Task.blueprint,
+        },
         migrations: createMigrations([
           createTaskTableSql,
           "INSERT INTO tasks(id, name, note, created_at, file) VALUES(3, 'File 3', NULL, '2025-10-30 14:00:00+03:00', 'path/to/file3')",
@@ -185,7 +211,13 @@ Future<void> main() async {
         ]),
       );
 
-      final query = QueryAllTasks(
+      // final query = QueryAllTasks(
+      //   sortBy: [
+      //     BreezeSortBy(TaskColumns.createdAt),
+      //     BreezeSortBy(TaskColumns.name),
+      //   ],
+      // );
+      final query = BreezeQueryAll<Task>(
         sortBy: [
           BreezeSortBy(TaskColumns.createdAt),
           BreezeSortBy(TaskColumns.name),

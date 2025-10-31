@@ -20,6 +20,7 @@ class JsonStore extends BreezeStore {
 
   JsonStore({
     this.log,
+    super.models,
     Map<int, Map<String, dynamic>>? records,
     super.typeConverters,
     this.simulateLatency = false,

@@ -4,58 +4,78 @@ import 'package:databreeze/src/model_blueprint.dart';
 import 'package:databreeze/src/store_fetch_options.dart';
 import 'package:databreeze/src/store.dart';
 import 'package:databreeze/src/store_change.dart';
+import 'package:meta/meta.dart';
 
-abstract class BreezeQuery<T> {
-  const BreezeQuery();
+abstract class BreezeQuery<M, R> {
+  BreezeQuery({
+    BreezeModelBlueprint? blueprint,
+  }) : _blueprint = blueprint;
+
+  final BreezeModelBlueprint? _blueprint;
+
+  /// The blueprint of the query model.
+  ///
+  /// If the blueprint is not specified when creating the query class,
+  /// it will be determined later, immediately before the first
+  /// execution of the query.
+  @protected
+  late BreezeModelBlueprint? blueprint = _blueprint;
 
   bool autoUpdateWhen(BreezeStoreChange change);
 
-  Future<T> fetch(BreezeStore store);
+  Future<R> fetch(BreezeStore store) {
+    if (_blueprint == null && blueprint == null) {
+      blueprint = store.blueprintOf(M);
+    }
+
+    return exec(store);
+  }
+
+  @protected
+  Future<R> exec(BreezeStore store);
 }
 
-class BreezeQueryById<T extends BreezeModel> extends BreezeQuery<T?> {
+class BreezeQueryById<M extends BreezeModel> extends BreezeQuery<M, M?> {
   final int id;
-  final BreezeModelBlueprint<T> blueprint;
   final bool autoUpdate;
 
-  const BreezeQueryById(
+  BreezeQueryById(
     this.id, {
-    required this.blueprint,
+    super.blueprint,
     this.autoUpdate = true,
   });
 
   @override
-  bool autoUpdateWhen(BreezeStoreChange change) => autoUpdate && (change.entity == blueprint.name && change.id == id);
+  bool autoUpdateWhen(BreezeStoreChange change) => autoUpdate && (change.entity == blueprint?.name && change.id == id);
 
   @override
-  Future<T?> fetch(BreezeStore store) async {
+  Future<M?> exec(BreezeStore store) async {
     return store.fetch(
-      blueprint: blueprint,
-      filter: BreezeField(blueprint.key).eq(id),
+      blueprint: blueprint as BreezeModelBlueprint<M>,
+      filter: BreezeField(blueprint!.key).eq(id),
     );
   }
 }
 
-class BreezeQueryAll<T extends BreezeModel> extends BreezeQuery<List<T>> {
+class BreezeQueryAll<M extends BreezeModel> extends BreezeQuery<M, List<M>> {
   final BreezeFilterExpression? filter;
   final List<BreezeSortBy> sortBy;
-  final BreezeModelBlueprint<T> blueprint;
   final bool autoUpdate;
 
-  const BreezeQueryAll({
+  BreezeQueryAll({
     this.filter,
     this.sortBy = const [],
-    required this.blueprint,
+    super.blueprint,
     this.autoUpdate = true,
   });
 
   @override
-  bool autoUpdateWhen(BreezeStoreChange change) => autoUpdate && (change.entity == blueprint.name);
+  bool autoUpdateWhen(BreezeStoreChange change) => autoUpdate && (change.entity == blueprint?.name);
 
   @override
-  Future<List<T>> fetch(BreezeStore store) async {
+  Future<List<M>> exec(BreezeStore store) async {
     return store.fetchAll(
-      blueprint: blueprint,
+      blueprint: blueprint as BreezeModelBlueprint<M>,
       filter: filter,
       sortBy: sortBy,
     );

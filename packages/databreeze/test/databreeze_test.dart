@@ -17,7 +17,35 @@ Future<void> main() async {
   final log = Logger('Breeze');
 
   group('Store fetch', () {
-    test('Fetch single record', () async {
+    test('Fetch single record (using generic type)', () async {
+      final id = 1;
+      final createdAt = DateTime.now();
+
+      final store = TestStore(
+        log: log,
+        models: {
+          Task.blueprint,
+        },
+        records: {
+          id: {
+            'id': id,
+            'name': 'File 1',
+            'note': null,
+            'created_at': createdAt,
+            'file': XFile('path/to/file1'),
+          },
+        },
+      );
+
+      final task = await store.fetch<Task>(filter: BreezeField('id').eq(1));
+
+      expect(task, isNotNull);
+      expect(task!.isNew, isFalse);
+      expect(task.id, isNotNull);
+      expect(task.name, equals('File 1'));
+    });
+
+    test('Fetch single record (using blueprint)', () async {
       final id = 1;
       final createdAt = DateTime.now();
 
@@ -48,6 +76,9 @@ Future<void> main() async {
     test('Fetch multiple records', () async {
       final store = TestStore(
         log: log,
+        models: {
+          Task.blueprint,
+        },
         records: {
           1: {
             'id': 1,
@@ -66,7 +97,7 @@ Future<void> main() async {
         },
       );
 
-      final tasks = await store.fetchAll(blueprint: Task.blueprint);
+      final tasks = await store.fetchAll<Task>();
 
       expect(tasks, hasLength(2));
 
@@ -113,6 +144,9 @@ Future<void> main() async {
 
       final store = TestStore(
         log: log,
+        models: {
+          Task.blueprint,
+        },
         records: {
           id: {
             'id': id,
@@ -124,7 +158,8 @@ Future<void> main() async {
         },
       );
 
-      final query = QueryTaskById(id);
+      // final query = QueryTaskById(id);
+      final query = BreezeQueryById<Task>(id);
       final task = await query.fetch(store);
 
       expect(task, isNotNull);
@@ -139,6 +174,9 @@ Future<void> main() async {
 
       final store = TestStore(
         log: log,
+        models: {
+          Task.blueprint,
+        },
         records: {
           id: {
             'id': id,
@@ -150,7 +188,8 @@ Future<void> main() async {
         },
       );
 
-      final query = QueryTaskById(id);
+      // final query = QueryTaskById(id);
+      final query = BreezeQueryById<Task>(id);
       final task = await query.fetch(store);
 
       expect(task, isNotNull);
@@ -183,6 +222,9 @@ Future<void> main() async {
 
       final store = TestStore(
         log: log,
+        models: {
+          Task.blueprint,
+        },
         records: {
           id1: {
             'id': id1,
@@ -201,7 +243,8 @@ Future<void> main() async {
         },
       );
 
-      final query = QueryTaskById(id2);
+      // final query = QueryTaskById(id2);
+      final query = BreezeQueryById<Task>(id2);
       final task2 = await query.fetch(store);
 
       expect(task2, isNotNull);
@@ -227,6 +270,9 @@ Future<void> main() async {
     test('Single field ASC', () async {
       final store = TestStore(
         log: log,
+        models: {
+          Task.blueprint,
+        },
         records: {
           2: {
             'id': 2,
@@ -245,7 +291,8 @@ Future<void> main() async {
         },
       );
 
-      final query = QueryAllTasks(sortBy: [BreezeSortBy(TaskColumns.name)]);
+      // final query = QueryAllTasks(sortBy: [BreezeSortBy(TaskColumns.name)]);
+      final query = BreezeQueryAll<Task>(sortBy: [BreezeSortBy(TaskColumns.name)]);
       final tasks = await query.fetch(store);
 
       expect(tasks, hasLength(2));
@@ -260,6 +307,9 @@ Future<void> main() async {
     test('Single field DESC', () async {
       final store = TestStore(
         log: log,
+        models: {
+          Task.blueprint,
+        },
         records: {
           2: {
             'id': 2,
@@ -278,7 +328,8 @@ Future<void> main() async {
         },
       );
 
-      final query = QueryAllTasks(sortBy: [BreezeSortBy(TaskColumns.name, BreezeSortDir.desc)]);
+      // final query = QueryAllTasks(sortBy: [BreezeSortBy(TaskColumns.name, BreezeSortDir.desc)]);
+      final query = BreezeQueryAll<Task>(sortBy: [BreezeSortBy(TaskColumns.name, BreezeSortDir.desc)]);
       final tasks = await query.fetch(store);
 
       expect(tasks, hasLength(2));
@@ -293,6 +344,9 @@ Future<void> main() async {
     test('Multiple fields', () async {
       final store = TestStore(
         log: log,
+        models: {
+          Task.blueprint,
+        },
         records: {
           3: {
             'id': 3,
@@ -318,7 +372,13 @@ Future<void> main() async {
         },
       );
 
-      final query = QueryAllTasks(
+      // final query = QueryAllTasks(
+      //   sortBy: [
+      //     BreezeSortBy(TaskColumns.createdAt),
+      //     BreezeSortBy(TaskColumns.name),
+      //   ],
+      // );
+      final query = BreezeQueryAll<Task>(
         sortBy: [
           BreezeSortBy(TaskColumns.createdAt),
           BreezeSortBy(TaskColumns.name),

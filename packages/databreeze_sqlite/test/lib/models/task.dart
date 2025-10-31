@@ -3,6 +3,7 @@ import '../model_types.dart';
 
 // Queries
 
+/*
 class QueryTaskById extends BreezeQueryById<Task> {
   QueryTaskById(
     super.id, {
@@ -17,6 +18,7 @@ class QueryAllTasks extends BreezeQueryAll<Task> {
     super.autoUpdate,
   }) : super(blueprint: Task.blueprint);
 }
+*/
 
 /*
 class QueryTaskById extends BreezeQuery<Task?> {
