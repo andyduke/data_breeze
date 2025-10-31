@@ -77,7 +77,7 @@ abstract class BreezeStore with BreezeStorageTypeConverters {
     if (!record.isFrozen) {
       final tableName = record.schema.name;
       final keyName = record.schema.key;
-      final rawRecord = record.schema.toRaw(record.raw, this);
+      final rawRecord = record.schema.toRaw(record.toRecord(), this);
 
       final newId = await addRecord(name: tableName, key: keyName, record: rawRecord);
 
@@ -96,6 +96,8 @@ abstract class BreezeStore with BreezeStorageTypeConverters {
           id: record.id,
         ),
       );
+
+      record.afterAdd();
     }
     return record;
   }
@@ -106,12 +108,13 @@ abstract class BreezeStore with BreezeStorageTypeConverters {
       final tableName = record.schema.name;
       final keyName = record.schema.key;
       final keyValue = record.id;
-      final rawRecord = record.schema.toRaw(record.raw, this);
+      final rawRecord = record.schema.toRaw(record.toRecord(), this);
 
       if (keyValue != null) {
         record.beforeUpdate();
 
         await updateRecord(name: tableName, key: keyName, keyValue: keyValue, record: rawRecord);
+
         _changesController.add(
           BreezeStoreChange(
             store: this,
@@ -133,7 +136,7 @@ abstract class BreezeStore with BreezeStorageTypeConverters {
       final tableName = record.schema.name;
       final keyName = record.schema.key;
       final keyValue = record.id;
-      final rawRecord = record.schema.toRaw(record.raw, this);
+      final rawRecord = record.schema.toRaw(record.toRecord(), this);
 
       if (keyValue != null) {
         record.beforeDelete();

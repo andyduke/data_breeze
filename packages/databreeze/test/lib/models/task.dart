@@ -3,7 +3,21 @@ import '../model_types.dart';
 
 // Queries
 
-// TODO: Extract to DataQueryById class
+class QueryTaskById extends BreezeQueryById<Task> {
+  QueryTaskById(
+    super.id, {
+    super.autoUpdate,
+  }) : super(blueprint: Task.blueprint);
+}
+
+class QueryTaskAll extends BreezeQueryAll<Task> {
+  QueryTaskAll({
+    super.filter,
+    super.autoUpdate,
+  }) : super(blueprint: Task.blueprint);
+}
+
+/*
 class QueryTaskById extends BreezeQuery<Task?> {
   final int id;
 
@@ -15,7 +29,6 @@ class QueryTaskById extends BreezeQuery<Task?> {
   @override
   Future<Task?> fetch(BreezeStore store) async {
     return store.fetch(
-      // table: 'tasks',
       blueprint: Task.blueprint,
       options: BreezeFetchOptions(
         filter: BreezeField(Task.blueprint.key).eq(id),
@@ -24,7 +37,6 @@ class QueryTaskById extends BreezeQuery<Task?> {
   }
 }
 
-// TODO: Extract to DataQueryAll class
 class QueryTaskAll extends BreezeQuery<List<Task>> {
   @override
   bool autoUpdateWhen(BreezeStoreChange change) => (change.entity == Task.blueprint.name);
@@ -32,11 +44,11 @@ class QueryTaskAll extends BreezeQuery<List<Task>> {
   @override
   Future<List<Task>> fetch(BreezeStore store) async {
     return store.fetchAll(
-      // table: 'tasks',
       blueprint: Task.blueprint,
     );
   }
 }
+*/
 
 // Model
 
@@ -50,7 +62,7 @@ final class _TaskColumns {
 
 class Task extends BreezeModel<int> {
   static final blueprint = BreezeModelBlueprint<Task>(
-    builder: Task.fromRaw,
+    builder: Task.fromRecord,
     name: 'tasks',
     // key: 'id',
     columns: [
@@ -78,16 +90,16 @@ class Task extends BreezeModel<int> {
     required this.file,
   }) : createdAt = createdAt ?? DateTime.now();
 
-  factory Task.fromRaw(BreezeDataRecord raw) => Task(
-    id: raw[_TaskColumns.id],
-    name: raw[_TaskColumns.name] ?? 'n/a',
-    note: raw[_TaskColumns.note],
-    createdAt: raw[_TaskColumns.createdAt],
-    file: raw[_TaskColumns.file],
+  factory Task.fromRecord(BreezeDataRecord record) => Task(
+    id: record[_TaskColumns.id],
+    name: record[_TaskColumns.name] ?? 'n/a',
+    note: record[_TaskColumns.note],
+    createdAt: record[_TaskColumns.createdAt],
+    file: record[_TaskColumns.file],
   );
 
   @override
-  Map<String, dynamic> get raw => {
+  Map<String, dynamic> toRecord() => {
     _TaskColumns.id: id,
     _TaskColumns.name: name,
     _TaskColumns.note: note,

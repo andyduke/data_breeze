@@ -1,18 +1,23 @@
-import 'dart:collection';
 import 'package:databreeze/src/model_blueprint.dart';
 import 'package:meta/meta.dart';
 
-abstract class BreezeModel<K> extends UnmodifiableMapBase<String, dynamic> {
+abstract class BreezeModel<K> {
   @internal
   bool isFrozen = false;
 
   bool get isNew => (id == null);
 
-  K? id;
+  K? get id => _id;
+  K? _id;
+
+  @internal
+  set id(K? newValue) => _id = newValue;
 
   BreezeModel({
-    this.id,
-  });
+    K? id,
+  }) : _id = id;
+
+  Future<void> afterAdd() async {}
 
   Future<void> beforeUpdate() async {}
 
@@ -24,11 +29,5 @@ abstract class BreezeModel<K> extends UnmodifiableMapBase<String, dynamic> {
 
   BreezeModelBlueprint get schema;
 
-  Map<String, dynamic> get raw;
-
-  @override
-  operator [](Object? key) => raw[key];
-
-  @override
-  Iterable<String> get keys => raw.keys;
+  Map<String, dynamic> toRecord();
 }
