@@ -1,5 +1,5 @@
 name: databreeze_sqlite
-description: "A new Flutter package project."
+description: "Implementation of a SQLite backend for DataBreeze."
 version: 0.0.1
 # homepage:
 # repository: https://github.com/my_org/my_repo
@@ -11,6 +11,14 @@ environment:
 
 dependencies:
   databreeze: ^0.0.1
+
+  meta: ^1.16.0
+  # collection: ^1.19.1
+  path: ^1.9.1
+  logging: ^1.3.0
+  sqlite_async: ^0.12.2
+  sqlite3: ^2.9.3
+  # sqlite3_flutter_libs: ^0.5.40
 
 dev_dependencies:
   lints: ^5.0.0

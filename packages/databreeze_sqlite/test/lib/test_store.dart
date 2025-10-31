@@ -1,15 +1,14 @@
 import 'package:databreeze/databreeze.dart';
+import 'package:databreeze_sqlite/src/sqlite_store.dart';
 
-import 'json_store.dart';
 import 'model_types.dart';
 
-class TestStore extends JsonStore {
+class TestStore extends BreezeSqliteStore {
   TestStore({
     super.log,
-    super.records,
+    super.migrations,
     super.typeConverters,
-    super.simulateLatency,
-  });
+  }) : super(onPath: () async => null);
 
   @override
   Set<BreezeTypeConverter> get defaultTypeConverters => {

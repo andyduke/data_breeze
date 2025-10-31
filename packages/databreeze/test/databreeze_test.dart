@@ -37,7 +37,7 @@ Future<void> main() async {
             'name': 'File 1',
             'note': null,
             'created_at': newTask.createdAt,
-            'file': XFile('path/to/file1'),
+            'file': 'path/to/file1',
           },
         }),
       );
@@ -81,7 +81,7 @@ Future<void> main() async {
             'name': 'File 1',
             'note': null,
             'created_at': createdAt,
-            'file': XFile('path/to/file1'),
+            'file': 'path/to/file1',
           },
         },
       );
@@ -105,7 +105,7 @@ Future<void> main() async {
             'name': 'File 1*',
             'note': null,
             'created_at': task.createdAt,
-            'file': XFile('path/to/file1'),
+            'file': 'path/to/file1',
           },
         }),
       );
@@ -125,14 +125,14 @@ Future<void> main() async {
             'name': 'File 1',
             'note': null,
             'created_at': createdAt1,
-            'file': XFile('path/to/file1'),
+            'file': 'path/to/file1',
           },
           id2: {
             'id': id2,
             'name': 'File 2',
             'note': null,
             'created_at': createdAt2,
-            'file': XFile('path/to/file2'),
+            'file': 'path/to/file2',
           },
         },
       );
@@ -152,7 +152,7 @@ Future<void> main() async {
             'name': 'File 1',
             'note': null,
             'created_at': createdAt1,
-            'file': XFile('path/to/file1'),
+            'file': 'path/to/file1',
           },
         }),
       );
