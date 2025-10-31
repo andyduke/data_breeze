@@ -1,0 +1,67 @@
+abstract class BreezeTypeConverter<DartType, StorageType> {
+  DartType toDart(StorageType value);
+
+  StorageType toStorage(DartType value);
+
+  bool isDartType(Type type) {
+    final result = (type == DartType) || ((type == Null) && _isNullableType<DartType>());
+    return result;
+  }
+
+  bool isStorageType(Type type) {
+    final result = (type.toString() == StorageType.toString()) || ((type == Null) && _isNullableType<StorageType>());
+    return result;
+  }
+
+  /// Checks whether the converter can convert the value to the specified Dart type.
+  ///
+  /// Note: It does not check the storage type, as this is unnecessary.
+  bool canConvertToStorage(Type dartType) {
+    final canConvert = isDartType(dartType);
+    return canConvert;
+  }
+
+  /// Checks whether the converter can convert a value of the specified storage type to a Dart type.
+  bool canConvertToDart(Type storageType, Type dartType) {
+    final canConvert = isStorageType(storageType) && isDartType(dartType);
+    return canConvert;
+  }
+
+  Type get dartType => DartType;
+
+  Type get storageType => StorageType;
+
+  bool _isType<T>(Type t) => t == T;
+  bool _isNullableType<T>() => _isType<T?>(T);
+
+  @override
+  bool operator ==(covariant BreezeTypeConverter other) =>
+      (dartType == other.dartType) && (storageType == other.storageType);
+
+  @override
+  int get hashCode => Object.hash(dartType, storageType);
+}
+
+mixin BreezeStorageTypeConverters {
+  Set<BreezeTypeConverter> get typeConverters;
+
+  dynamic toDartValue(dynamic value, {required Type dartType}) {
+    final storageType = value.runtimeType;
+
+    for (final converter in typeConverters) {
+      if (converter.canConvertToDart(storageType, dartType)) {
+        return converter.toDart(value);
+      }
+    }
+    return null;
+  }
+
+  dynamic toStorageValue(dynamic value, {required Type dartType}) {
+    for (final converter in typeConverters) {
+      if (converter.canConvertToStorage(dartType)) {
+        return converter.toStorage(value);
+      }
+    }
+    return null;
+  }
+}
