@@ -3,8 +3,6 @@ import 'package:databreeze/databreeze.dart';
 import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
 
-import 'model_types.dart';
-
 class JsonStore extends BreezeStore {
   static const _latency = Duration(milliseconds: 500);
 
@@ -31,16 +29,22 @@ class JsonStore extends BreezeStore {
   Future<BreezeDataRecord?> fetchRecord({
     required String table,
     BreezeModelBlueprint? blueprint,
-    required BreezeFetchOptions options,
+    required BreezeFilterExpression filter,
+    BreezeSortBy? sortBy,
   }) async {
     if (simulateLatency) {
       // Simulate latency
       await Future.delayed(_latency);
     }
 
-    final record = records.values.firstWhereOrNull((entry) => applyFilter(entry, options.filter));
+    Iterable<Map<String, dynamic>> allRecords = records.values;
+    if (sortBy != null && sortBy.isNotEmpty) {
+      allRecords = allRecords.sorted((a, b) => applySort(a, b, sortBy));
+    }
 
-    log?.finest('Fetch $options: $record');
+    final record = allRecords.firstWhereOrNull((entry) => applyFilter(entry, filter));
+
+    log?.finest('Fetch $filter: $record');
 
     return record;
   }
@@ -49,19 +53,25 @@ class JsonStore extends BreezeStore {
   Future<List<BreezeDataRecord>> fetchAllRecords({
     required String table,
     BreezeModelBlueprint? blueprint,
-    BreezeFetchOptions? options,
+    BreezeFilterExpression? filter,
+    BreezeSortBy? sortBy,
   }) async {
     if (simulateLatency) {
       // Simulate latency
       await Future.delayed(_latency);
     }
 
-    var result = records.values;
-    if (options != null) {
-      result = result.where((entry) => applyFilter(entry, options.filter));
+    Iterable<Map<String, dynamic>> allRecords = records.values;
+    if (sortBy != null && sortBy.isNotEmpty) {
+      allRecords = allRecords.sorted((a, b) => applySort(a, b, sortBy));
     }
 
-    log?.finest('Fetch All $options: $result');
+    var result = allRecords;
+    if (filter != null) {
+      result = result.where((entry) => applyFilter(entry, filter));
+    }
+
+    log?.finest('Fetch All $filter: $result');
 
     return result.toList(growable: false);
   }
@@ -125,7 +135,13 @@ class JsonStore extends BreezeStore {
   }
 
   @override
-  Future<T?> aggregate<T>(String entity, BreezeAggregationOp op, String column, [BreezeFetchOptions? options]) {
+  Future<T?> aggregate<T>(
+    String entity,
+    BreezeAggregationOp op,
+    String column, [
+    BreezeFetchOptions? options,
+    BreezeSortBy? sortBy,
+  ]) {
     // TODO: implement aggregate
     throw UnimplementedError();
   }
@@ -176,8 +192,30 @@ class JsonStore extends BreezeStore {
       return applyFilter(entry, filter.left) && applyFilter(entry, filter.right);
     } else if (filter is BreezeOrFilter) {
       return applyFilter(entry, filter.left) || applyFilter(entry, filter.right);
+    } else if (filter == null) {
+      // Do nothing
+      return true;
     } else {
       throw UnsupportedError('Unknown filter type: $filter');
+    }
+  }
+
+  @protected
+  int applySort(Map<String, dynamic> a, Map<String, dynamic> b, BreezeSortBy sortBy) {
+    for (final order in sortBy.orders) {
+      int cmp = compare(a[order.column], b[order.column], inverse: order.direction == BreezeSortDir.desc);
+      if (cmp != 0) return cmp;
+    }
+    return 0;
+  }
+
+  @protected
+  int compare(dynamic a, dynamic b, {bool inverse = false}) {
+    final mul = inverse ? -1 : 1;
+    if (a is Comparable) {
+      return mul * a.compareTo(b);
+    } else {
+      return mul * ((a == b) ? 0 : (a > b ? 1 : -1));
     }
   }
 }

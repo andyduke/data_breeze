@@ -1,6 +1,7 @@
-import 'package:databreeze/src/fetch_options.dart';
 import 'package:databreeze/src/filter.dart';
+import 'package:databreeze/src/model.dart';
 import 'package:databreeze/src/model_blueprint.dart';
+import 'package:databreeze/src/store_fetch_options.dart';
 import 'package:databreeze/src/store.dart';
 import 'package:databreeze/src/store_change.dart';
 
@@ -12,9 +13,9 @@ abstract class BreezeQuery<T> {
   Future<T> fetch(BreezeStore store);
 }
 
-class BreezeQueryById<T> extends BreezeQuery<T?> {
+class BreezeQueryById<T extends BreezeModel> extends BreezeQuery<T?> {
   final int id;
-  final BreezeModelBlueprint blueprint;
+  final BreezeModelBlueprint<T> blueprint;
   final bool autoUpdate;
 
   const BreezeQueryById(
@@ -30,20 +31,20 @@ class BreezeQueryById<T> extends BreezeQuery<T?> {
   Future<T?> fetch(BreezeStore store) async {
     return store.fetch(
       blueprint: blueprint,
-      options: BreezeFetchOptions(
-        filter: BreezeField(blueprint.key).eq(id),
-      ),
+      filter: BreezeField(blueprint.key).eq(id),
     );
   }
 }
 
-class BreezeQueryAll<T> extends BreezeQuery<List<T>> {
+class BreezeQueryAll<T extends BreezeModel> extends BreezeQuery<List<T>> {
   final BreezeFilterExpression? filter;
-  final BreezeModelBlueprint blueprint;
+  final BreezeSortBy? sortBy;
+  final BreezeModelBlueprint<T> blueprint;
   final bool autoUpdate;
 
   const BreezeQueryAll({
     this.filter,
+    this.sortBy,
     required this.blueprint,
     this.autoUpdate = true,
   });
@@ -55,9 +56,8 @@ class BreezeQueryAll<T> extends BreezeQuery<List<T>> {
   Future<List<T>> fetch(BreezeStore store) async {
     return store.fetchAll(
       blueprint: blueprint,
-      options: BreezeFetchOptions(
-        filter: filter,
-      ),
+      filter: filter,
+      sortBy: sortBy,
     );
   }
 }

@@ -1,3 +1,4 @@
+import 'package:databreeze/databreeze.dart';
 import 'package:databreeze_sqlite/src/sqlite_type_converters.dart';
 import 'package:test/test.dart';
 import 'package:logging/logging.dart';
@@ -133,6 +134,74 @@ Future<void> main() async {
           ],
         ),
       );
+    });
+  });
+
+  group('Sort Order', () {
+    test('Single field ASC', () async {
+      final store = TestStore(
+        log: log,
+        migrations: tasksMigration,
+      );
+
+      final query = QueryAllTasks(sortBy: BreezeSortBy(TaskColumns.createdAt));
+      final tasks = await query.fetch(store);
+
+      expect(tasks, hasLength(2));
+
+      expect(tasks[0].id, equals(2));
+      expect(tasks[0].name, equals('File 2'));
+
+      expect(tasks[1].id, equals(1));
+      expect(tasks[1].name, equals('File 1'));
+    });
+
+    test('Single field DESC', () async {
+      final store = TestStore(
+        log: log,
+        migrations: tasksMigration,
+      );
+
+      final query = QueryAllTasks(sortBy: BreezeSortBy(TaskColumns.name, BreezeSortDir.desc));
+      final tasks = await query.fetch(store);
+
+      expect(tasks, hasLength(2));
+
+      expect(tasks[0].id, equals(2));
+      expect(tasks[0].name, equals('File 2'));
+
+      expect(tasks[1].id, equals(1));
+      expect(tasks[1].name, equals('File 1'));
+    });
+
+    test('Multiple fields', () async {
+      final store = TestStore(
+        log: log,
+        migrations: createMigrations([
+          createTaskTableSql,
+          "INSERT INTO tasks(id, name, note, created_at, file) VALUES(3, 'File 3', NULL, '2025-10-30 14:00:00+03:00', 'path/to/file3')",
+          "INSERT INTO tasks(id, name, note, created_at, file) VALUES(1, 'File 1', NULL, '2025-10-30 15:00:00+03:00', 'path/to/file1')",
+          "INSERT INTO tasks(id, name, note, created_at, file) VALUES(2, 'File 2', NULL, '2025-10-30 14:00:00+03:00', 'path/to/file2')",
+        ]),
+      );
+
+      final query = QueryAllTasks(
+        sortBy:
+            BreezeSortBy(TaskColumns.createdAt) //
+              ..sortBy(TaskColumns.name),
+      );
+      final tasks = await query.fetch(store);
+
+      expect(tasks, hasLength(3));
+
+      expect(tasks[0].id, equals(2));
+      expect(tasks[0].name, equals('File 2'));
+
+      expect(tasks[1].id, equals(3));
+      expect(tasks[1].name, equals('File 3'));
+
+      expect(tasks[2].id, equals(1));
+      expect(tasks[2].name, equals('File 1'));
     });
   });
 }

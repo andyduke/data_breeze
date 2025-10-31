@@ -1,7 +1,8 @@
 import 'dart:async';
-import 'package:databreeze/src/fetch_options.dart';
+import 'package:databreeze/src/filter.dart';
 import 'package:databreeze/src/model.dart';
 import 'package:databreeze/src/model_blueprint.dart';
+import 'package:databreeze/src/store_fetch_options.dart';
 import 'package:databreeze/src/store_change.dart';
 import 'package:databreeze/src/type_converters.dart';
 import 'package:databreeze/src/types.dart';
@@ -36,27 +37,31 @@ abstract class BreezeStore with BreezeStorageTypeConverters {
 
   // --- API
 
-  Future<M?> fetch<M>({
-    required BreezeModelBlueprint blueprint,
-    required BreezeFetchOptions options,
+  Future<M?> fetch<M extends BreezeModel>({
+    required BreezeModelBlueprint<M> blueprint,
+    required BreezeFilterExpression filter,
+    BreezeSortBy? sortBy,
   }) async {
     final record = await fetchRecord(
       table: blueprint.name,
       blueprint: blueprint,
-      options: options,
+      filter: filter,
+      sortBy: sortBy,
     );
 
     return ((record != null) ? blueprint.fromRecord<M>(record, this) : null);
   }
 
-  Future<List<M>> fetchAll<M>({
-    required BreezeModelBlueprint blueprint,
-    BreezeFetchOptions? options,
+  Future<List<M>> fetchAll<M extends BreezeModel>({
+    required BreezeModelBlueprint<M> blueprint,
+    BreezeFilterExpression? filter,
+    BreezeSortBy? sortBy,
   }) async {
     final records = await fetchAllRecords(
       table: blueprint.name,
       blueprint: blueprint,
-      options: options,
+      filter: filter,
+      sortBy: sortBy,
     );
 
     return [
@@ -161,16 +166,16 @@ abstract class BreezeStore with BreezeStorageTypeConverters {
     return record;
   }
 
-  Future<int> count(String entity, String column, [BreezeFetchOptions? options]) =>
+  Future<int> count(String entity, String column, [BreezeFetchOptions? options, BreezeSortBy? sortBy]) =>
       aggregate<int>(entity, BreezeAggregationOp.count, column, options).then((value) => value ?? 0);
 
-  Future<num> average(String entity, String column, [BreezeFetchOptions? options]) =>
+  Future<num> average(String entity, String column, [BreezeFetchOptions? options, BreezeSortBy? sortBy]) =>
       aggregate<num>(entity, BreezeAggregationOp.avg, column, options).then((value) => value ?? 0);
 
-  Future<num> min(String entity, String column, [BreezeFetchOptions? options]) =>
+  Future<num> min(String entity, String column, [BreezeFetchOptions? options, BreezeSortBy? sortBy]) =>
       aggregate<num>(entity, BreezeAggregationOp.min, column, options).then((value) => value ?? 0);
 
-  Future<num> max(String entity, String column, [BreezeFetchOptions? options]) =>
+  Future<num> max(String entity, String column, [BreezeFetchOptions? options, BreezeSortBy? sortBy]) =>
       aggregate<num>(entity, BreezeAggregationOp.max, column, options).then((value) => value ?? 0);
 
   Future<void> close() async {}
@@ -180,13 +185,15 @@ abstract class BreezeStore with BreezeStorageTypeConverters {
   Future<BreezeDataRecord?> fetchRecord({
     required String table,
     BreezeModelBlueprint? blueprint,
-    required BreezeFetchOptions options,
+    required BreezeFilterExpression filter,
+    BreezeSortBy? sortBy,
   });
 
   Future<List<BreezeDataRecord>> fetchAllRecords({
     required String table,
     BreezeModelBlueprint? blueprint,
-    BreezeFetchOptions? options,
+    BreezeFilterExpression? filter,
+    BreezeSortBy? sortBy,
   });
 
   @protected
@@ -213,5 +220,11 @@ abstract class BreezeStore with BreezeStorageTypeConverters {
   });
 
   @protected
-  Future<T?> aggregate<T>(String entity, BreezeAggregationOp op, String column, [BreezeFetchOptions? options]);
+  Future<T?> aggregate<T>(
+    String entity,
+    BreezeAggregationOp op,
+    String column, [
+    BreezeFetchOptions? options,
+    BreezeSortBy? sortBy,
+  ]);
 }

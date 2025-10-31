@@ -10,9 +10,10 @@ class QueryTaskById extends BreezeQueryById<Task> {
   }) : super(blueprint: Task.blueprint);
 }
 
-class QueryTaskAll extends BreezeQueryAll<Task> {
-  QueryTaskAll({
+class QueryAllTasks extends BreezeQueryAll<Task> {
+  QueryAllTasks({
     super.filter,
+    super.sortBy,
     super.autoUpdate,
   }) : super(blueprint: Task.blueprint);
 }
@@ -52,7 +53,7 @@ class QueryTaskAll extends BreezeQuery<List<Task>> {
 
 // Model
 
-final class _TaskColumns {
+final class TaskColumns {
   static const id = 'id';
   static const name = 'name';
   static const note = 'note';
@@ -66,11 +67,11 @@ class Task extends BreezeModel<int> {
     name: 'tasks',
     // key: 'id',
     columns: [
-      BreezeModelColumn<int>(_TaskColumns.id, isPrimaryKey: true),
-      BreezeModelColumn<String>(_TaskColumns.name),
-      BreezeModelColumn<String?>(_TaskColumns.note),
-      BreezeModelColumn<DateTime>(_TaskColumns.createdAt),
-      BreezeModelColumn<XFile>(_TaskColumns.file),
+      BreezeModelColumn<int>(TaskColumns.id, isPrimaryKey: true),
+      BreezeModelColumn<String>(TaskColumns.name),
+      BreezeModelColumn<String?>(TaskColumns.note),
+      BreezeModelColumn<DateTime>(TaskColumns.createdAt),
+      BreezeModelColumn<XFile>(TaskColumns.file),
     ],
   );
 
@@ -91,20 +92,20 @@ class Task extends BreezeModel<int> {
   }) : createdAt = createdAt ?? DateTime.now();
 
   factory Task.fromRecord(BreezeDataRecord record) => Task(
-    id: record[_TaskColumns.id],
-    name: record[_TaskColumns.name] ?? 'n/a',
-    note: record[_TaskColumns.note],
-    createdAt: record[_TaskColumns.createdAt],
-    file: record[_TaskColumns.file],
+    id: record[TaskColumns.id],
+    name: record[TaskColumns.name] ?? 'n/a',
+    note: record[TaskColumns.note],
+    createdAt: record[TaskColumns.createdAt],
+    file: record[TaskColumns.file],
   );
 
   @override
   Map<String, dynamic> toRecord() => {
-    _TaskColumns.id: id,
-    _TaskColumns.name: name,
-    _TaskColumns.note: note,
-    _TaskColumns.createdAt: createdAt,
-    _TaskColumns.file: file,
+    TaskColumns.id: id,
+    TaskColumns.name: name,
+    TaskColumns.note: note,
+    TaskColumns.createdAt: createdAt,
+    TaskColumns.file: file,
   };
 
   @override

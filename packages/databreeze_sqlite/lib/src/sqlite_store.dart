@@ -33,6 +33,11 @@ class BreezeSqliteStore extends BreezeStore {
     BreezeSqliteDateTimeStringConverter(),
   };
 
+  final _orderDirections = {
+    BreezeSortDir.asc: 'ASC',
+    BreezeSortDir.desc: 'DESC',
+  };
+
   Future<SqliteConnection> createDatabase() async {
     final location = await onPath();
     final db = SqliteDatabase.withFactory(
@@ -90,14 +95,15 @@ class BreezeSqliteStore extends BreezeStore {
   Future<BreezeDataRecord?> fetchRecord({
     required String table,
     BreezeModelBlueprint? blueprint,
-    required BreezeFetchOptions options,
+    required BreezeFilterExpression filter,
+    BreezeSortBy? sortBy,
   }) async {
-    final (:sql, :params) = buildSql(table, options.filter);
+    final (:sql, :params) = buildSql(table, filter, sortBy);
     final result = await executeSql(sql, params);
 
     final record = result.isNotEmpty ? Map.from(result.first).cast<String, dynamic>() : null;
 
-    log?.finest('Fetch $options: $record');
+    log?.finest('Fetch $filter: $record');
 
     return record;
   }
@@ -106,14 +112,15 @@ class BreezeSqliteStore extends BreezeStore {
   Future<List<BreezeDataRecord>> fetchAllRecords({
     required String table,
     BreezeModelBlueprint? blueprint,
-    BreezeFetchOptions? options,
+    BreezeFilterExpression? filter,
+    BreezeSortBy? sortBy,
   }) async {
-    final (:sql, :params) = buildSql(table, options?.filter);
+    final (:sql, :params) = buildSql(table, filter, sortBy);
     final result = await executeSql(sql, params);
 
     final records = result.map((r) => Map.from(r).cast<String, dynamic>()).toList(growable: false);
 
-    log?.finest('Fetch All $options: $records');
+    log?.finest('Fetch All $filter: $records');
 
     return records;
   }
@@ -173,7 +180,13 @@ class BreezeSqliteStore extends BreezeStore {
   }
 
   @override
-  Future<T?> aggregate<T>(String entity, BreezeAggregationOp op, String column, [BreezeFetchOptions? options]) {
+  Future<T?> aggregate<T>(
+    String entity,
+    BreezeAggregationOp op,
+    String column, [
+    BreezeFetchOptions? options,
+    BreezeSortBy? sortBy,
+  ]) {
     // TODO: implement aggregate
     throw UnimplementedError();
   }
@@ -229,12 +242,21 @@ class BreezeSqliteStore extends BreezeStore {
   }
 
   @protected
-  ({String sql, List<dynamic> params}) buildSql(String table, BreezeFilterExpression? filter) {
+  ({String sql, List<dynamic> params}) buildSql(
+    String table, [
+    BreezeFilterExpression? filter,
+    BreezeSortBy? sortBy,
+  ]) {
     final (whereSql, whereParams) = _buildWhere(filter);
+    final whereClause = whereSql.isNotEmpty ? ' WHERE $whereSql' : '';
 
-    final where = whereSql.isNotEmpty ? 'WHERE $whereSql' : '';
+    final (orderSql, orderParams) = _buildOrderBy(sortBy);
+    final orderClause = orderSql.isNotEmpty ? ' ORDER BY $orderSql' : '';
 
-    return (sql: 'SELECT * FROM $table $where', params: whereParams);
+    return (
+      sql: 'SELECT * FROM $table$whereClause$orderClause',
+      params: [...whereParams, ...orderParams],
+    );
   }
 
   (String, List<dynamic>) _buildWhere(BreezeFilterExpression? filter) {
@@ -288,6 +310,15 @@ class BreezeSqliteStore extends BreezeStore {
       '($leftSql $op $rightSql)',
       [...leftArgs, ...rightArgs],
     );
+  }
+
+  (String, List<dynamic>) _buildOrderBy(BreezeSortBy? orderBy) {
+    final result = orderBy?.orders
+        .map((order) => '${order.column} ${_orderDirections[order.direction]}')
+        .join(
+          ', ',
+        );
+    return (result ?? '', []);
   }
 }
 
