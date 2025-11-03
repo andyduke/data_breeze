@@ -92,6 +92,27 @@ class BreezeSqliteStore extends BreezeStore {
 
   // Database API
 
+  // TODO: fetchUsingSql
+
+  Future<List<M>> fetchAllUsingSql<M extends BreezeModel>({
+    required String sql,
+    List<Object?> params = const [],
+    BreezeModelBlueprint<M>? blueprint,
+  }) async {
+    final modelBlueprint = blueprint ?? blueprintOf(M);
+
+    final records = await fetchAllRecordsUsingSql(
+      table: modelBlueprint.name,
+      blueprint: modelBlueprint,
+      sql: sql,
+      params: params,
+    );
+
+    return [
+      for (final record in records) modelBlueprint.fromRecord<M>(record, this),
+    ];
+  }
+
   @override
   Future<BreezeDataRecord?> fetchRecord({
     required String table,
@@ -122,6 +143,21 @@ class BreezeSqliteStore extends BreezeStore {
     final records = result.map((r) => Map.from(r).cast<String, dynamic>()).toList(growable: false);
 
     log?.finest('Fetch All $filter: $records');
+
+    return records;
+  }
+
+  Future<List<BreezeDataRecord>> fetchAllRecordsUsingSql({
+    required String table,
+    BreezeModelBlueprint? blueprint,
+    required String sql,
+    List<Object?> params = const [],
+  }) async {
+    final result = await executeSql(sql, params);
+
+    final records = result.map((r) => Map.from(r).cast<String, dynamic>()).toList(growable: false);
+
+    log?.finest('Fetch All $sql ($params): $records');
 
     return records;
   }
@@ -191,6 +227,10 @@ class BreezeSqliteStore extends BreezeStore {
     // TODO: implement aggregate
     throw UnimplementedError();
   }
+
+  // TODO: aggregateUsingSql
+
+  // TODO: countUsingSql, avgUsingSql, minUsingSql, maxUsingSql
 
   dynamic _tryCastJson(BreezeSqliteJsonB value) {
     try {

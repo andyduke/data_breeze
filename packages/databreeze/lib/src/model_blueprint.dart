@@ -53,7 +53,11 @@ class BreezeModelBlueprint<M extends BreezeModel> {
       raw.map((k, v) => MapEntry(k, valueToStorage(k, v, converters)));
 
   dynamic valueFromStorage(String name, dynamic value, BreezeStorageTypeConverters converters) {
-    final column = columns[name]!;
+    final column = columns[name];
+
+    if (column == null) {
+      return value;
+    }
 
     if (!column.isNullable && value == null) {
       throw Exception('[valueFromStorage] The value for column "$name" cannot be null.');

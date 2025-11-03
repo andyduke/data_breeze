@@ -1,5 +1,6 @@
 import 'package:databreeze/databreeze.dart';
 import 'package:databreeze_sqlite/src/sqlite_type_converters.dart';
+import 'package:sqlite_async/sqlite_async.dart';
 import 'package:test/test.dart';
 import 'package:logging/logging.dart';
 // import 'package:databreeze/databreeze.dart';
@@ -7,6 +8,7 @@ import 'package:logging/logging.dart';
 import 'lib/migrations/task_migrations.dart';
 import 'lib/model_types.dart';
 import 'lib/models/task.dart';
+import 'lib/models/task_with_progress.dart';
 import 'lib/test_store.dart';
 
 Future<void> main() async {
@@ -235,6 +237,59 @@ Future<void> main() async {
 
       expect(tasks[2].id, equals(1));
       expect(tasks[2].name, equals('File 1'));
+    });
+  });
+
+  group('Query with raw SQL', () {
+    test('SELECT with JOIN', () async {
+      final store = TestStore(
+        log: log,
+        models: {
+          TaskWithProgress.blueprint,
+        },
+        migrations: SqliteMigrations()
+          ..add(
+            SqliteMigration(
+              1,
+              (tx) async {
+                await tx.execute(createTaskTableSql);
+
+                await tx.execute('''
+  INSERT INTO tasks(id, name, note, created_at, file) VALUES(1, 'File 1', NULL, '2025-10-30 12:00:00+03:00', 'path/to/file1')
+''');
+
+                await tx.execute('''
+  INSERT INTO tasks(id, name, note, created_at, file) VALUES(2, 'File 2', NULL, '2025-10-30 11:00:00+03:00', 'path/to/file2')
+''');
+
+                await tx.execute('''
+CREATE TEMP TABLE task_progress(
+  id INT PRIMARY KEY,
+  task_id INT,
+  progress REAL
+)
+''');
+
+                await tx.execute('''
+  INSERT INTO task_progress(id, task_id, progress) VALUES(1, 1, 0.3)
+''');
+              },
+            ),
+          ),
+      );
+
+      final query = QueryAllTaskWithProgress();
+      final tasks = await query.fetch(store);
+
+      expect(tasks, hasLength(2));
+
+      expect(tasks[0].id, equals(1));
+      expect(tasks[0].name, equals('File 1'));
+      expect(tasks[0].progress, equals(0.3));
+
+      expect(tasks[1].id, equals(2));
+      expect(tasks[1].name, equals('File 2'));
+      expect(tasks[1].progress, isNull);
     });
   });
 }

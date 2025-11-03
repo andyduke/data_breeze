@@ -6,12 +6,14 @@ import 'package:databreeze/src/store.dart';
 import 'package:databreeze/src/store_change.dart';
 import 'package:meta/meta.dart';
 
-abstract class BreezeQuery<M, R> {
+// TODO: Refactor - extract blueprint property to BreezeQueryWithBlueprint;
+//  BreezeQueryById & BreezeQueryAll must extends BreezeQueryWithBlueprint
+abstract class BreezeQuery<M extends BreezeModel, R> {
   BreezeQuery({
-    BreezeModelBlueprint? blueprint,
+    BreezeModelBlueprint<M>? blueprint,
   }) : _blueprint = blueprint;
 
-  final BreezeModelBlueprint? _blueprint;
+  final BreezeModelBlueprint<M>? _blueprint;
 
   /// The blueprint of the query model.
   ///
@@ -19,13 +21,13 @@ abstract class BreezeQuery<M, R> {
   /// it will be determined later, immediately before the first
   /// execution of the query.
   @protected
-  late BreezeModelBlueprint? blueprint = _blueprint;
+  late BreezeModelBlueprint<M>? blueprint = _blueprint;
 
   bool autoUpdateWhen(BreezeStoreChange change);
 
   Future<R> fetch(BreezeStore store) {
     if (_blueprint == null && blueprint == null) {
-      blueprint = store.blueprintOf(M);
+      blueprint = store.blueprintOf(M) as BreezeModelBlueprint<M>?;
     }
 
     return exec(store);
@@ -51,7 +53,7 @@ class BreezeQueryById<M extends BreezeModel> extends BreezeQuery<M, M?> {
   @override
   Future<M?> exec(BreezeStore store) async {
     return store.fetch(
-      blueprint: blueprint as BreezeModelBlueprint<M>,
+      blueprint: blueprint /* as BreezeModelBlueprint<M>*/,
       filter: BreezeField(blueprint!.key).eq(id),
     );
   }
@@ -75,7 +77,7 @@ class BreezeQueryAll<M extends BreezeModel> extends BreezeQuery<M, List<M>> {
   @override
   Future<List<M>> exec(BreezeStore store) async {
     return store.fetchAll(
-      blueprint: blueprint as BreezeModelBlueprint<M>,
+      blueprint: blueprint /* as BreezeModelBlueprint<M>*/,
       filter: filter,
       sortBy: sortBy,
     );
