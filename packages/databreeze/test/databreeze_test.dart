@@ -1,8 +1,6 @@
 import 'package:databreeze/databreeze.dart';
-import 'package:databreeze/src/store_fetch_options.dart';
 import 'package:test/test.dart';
 import 'package:logging/logging.dart';
-// import 'package:databreeze/databreeze.dart';
 
 import 'lib/model_types.dart';
 import 'lib/models/task.dart';
@@ -42,6 +40,7 @@ Future<void> main() async {
       expect(task, isNotNull);
       expect(task!.isNew, isFalse);
       expect(task.id, isNotNull);
+      expect(task.id, equals(1));
       expect(task.name, equals('File 1'));
     });
 
@@ -70,6 +69,7 @@ Future<void> main() async {
       expect(task, isNotNull);
       expect(task!.isNew, isFalse);
       expect(task.id, isNotNull);
+      expect(task.id, equals(1));
       expect(task.name, equals('File 1'));
     });
 

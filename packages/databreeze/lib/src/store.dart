@@ -53,7 +53,7 @@ abstract class BreezeStore with BreezeStorageTypeConverters {
     List<BreezeSortBy> sortBy = const [],
     BreezeModelBlueprint<M>? blueprint,
   }) async {
-    final modelBlueprint = blueprint ?? blueprintOf(M);
+    final modelBlueprint = blueprint ?? (blueprintOf(M) as BreezeModelBlueprint<M>);
 
     final record = await fetchRecord(
       table: modelBlueprint.name,
@@ -62,7 +62,7 @@ abstract class BreezeStore with BreezeStorageTypeConverters {
       sortBy: sortBy,
     );
 
-    return ((record != null) ? modelBlueprint.fromRecord<M>(record, this) : null);
+    return ((record != null) ? modelBlueprint.fromRecord(record, this) : null);
   }
 
   Future<List<M>> fetchAll<M extends BreezeModel>({
@@ -71,7 +71,7 @@ abstract class BreezeStore with BreezeStorageTypeConverters {
     // TODO: Pagination/limit
     BreezeModelBlueprint<M>? blueprint,
   }) async {
-    final modelBlueprint = blueprint ?? blueprintOf(M);
+    final modelBlueprint = blueprint ?? (blueprintOf(M) as BreezeModelBlueprint<M>);
 
     final records = await fetchAllRecords(
       table: modelBlueprint.name,
@@ -81,7 +81,7 @@ abstract class BreezeStore with BreezeStorageTypeConverters {
     );
 
     return [
-      for (final record in records) modelBlueprint.fromRecord<M>(record, this),
+      for (final record in records) modelBlueprint.fromRecord(record, this),
     ];
   }
 
@@ -98,7 +98,7 @@ abstract class BreezeStore with BreezeStorageTypeConverters {
     if (!record.isFrozen) {
       final tableName = record.schema.name;
       final keyName = record.schema.key;
-      final rawRecord = record.schema.toRaw(record.toRecord(), this);
+      final rawRecord = record.schema.toRaw(record.toRawRecord(), this);
 
       final newId = await addRecord(name: tableName, key: keyName, record: rawRecord);
 
@@ -129,7 +129,7 @@ abstract class BreezeStore with BreezeStorageTypeConverters {
       final tableName = record.schema.name;
       final keyName = record.schema.key;
       final keyValue = record.id;
-      final rawRecord = record.schema.toRaw(record.toRecord(), this);
+      final rawRecord = record.schema.toRaw(record.toRawRecord(), this);
 
       if (keyValue != null) {
         record.beforeUpdate();
@@ -157,7 +157,7 @@ abstract class BreezeStore with BreezeStorageTypeConverters {
       final tableName = record.schema.name;
       final keyName = record.schema.key;
       final keyValue = record.id;
-      final rawRecord = record.schema.toRaw(record.toRecord(), this);
+      final rawRecord = record.schema.toRaw(record.toRawRecord(), this);
 
       if (keyValue != null) {
         record.beforeDelete();

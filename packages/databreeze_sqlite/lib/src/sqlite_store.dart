@@ -99,7 +99,7 @@ class BreezeSqliteStore extends BreezeStore {
     List<Object?> params = const [],
     BreezeModelBlueprint<M>? blueprint,
   }) async {
-    final modelBlueprint = blueprint ?? blueprintOf(M);
+    final modelBlueprint = blueprint ?? (blueprintOf(M) as BreezeModelBlueprint<M>);
 
     final records = await fetchAllRecordsUsingSql(
       table: modelBlueprint.name,
@@ -109,7 +109,7 @@ class BreezeSqliteStore extends BreezeStore {
     );
 
     return [
-      for (final record in records) modelBlueprint.fromRecord<M>(record, this),
+      for (final record in records) modelBlueprint.fromRecord(record, this),
     ];
   }
 

@@ -41,8 +41,12 @@ class BreezeModelBlueprint<M extends BreezeModel> {
   Type get type => M;
 
   /// Create a model instance from a raw record
-  T fromRecord<T>(Map<String, dynamic> record, BreezeStorageTypeConverters converters) =>
-      ((T == M) ? builder(fromRaw(record, converters)) : record) as T;
+  M fromRecord(Map<String, dynamic> record, BreezeStorageTypeConverters converters) {
+    final typedRecord = fromRaw(record, converters);
+    final result = builder(typedRecord);
+    result.id = typedRecord[key];
+    return result;
+  }
 
   /// Convert db's data types to schema column types
   Map<String, dynamic> fromRaw(Map<String, dynamic> raw, BreezeStorageTypeConverters converters) =>

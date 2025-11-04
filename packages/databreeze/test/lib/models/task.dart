@@ -94,7 +94,6 @@ class Task extends BreezeModel<int> {
   }) : createdAt = createdAt ?? DateTime.now();
 
   factory Task.fromRecord(BreezeDataRecord record) => Task(
-    id: record[TaskColumns.id],
     name: record[TaskColumns.name] ?? 'n/a',
     note: record[TaskColumns.note],
     createdAt: record[TaskColumns.createdAt],
@@ -103,7 +102,6 @@ class Task extends BreezeModel<int> {
 
   @override
   Map<String, dynamic> toRecord() => {
-    TaskColumns.id: id,
     TaskColumns.name: name,
     TaskColumns.note: note,
     TaskColumns.createdAt: createdAt,

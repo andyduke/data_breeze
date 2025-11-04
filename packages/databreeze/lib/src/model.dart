@@ -30,4 +30,10 @@ abstract class BreezeModel<K> {
   BreezeModelBlueprint get schema;
 
   Map<String, dynamic> toRecord();
+
+  @internal
+  Map<String, dynamic> toRawRecord() => {
+    schema.key: id,
+    ...toRecord(),
+  };
 }
