@@ -48,21 +48,50 @@ abstract class BreezeStore with BreezeStorageTypeConverters {
 
   // --- API
 
-  Future<M?> fetch<M extends BreezeAbstractModel>({
-    required BreezeFilterExpression filter,
-    List<BreezeSortBy> sortBy = const [],
+  Future<M?> fetchWithRequest<M extends BreezeAbstractModel>(
+    BreezeAbstractFetchRequest request, {
     BreezeModelBlueprint<M>? blueprint,
   }) async {
     final modelBlueprint = blueprint ?? (blueprintOf(M) as BreezeModelBlueprint<M>);
 
     final record = await fetchRecord(
       table: modelBlueprint.name,
+      request: request,
       blueprint: modelBlueprint,
-      filter: filter,
-      sortBy: sortBy,
     );
 
     return ((record != null) ? modelBlueprint.fromRecord(record, this) : null);
+  }
+
+  Future<List<M>> fetchAllWithRequest<M extends BreezeAbstractModel>(
+    BreezeAbstractFetchRequest request, {
+    BreezeModelBlueprint<M>? blueprint,
+  }) async {
+    final modelBlueprint = blueprint ?? (blueprintOf(M) as BreezeModelBlueprint<M>);
+
+    final records = await fetchAllRecords(
+      table: modelBlueprint.name,
+      request: request,
+      blueprint: modelBlueprint,
+    );
+
+    return [
+      for (final record in records) modelBlueprint.fromRecord(record, this),
+    ];
+  }
+
+  Future<M?> fetch<M extends BreezeAbstractModel>({
+    required BreezeFilterExpression filter,
+    List<BreezeSortBy> sortBy = const [],
+    BreezeModelBlueprint<M>? blueprint,
+  }) {
+    return fetchWithRequest<M>(
+      BreezeFetchRequest(
+        filter: filter,
+        sortBy: sortBy,
+      ),
+      blueprint: blueprint,
+    );
   }
 
   Future<List<M>> fetchAll<M extends BreezeAbstractModel>({
@@ -70,19 +99,14 @@ abstract class BreezeStore with BreezeStorageTypeConverters {
     List<BreezeSortBy> sortBy = const [],
     // TODO: Pagination/limit
     BreezeModelBlueprint<M>? blueprint,
-  }) async {
-    final modelBlueprint = blueprint ?? (blueprintOf(M) as BreezeModelBlueprint<M>);
-
-    final records = await fetchAllRecords(
-      table: modelBlueprint.name,
-      blueprint: modelBlueprint,
-      filter: filter,
-      sortBy: sortBy,
+  }) {
+    return fetchAllWithRequest<M>(
+      BreezeFetchRequest(
+        filter: filter,
+        sortBy: sortBy,
+      ),
+      blueprint: blueprint,
     );
-
-    return [
-      for (final record in records) modelBlueprint.fromRecord(record, this),
-    ];
   }
 
   Future<M> save<M extends BreezeModel>(M record) async {
@@ -185,30 +209,26 @@ abstract class BreezeStore with BreezeStorageTypeConverters {
   Future<int> count(
     String entity,
     String column, [
-    BreezeFilterExpression? filter,
-    List<BreezeSortBy> sortBy = const [],
-  ]) => aggregate<int>(entity, BreezeAggregationOp.count, column, filter, sortBy).then((value) => value ?? 0);
+    BreezeAbstractFetchRequest? request,
+  ]) => aggregate<int>(entity, BreezeAggregationOp.count, column, request).then((value) => value ?? 0);
 
   Future<num> average(
     String entity,
     String column, [
-    BreezeFilterExpression? filter,
-    List<BreezeSortBy> sortBy = const [],
-  ]) => aggregate<num>(entity, BreezeAggregationOp.avg, column, filter, sortBy).then((value) => value ?? 0);
+    BreezeAbstractFetchRequest? request,
+  ]) => aggregate<num>(entity, BreezeAggregationOp.avg, column, request).then((value) => value ?? 0);
 
   Future<num> min(
     String entity,
     String column, [
-    BreezeFilterExpression? filter,
-    List<BreezeSortBy> sortBy = const [],
-  ]) => aggregate<num>(entity, BreezeAggregationOp.min, column, filter, sortBy).then((value) => value ?? 0);
+    BreezeAbstractFetchRequest? request,
+  ]) => aggregate<num>(entity, BreezeAggregationOp.min, column, request).then((value) => value ?? 0);
 
   Future<num> max(
     String entity,
     String column, [
-    BreezeFilterExpression? filter,
-    List<BreezeSortBy> sortBy = const [],
-  ]) => aggregate<num>(entity, BreezeAggregationOp.max, column, filter, sortBy).then((value) => value ?? 0);
+    BreezeAbstractFetchRequest? request,
+  ]) => aggregate<num>(entity, BreezeAggregationOp.max, column, request).then((value) => value ?? 0);
 
   Future<void> close() async {}
 
@@ -216,17 +236,18 @@ abstract class BreezeStore with BreezeStorageTypeConverters {
 
   Future<BreezeDataRecord?> fetchRecord({
     required String table,
+    required BreezeAbstractFetchRequest request,
     BreezeModelBlueprint? blueprint,
-    required BreezeFilterExpression filter,
-    List<BreezeSortBy> sortBy = const [],
+    // required BreezeFilterExpression filter,
+    // List<BreezeSortBy> sortBy = const [],
   });
 
   Future<List<BreezeDataRecord>> fetchAllRecords({
     required String table,
+    BreezeAbstractFetchRequest? request,
     BreezeModelBlueprint? blueprint,
-    BreezeFilterExpression? filter,
-    List<BreezeSortBy> sortBy = const [],
-    // TODO: Pagination/limit
+    // BreezeFilterExpression? filter,
+    // List<BreezeSortBy> sortBy = const [],
   });
 
   @protected
@@ -257,8 +278,7 @@ abstract class BreezeStore with BreezeStorageTypeConverters {
     String entity,
     BreezeAggregationOp op,
     String column, [
-    BreezeFilterExpression? filter,
-    List<BreezeSortBy> sortBy = const [],
+    BreezeAbstractFetchRequest? request,
   ]);
 }
 

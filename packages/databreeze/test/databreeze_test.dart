@@ -2,6 +2,7 @@ import 'package:databreeze/databreeze.dart';
 import 'package:test/test.dart';
 import 'package:logging/logging.dart';
 
+import 'lib/json_store.dart';
 import 'lib/model_types.dart';
 import 'lib/models/task.dart';
 import 'lib/test_store.dart';
@@ -112,6 +113,42 @@ Future<void> main() async {
 
       expect(tasks[1].id, equals(2));
       expect(tasks[1].name, equals('File 2'));
+    });
+
+    test('Fetch multiple records (using request with callback)', () async {
+      final store = TestStore(
+        log: log,
+        models: {
+          Task.blueprint,
+        },
+        records: {
+          'tasks': {
+            1: {
+              'id': 1,
+              'name': 'File 1',
+              'note': null,
+              'created_at': DateTime.now(),
+              'file': XFile('path/to/file1'),
+            },
+            2: {
+              'id': 2,
+              'name': 'File 2',
+              'note': null,
+              'created_at': DateTime.now(),
+              'file': XFile('path/to/file2'),
+            },
+          },
+        },
+      );
+
+      final tasks = await store.fetchAllWithRequest<Task>(
+        JsonFetchRequest(test: (record) => record['id'] == 2),
+      );
+
+      expect(tasks, hasLength(1));
+
+      expect(tasks[0].id, equals(2));
+      expect(tasks[0].name, equals('File 2'));
     });
   });
 

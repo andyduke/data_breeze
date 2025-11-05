@@ -3,6 +3,17 @@ import 'package:databreeze/databreeze.dart';
 import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
 
+class JsonFetchRequest extends BreezeAbstractFetchRequest {
+  final bool Function(Map<String, dynamic> record) test;
+
+  const JsonFetchRequest({
+    required this.test,
+  });
+
+  @override
+  String toString() => '''JsonFetchRequest([test callback])''';
+}
+
 class JsonStore extends BreezeStore {
   static const _latency = Duration(milliseconds: 500);
 
@@ -29,9 +40,8 @@ class JsonStore extends BreezeStore {
   @override
   Future<BreezeDataRecord?> fetchRecord({
     required String table,
+    required BreezeAbstractFetchRequest request,
     BreezeModelBlueprint? blueprint,
-    required BreezeFilterExpression filter,
-    List<BreezeSortBy> sortBy = const [],
   }) async {
     if (simulateLatency) {
       // Simulate latency
@@ -43,13 +53,23 @@ class JsonStore extends BreezeStore {
     }
 
     Iterable<Map<String, dynamic>> allRecords = records[table]!.values;
-    if (sortBy.isNotEmpty) {
-      allRecords = allRecords.sorted((a, b) => applySort(a, b, sortBy));
+    Map<String, dynamic>? record;
+
+    switch (request) {
+      case BreezeFetchRequest(filter: final filter, sortBy: final sortBy):
+        if (sortBy.isNotEmpty) {
+          allRecords = allRecords.sorted((a, b) => applySort(a, b, sortBy));
+        }
+
+        record = allRecords.firstWhereOrNull((entry) => applyFilter(entry, filter));
+        break;
+
+      case JsonFetchRequest(test: final test):
+        record = allRecords.firstWhereOrNull((entry) => test(entry));
+        break;
     }
 
-    final record = allRecords.firstWhereOrNull((entry) => applyFilter(entry, filter));
-
-    log?.finest('Fetch $filter: $record');
+    log?.finest('Fetch $request: $record');
 
     return record;
   }
@@ -57,9 +77,8 @@ class JsonStore extends BreezeStore {
   @override
   Future<List<BreezeDataRecord>> fetchAllRecords({
     required String table,
+    BreezeAbstractFetchRequest? request,
     BreezeModelBlueprint? blueprint,
-    BreezeFilterExpression? filter,
-    List<BreezeSortBy> sortBy = const [],
   }) async {
     if (simulateLatency) {
       // Simulate latency
@@ -71,16 +90,26 @@ class JsonStore extends BreezeStore {
     }
 
     Iterable<Map<String, dynamic>> allRecords = records[table]!.values;
-    if (sortBy.isNotEmpty) {
-      allRecords = allRecords.sorted((a, b) => applySort(a, b, sortBy));
+    late Iterable<Map<String, dynamic>> result;
+
+    switch (request) {
+      case BreezeFetchRequest(filter: final filter, sortBy: final sortBy):
+        if (sortBy.isNotEmpty) {
+          allRecords = allRecords.sorted((a, b) => applySort(a, b, sortBy));
+        }
+
+        result = allRecords;
+        if (filter != null) {
+          result = result.where((entry) => applyFilter(entry, filter));
+        }
+        break;
+
+      case JsonFetchRequest(test: final test):
+        result = allRecords.where((entry) => test(entry));
+        break;
     }
 
-    var result = allRecords;
-    if (filter != null) {
-      result = result.where((entry) => applyFilter(entry, filter));
-    }
-
-    log?.finest('Fetch All $filter: $result');
+    log?.finest('Fetch All $request: $result');
 
     return result.toList(growable: false);
   }
@@ -160,8 +189,7 @@ class JsonStore extends BreezeStore {
     String entity,
     BreezeAggregationOp op,
     String column, [
-    BreezeFilterExpression? filter,
-    List<BreezeSortBy> sortBy = const [],
+    BreezeAbstractFetchRequest? request,
   ]) {
     // TODO: implement aggregate
     throw UnimplementedError();

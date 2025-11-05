@@ -11,6 +11,23 @@ import 'package:sqlite_async/sqlite_async.dart';
 import 'package:sqlite3/open.dart' as sqlite_open;
 import 'package:path/path.dart' as path;
 
+class BreezeSqliteRequest extends BreezeAbstractFetchRequest {
+  final String sql;
+  final List<Object?> params;
+
+  const BreezeSqliteRequest(
+    this.sql, [
+    this.params = const [],
+  ]);
+
+  @override
+  String toString() =>
+      '''BreezeSqliteRequest(
+  sql: $sql,
+  params: $params
+)''';
+}
+
 class BreezeSqliteStore extends BreezeStore {
   final Logger? log;
   final Future<String?> Function() onPath;
@@ -92,40 +109,31 @@ class BreezeSqliteStore extends BreezeStore {
 
   // Database API
 
-  // TODO: fetchUsingSql
-
-  Future<List<M>> fetchAllUsingSql<M extends BreezeAbstractModel>({
-    required String sql,
-    List<Object?> params = const [],
-    BreezeModelBlueprint<M>? blueprint,
-  }) async {
-    final modelBlueprint = blueprint ?? (blueprintOf(M) as BreezeModelBlueprint<M>);
-
-    final records = await fetchAllRecordsUsingSql(
-      table: modelBlueprint.name,
-      blueprint: modelBlueprint,
-      sql: sql,
-      params: params,
-    );
-
-    return [
-      for (final record in records) modelBlueprint.fromRecord(record, this),
-    ];
-  }
-
   @override
   Future<BreezeDataRecord?> fetchRecord({
     required String table,
+    required BreezeAbstractFetchRequest request,
     BreezeModelBlueprint? blueprint,
-    required BreezeFilterExpression filter,
-    List<BreezeSortBy> sortBy = const [],
   }) async {
-    final (:sql, :params) = buildSql(table, filter, sortBy);
-    final result = await executeSql(sql, params);
+    ResultSet? result;
+    Map<String, dynamic>? record;
 
-    final record = result.isNotEmpty ? Map.from(result.first).cast<String, dynamic>() : null;
+    switch (request) {
+      case BreezeFetchRequest(filter: final filter, sortBy: final sortBy):
+        final (:sql, :params) = buildSql(table, filter, sortBy, 1);
+        result = await executeSql(sql, params);
+        break;
 
-    log?.finest('Fetch $filter: $record');
+      case BreezeSqliteRequest(sql: final sql, params: final params):
+        result = await executeSql(sql, params);
+        break;
+    }
+
+    if (result != null) {
+      record = result.isNotEmpty ? Map.from(result.first).cast<String, dynamic>() : null;
+    }
+
+    log?.finest('Fetch $request: $record');
 
     return record;
   }
@@ -133,31 +141,32 @@ class BreezeSqliteStore extends BreezeStore {
   @override
   Future<List<BreezeDataRecord>> fetchAllRecords({
     required String table,
+    BreezeAbstractFetchRequest? request,
     BreezeModelBlueprint? blueprint,
-    BreezeFilterExpression? filter,
-    List<BreezeSortBy> sortBy = const [],
   }) async {
-    final (:sql, :params) = buildSql(table, filter, sortBy);
-    final result = await executeSql(sql, params);
+    ResultSet? result;
+    List<Map<String, dynamic>>? records;
 
-    final records = result.map((r) => Map.from(r).cast<String, dynamic>()).toList(growable: false);
+    switch (request) {
+      case BreezeFetchRequest(filter: final filter, sortBy: final sortBy):
+        final (:sql, :params) = buildSql(table, filter, sortBy);
+        result = await executeSql(sql, params);
+        break;
 
-    log?.finest('Fetch All $filter: $records');
+      case BreezeSqliteRequest(sql: final sql, params: final params):
+        result = await executeSql(sql, params);
+        break;
+    }
 
-    return records;
-  }
+    if (result != null) {
+      records = result.map((r) => Map.from(r).cast<String, dynamic>()).toList(growable: false);
+    } else {
+      records = [];
+    }
 
-  Future<List<BreezeDataRecord>> fetchAllRecordsUsingSql({
-    required String table,
-    BreezeModelBlueprint? blueprint,
-    required String sql,
-    List<Object?> params = const [],
-  }) async {
-    final result = await executeSql(sql, params);
+    // --
 
-    final records = result.map((r) => Map.from(r).cast<String, dynamic>()).toList(growable: false);
-
-    log?.finest('Fetch All $sql ($params): $records');
+    log?.finest('Fetch All $request: $records');
 
     return records;
   }
@@ -221,16 +230,11 @@ class BreezeSqliteStore extends BreezeStore {
     String entity,
     BreezeAggregationOp op,
     String column, [
-    BreezeFilterExpression? filter,
-    List<BreezeSortBy> sortBy = const [],
+    BreezeAbstractFetchRequest? request,
   ]) {
     // TODO: implement aggregate
     throw UnimplementedError();
   }
-
-  // TODO: aggregateUsingSql
-
-  // TODO: countUsingSql, avgUsingSql, minUsingSql, maxUsingSql
 
   dynamic _tryCastJson(BreezeSqliteJsonB value) {
     try {
@@ -287,6 +291,8 @@ class BreezeSqliteStore extends BreezeStore {
     String table, [
     BreezeFilterExpression? filter,
     List<BreezeSortBy> sortBy = const [],
+    int? limit,
+    int? offset,
   ]) {
     final (whereSql, whereParams) = _buildWhere(filter);
     final whereClause = whereSql.isNotEmpty ? ' WHERE $whereSql' : '';
@@ -294,8 +300,10 @@ class BreezeSqliteStore extends BreezeStore {
     final (orderSql, orderParams) = _buildOrderBy(sortBy);
     final orderClause = orderSql.isNotEmpty ? ' ORDER BY $orderSql' : '';
 
+    final limitClause = _buildLimit(limit, offset);
+
     return (
-      sql: 'SELECT * FROM $table$whereClause$orderClause',
+      sql: 'SELECT * FROM $table$whereClause$orderClause$limitClause',
       params: [...whereParams, ...orderParams],
     );
   }
@@ -360,6 +368,20 @@ class BreezeSqliteStore extends BreezeStore {
           ', ',
         );
     return (result, []);
+  }
+
+  String _buildLimit(int? limit, int? offset) {
+    final result = StringBuffer();
+
+    if (limit != null) {
+      result.write(' LIMIT $limit');
+    }
+
+    if (limit != null && offset != null) {
+      result.write(' OFFSET $offset');
+    }
+
+    return result.toString();
   }
 }
 

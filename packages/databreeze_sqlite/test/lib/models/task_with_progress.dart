@@ -20,11 +20,21 @@ class QueryAllTaskWithProgress extends BreezeQuery<TaskWithProgress, List<TaskWi
 
   @override
   Future<List<TaskWithProgress>> exec(covariant BreezeSqliteStore store) async {
+    /*
     return store.fetchAllUsingSql<TaskWithProgress>(
       sql:
           'SELECT tasks.*, task_progress.progress AS progress '
           'FROM tasks LEFT JOIN task_progress ON tasks.id = task_progress.task_id '
           'GROUP BY tasks.id',
+    );
+    */
+
+    return store.fetchAllWithRequest<TaskWithProgress>(
+      BreezeSqliteRequest(
+        'SELECT tasks.*, task_progress.progress AS progress '
+        'FROM tasks LEFT JOIN task_progress ON tasks.id = task_progress.task_id '
+        'GROUP BY tasks.id',
+      ),
     );
   }
 }
