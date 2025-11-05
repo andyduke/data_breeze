@@ -1,5 +1,5 @@
-/// A Calculator.
-class Calculator {
-  /// Returns [value] plus 1.
-  int addOne(int value) => value + 1;
-}
+library;
+
+export 'src/sqlite_json_type.dart';
+export 'src/sqlite_type_converters.dart';
+export 'src/sqlite_store.dart';

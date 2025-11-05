@@ -5,6 +5,7 @@ abstract class BreezeAbstractModel<K> {
   K? id;
 }
 
+// TODO: Remove the ID, since the view model may not have a key?
 abstract mixin class BreezeModelView<K> implements BreezeAbstractModel<K> {
   @override
   K? get id => _id;

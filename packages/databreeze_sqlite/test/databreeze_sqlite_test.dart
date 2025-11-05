@@ -16,7 +16,7 @@ Future<void> main() async {
     print('[${record.loggerName}] ${record.time} ${record.level.name}: ${record.message}');
   });
 
-  final log = Logger('Breeze');
+  final log = Logger('Breeze Sqlite');
 
   group('CRUD', () {
     test('Create', () async {

@@ -8,7 +8,7 @@ import 'package:meta/meta.dart';
 
 // TODO: Refactor - extract blueprint property to BreezeQueryWithBlueprint;
 //  BreezeQueryById & BreezeQueryAll must extends BreezeQueryWithBlueprint
-abstract class BreezeQuery<M extends BreezeModel, R> {
+abstract class BreezeQuery<M extends BreezeAbstractModel, R> {
   BreezeQuery({
     BreezeModelBlueprint<M>? blueprint,
   }) : _blueprint = blueprint;
@@ -37,7 +37,7 @@ abstract class BreezeQuery<M extends BreezeModel, R> {
   Future<R> exec(BreezeStore store);
 }
 
-class BreezeQueryById<M extends BreezeModel> extends BreezeQuery<M, M?> {
+class BreezeQueryById<M extends BreezeAbstractModel> extends BreezeQuery<M, M?> {
   final int id;
   final bool autoUpdate;
 
@@ -59,7 +59,7 @@ class BreezeQueryById<M extends BreezeModel> extends BreezeQuery<M, M?> {
   }
 }
 
-class BreezeQueryAll<M extends BreezeModel> extends BreezeQuery<M, List<M>> {
+class BreezeQueryAll<M extends BreezeAbstractModel> extends BreezeQuery<M, List<M>> {
   final BreezeFilterExpression? filter;
   final List<BreezeSortBy> sortBy;
   final bool autoUpdate;
