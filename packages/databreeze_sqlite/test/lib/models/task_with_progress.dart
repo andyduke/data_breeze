@@ -47,7 +47,6 @@ class TaskWithProgress extends Task {
   double? progress;
 
   TaskWithProgress({
-    super.id,
     required super.name,
     super.note,
     super.createdAt,
@@ -56,7 +55,6 @@ class TaskWithProgress extends Task {
   });
 
   factory TaskWithProgress.fromRecord(BreezeDataRecord record) => TaskWithProgress(
-    id: record[TaskColumns.id],
     name: record[TaskColumns.name] ?? 'n/a',
     note: record[TaskColumns.note],
     createdAt: record[TaskColumns.createdAt],
@@ -66,7 +64,6 @@ class TaskWithProgress extends Task {
 
   @override
   Map<String, dynamic> toRecord() => {
-    TaskColumns.id: id,
     TaskColumns.name: name,
     TaskColumns.note: note,
     TaskColumns.createdAt: createdAt,

@@ -25,12 +25,14 @@ Future<void> main() async {
           Task.blueprint,
         },
         records: {
-          id: {
-            'id': id,
-            'name': 'File 1',
-            'note': null,
-            'created_at': createdAt,
-            'file': XFile('path/to/file1'),
+          'tasks': {
+            id: {
+              'id': id,
+              'name': 'File 1',
+              'note': null,
+              'created_at': createdAt,
+              'file': XFile('path/to/file1'),
+            },
           },
         },
       );
@@ -51,12 +53,14 @@ Future<void> main() async {
       final store = TestStore(
         log: log,
         records: {
-          id: {
-            'id': id,
-            'name': 'File 1',
-            'note': null,
-            'created_at': createdAt,
-            'file': XFile('path/to/file1'),
+          'tasks': {
+            id: {
+              'id': id,
+              'name': 'File 1',
+              'note': null,
+              'created_at': createdAt,
+              'file': XFile('path/to/file1'),
+            },
           },
         },
       );
@@ -80,19 +84,21 @@ Future<void> main() async {
           Task.blueprint,
         },
         records: {
-          1: {
-            'id': 1,
-            'name': 'File 1',
-            'note': null,
-            'created_at': DateTime.now(),
-            'file': XFile('path/to/file1'),
-          },
-          2: {
-            'id': 2,
-            'name': 'File 2',
-            'note': null,
-            'created_at': DateTime.now(),
-            'file': XFile('path/to/file2'),
+          'tasks': {
+            1: {
+              'id': 1,
+              'name': 'File 1',
+              'note': null,
+              'created_at': DateTime.now(),
+              'file': XFile('path/to/file1'),
+            },
+            2: {
+              'id': 2,
+              'name': 'File 2',
+              'note': null,
+              'created_at': DateTime.now(),
+              'file': XFile('path/to/file2'),
+            },
           },
         },
       );
@@ -127,12 +133,14 @@ Future<void> main() async {
       expect(
         store.records,
         equals({
-          newTask.id: {
-            'id': newTask.id,
-            'name': 'File 1',
-            'note': null,
-            'created_at': newTask.createdAt,
-            'file': 'path/to/file1',
+          'tasks': {
+            newTask.id: {
+              'id': newTask.id,
+              'name': 'File 1',
+              'note': null,
+              'created_at': newTask.createdAt,
+              'file': 'path/to/file1',
+            },
           },
         }),
       );
@@ -148,12 +156,14 @@ Future<void> main() async {
           Task.blueprint,
         },
         records: {
-          id: {
-            'id': id,
-            'name': 'File 1',
-            'note': null,
-            'created_at': createdAt,
-            'file': XFile('path/to/file1'),
+          'tasks': {
+            id: {
+              'id': id,
+              'name': 'File 1',
+              'note': null,
+              'created_at': createdAt,
+              'file': XFile('path/to/file1'),
+            },
           },
         },
       );
@@ -178,12 +188,14 @@ Future<void> main() async {
           Task.blueprint,
         },
         records: {
-          id: {
-            'id': id,
-            'name': 'File 1',
-            'note': null,
-            'created_at': createdAt,
-            'file': 'path/to/file1',
+          'tasks': {
+            id: {
+              'id': id,
+              'name': 'File 1',
+              'note': null,
+              'created_at': createdAt,
+              'file': 'path/to/file1',
+            },
           },
         },
       );
@@ -203,12 +215,14 @@ Future<void> main() async {
       expect(
         store.records,
         equals({
-          task.id: {
-            'id': task.id,
-            'name': 'File 1*',
-            'note': null,
-            'created_at': task.createdAt,
-            'file': 'path/to/file1',
+          'tasks': {
+            task.id: {
+              'id': task.id,
+              'name': 'File 1*',
+              'note': null,
+              'created_at': task.createdAt,
+              'file': 'path/to/file1',
+            },
           },
         }),
       );
@@ -226,19 +240,21 @@ Future<void> main() async {
           Task.blueprint,
         },
         records: {
-          id1: {
-            'id': id1,
-            'name': 'File 1',
-            'note': null,
-            'created_at': createdAt1,
-            'file': 'path/to/file1',
-          },
-          id2: {
-            'id': id2,
-            'name': 'File 2',
-            'note': null,
-            'created_at': createdAt2,
-            'file': 'path/to/file2',
+          'tasks': {
+            id1: {
+              'id': id1,
+              'name': 'File 1',
+              'note': null,
+              'created_at': createdAt1,
+              'file': 'path/to/file1',
+            },
+            id2: {
+              'id': id2,
+              'name': 'File 2',
+              'note': null,
+              'created_at': createdAt2,
+              'file': 'path/to/file2',
+            },
           },
         },
       );
@@ -254,12 +270,14 @@ Future<void> main() async {
       expect(
         store.records,
         equals({
-          id1: {
-            'id': id1,
-            'name': 'File 1',
-            'note': null,
-            'created_at': createdAt1,
-            'file': 'path/to/file1',
+          'tasks': {
+            id1: {
+              'id': id1,
+              'name': 'File 1',
+              'note': null,
+              'created_at': createdAt1,
+              'file': 'path/to/file1',
+            },
           },
         }),
       );
@@ -274,19 +292,21 @@ Future<void> main() async {
           Task.blueprint,
         },
         records: {
-          2: {
-            'id': 2,
-            'name': 'File 2',
-            'note': null,
-            'created_at': DateTime.parse('2025-10-31 14:00:00.000+03:30'),
-            'file': XFile('path/to/file2'),
-          },
-          1: {
-            'id': 1,
-            'name': 'File 1',
-            'note': null,
-            'created_at': DateTime.parse('2025-10-31 15:00:00.000+03:30'),
-            'file': XFile('path/to/file1'),
+          'tasks': {
+            2: {
+              'id': 2,
+              'name': 'File 2',
+              'note': null,
+              'created_at': DateTime.parse('2025-10-31 14:00:00.000+03:30'),
+              'file': XFile('path/to/file2'),
+            },
+            1: {
+              'id': 1,
+              'name': 'File 1',
+              'note': null,
+              'created_at': DateTime.parse('2025-10-31 15:00:00.000+03:30'),
+              'file': XFile('path/to/file1'),
+            },
           },
         },
       );
@@ -311,19 +331,21 @@ Future<void> main() async {
           Task.blueprint,
         },
         records: {
-          2: {
-            'id': 2,
-            'name': 'File 2',
-            'note': null,
-            'created_at': DateTime.parse('2025-10-31 14:00:00.000+03:30'),
-            'file': XFile('path/to/file2'),
-          },
-          1: {
-            'id': 1,
-            'name': 'File 1',
-            'note': null,
-            'created_at': DateTime.parse('2025-10-31 15:00:00.000+03:30'),
-            'file': XFile('path/to/file1'),
+          'tasks': {
+            2: {
+              'id': 2,
+              'name': 'File 2',
+              'note': null,
+              'created_at': DateTime.parse('2025-10-31 14:00:00.000+03:30'),
+              'file': XFile('path/to/file2'),
+            },
+            1: {
+              'id': 1,
+              'name': 'File 1',
+              'note': null,
+              'created_at': DateTime.parse('2025-10-31 15:00:00.000+03:30'),
+              'file': XFile('path/to/file1'),
+            },
           },
         },
       );
@@ -348,26 +370,28 @@ Future<void> main() async {
           Task.blueprint,
         },
         records: {
-          3: {
-            'id': 3,
-            'name': 'File 3',
-            'note': null,
-            'created_at': DateTime.parse('2025-10-31 14:00:00.000+03:30'),
-            'file': XFile('path/to/file3'),
-          },
-          1: {
-            'id': 1,
-            'name': 'File 1',
-            'note': null,
-            'created_at': DateTime.parse('2025-10-31 15:00:00.000+03:30'),
-            'file': XFile('path/to/file1'),
-          },
-          2: {
-            'id': 2,
-            'name': 'File 2',
-            'note': null,
-            'created_at': DateTime.parse('2025-10-31 14:00:00.000+03:30'),
-            'file': XFile('path/to/file2'),
+          'tasks': {
+            3: {
+              'id': 3,
+              'name': 'File 3',
+              'note': null,
+              'created_at': DateTime.parse('2025-10-31 14:00:00.000+03:30'),
+              'file': XFile('path/to/file3'),
+            },
+            1: {
+              'id': 1,
+              'name': 'File 1',
+              'note': null,
+              'created_at': DateTime.parse('2025-10-31 15:00:00.000+03:30'),
+              'file': XFile('path/to/file1'),
+            },
+            2: {
+              'id': 2,
+              'name': 'File 2',
+              'note': null,
+              'created_at': DateTime.parse('2025-10-31 14:00:00.000+03:30'),
+              'file': XFile('path/to/file2'),
+            },
           },
         },
       );

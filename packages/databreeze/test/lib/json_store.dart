@@ -14,14 +14,14 @@ class JsonStore extends BreezeStore {
 
   @protected
   @visibleForTesting
-  final Map<int, Map<String, dynamic>> records;
+  final Map<String, Map<int, Map<String, dynamic>>> records;
 
   final bool simulateLatency;
 
   JsonStore({
     this.log,
     super.models,
-    Map<int, Map<String, dynamic>>? records,
+    Map<String, Map<int, Map<String, dynamic>>>? records,
     super.typeConverters,
     this.simulateLatency = false,
   }) : records = records ?? {};
@@ -38,7 +38,11 @@ class JsonStore extends BreezeStore {
       await Future.delayed(_latency);
     }
 
-    Iterable<Map<String, dynamic>> allRecords = records.values;
+    if (!records.containsKey(table)) {
+      throw Exception('Table "$table" not found.');
+    }
+
+    Iterable<Map<String, dynamic>> allRecords = records[table]!.values;
     if (sortBy.isNotEmpty) {
       allRecords = allRecords.sorted((a, b) => applySort(a, b, sortBy));
     }
@@ -62,7 +66,11 @@ class JsonStore extends BreezeStore {
       await Future.delayed(_latency);
     }
 
-    Iterable<Map<String, dynamic>> allRecords = records.values;
+    if (!records.containsKey(table)) {
+      throw Exception('Table "$table" not found.');
+    }
+
+    Iterable<Map<String, dynamic>> allRecords = records[table]!.values;
     if (sortBy.isNotEmpty) {
       allRecords = allRecords.sorted((a, b) => applySort(a, b, sortBy));
     }
@@ -94,7 +102,11 @@ class JsonStore extends BreezeStore {
       key: newId,
     };
 
-    records[newId] = newRecord;
+    if (!records.containsKey(name)) {
+      records[name] = {};
+    }
+
+    records[name]![newId] = newRecord;
 
     log?.finest('Add #$newId: $newRecord');
 
@@ -113,7 +125,11 @@ class JsonStore extends BreezeStore {
       await Future.delayed(_latency);
     }
 
-    records[keyValue] = record;
+    if (!records.containsKey(name)) {
+      throw Exception('Table "$name" not found.');
+    }
+
+    records[name]![keyValue] = record;
 
     log?.finest('Update #$keyValue: $record');
   }
@@ -130,7 +146,11 @@ class JsonStore extends BreezeStore {
       await Future.delayed(_latency);
     }
 
-    records.remove(keyValue);
+    if (!records.containsKey(name)) {
+      throw Exception('Table "$name" not found.');
+    }
+
+    records[name]!.remove(keyValue);
 
     log?.finest('Delete #$keyValue: $record');
   }

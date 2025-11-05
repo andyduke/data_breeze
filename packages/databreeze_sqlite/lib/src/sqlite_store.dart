@@ -94,7 +94,7 @@ class BreezeSqliteStore extends BreezeStore {
 
   // TODO: fetchUsingSql
 
-  Future<List<M>> fetchAllUsingSql<M extends BreezeModel>({
+  Future<List<M>> fetchAllUsingSql<M extends BreezeAbstractModel>({
     required String sql,
     List<Object?> params = const [],
     BreezeModelBlueprint<M>? blueprint,

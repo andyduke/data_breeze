@@ -1,3 +1,4 @@
+import 'dart:collection';
 import 'package:databreeze/src/model.dart';
 import 'package:databreeze/src/type_converters.dart';
 import 'package:databreeze/src/types.dart';
@@ -21,12 +22,12 @@ class BreezeModelColumn<T> {
   }) : isAutoGenerate = isAutoGenerate ?? (isPrimaryKey ? true : false);
 }
 
-class BreezeModelBlueprint<M extends BreezeModel> {
+class BreezeModelBlueprint<M extends BreezeAbstractModel> {
   static const defaultKey = 'id';
 
   final String name;
   final String key;
-  final Map<String, BreezeModelColumn> columns;
+  final UnmodifiableMapView<String, BreezeModelColumn> columns;
   final M Function(BreezeDataRecord record) builder;
   final Set<BreezeBaseTypeConverter> typeConverters;
 
@@ -36,11 +37,27 @@ class BreezeModelBlueprint<M extends BreezeModel> {
     required List<BreezeModelColumn> columns,
     required this.builder,
     this.typeConverters = const {},
-  }) : columns = {
+  }) : columns = UnmodifiableMapView({
          for (final col in columns) col.name: col,
-       };
+       });
 
   Type get type => M;
+
+  /// Creates a copy of the model blueprint, changes the model type,
+  /// and also allows you to modify other blueprint parameters.
+  ///
+  /// Note: Allows copying only for inherited models.
+  BreezeModelBlueprint<T> extend<T extends M>({
+    String? name,
+    List<BreezeModelColumn>? columns,
+    required T Function(Map<String, dynamic> raw) builder,
+  }) {
+    return BreezeModelBlueprint<T>(
+      name: name ?? this.name,
+      columns: columns ?? this.columns.values.toList(),
+      builder: builder,
+    );
+  }
 
   /// Create a model instance from a raw record
   M fromRecord(Map<String, dynamic> record, BreezeStorageTypeConverters converters) {

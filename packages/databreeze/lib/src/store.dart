@@ -48,7 +48,7 @@ abstract class BreezeStore with BreezeStorageTypeConverters {
 
   // --- API
 
-  Future<M?> fetch<M extends BreezeModel>({
+  Future<M?> fetch<M extends BreezeAbstractModel>({
     required BreezeFilterExpression filter,
     List<BreezeSortBy> sortBy = const [],
     BreezeModelBlueprint<M>? blueprint,
@@ -65,7 +65,7 @@ abstract class BreezeStore with BreezeStorageTypeConverters {
     return ((record != null) ? modelBlueprint.fromRecord(record, this) : null);
   }
 
-  Future<List<M>> fetchAll<M extends BreezeModel>({
+  Future<List<M>> fetchAll<M extends BreezeAbstractModel>({
     BreezeFilterExpression? filter,
     List<BreezeSortBy> sortBy = const [],
     // TODO: Pagination/limit
@@ -102,7 +102,7 @@ abstract class BreezeStore with BreezeStorageTypeConverters {
 
       final newId = await addRecord(name: tableName, key: keyName, record: rawRecord);
 
-      // TODO: Check key type
+      // TODO: Check key type?
       // if (newId.runtimeType != record.keyType) {
       //   throw Exception('Key type mismatch.');
       // }

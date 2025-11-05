@@ -86,7 +86,6 @@ class Task extends BreezeModel<int> {
   XFile file;
 
   Task({
-    super.id,
     required this.name,
     this.note,
     DateTime? createdAt,

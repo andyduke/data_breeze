@@ -1,21 +1,31 @@
 import 'package:databreeze/src/model_blueprint.dart';
 import 'package:meta/meta.dart';
 
-abstract class BreezeModel<K> {
+abstract class BreezeAbstractModel<K> {
+  K? id;
+}
+
+abstract mixin class BreezeModelView<K> implements BreezeAbstractModel<K> {
+  @override
+  K? get id => _id;
+  K? _id;
+  @override
+  @internal
+  set id(K? newValue) => _id = newValue;
+}
+
+abstract mixin class BreezeModel<K> implements BreezeAbstractModel<K> {
+  @override
+  K? get id => _id;
+  K? _id;
+  @override
+  @internal
+  set id(K? newValue) => _id = newValue;
+
   @internal
   bool isFrozen = false;
 
   bool get isNew => (id == null);
-
-  K? get id => _id;
-  K? _id;
-
-  @internal
-  set id(K? newValue) => _id = newValue;
-
-  BreezeModel({
-    K? id,
-  }) : _id = id;
 
   Future<void> afterAdd() async {}
 
