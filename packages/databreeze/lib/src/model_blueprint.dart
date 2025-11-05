@@ -7,6 +7,7 @@ class BreezeModelColumn<T> {
   final String name;
   final bool isPrimaryKey;
   final bool isAutoGenerate;
+  final T? defaultValue;
 
   /// Model type
   Type get type => T;
@@ -18,6 +19,7 @@ class BreezeModelColumn<T> {
     this.name, {
     this.isPrimaryKey = false,
     bool? isAutoGenerate,
+    this.defaultValue,
     // this.isNullable = false,
   }) : isAutoGenerate = isAutoGenerate ?? (isPrimaryKey ? true : false);
 }
@@ -33,7 +35,7 @@ class BreezeModelBlueprint<M extends BreezeAbstractModel> {
 
   BreezeModelBlueprint({
     required this.name,
-    this.key = defaultKey,
+    @Deprecated('Determine the key based on the column with the isPrimaryKey parameter.') this.key = defaultKey,
     required List<BreezeModelColumn> columns,
     required this.builder,
     this.typeConverters = const {},
@@ -51,11 +53,13 @@ class BreezeModelBlueprint<M extends BreezeAbstractModel> {
     String? name,
     List<BreezeModelColumn>? columns,
     required T Function(Map<String, dynamic> raw) builder,
+    Set<BreezeBaseTypeConverter>? typeConverters,
   }) {
     return BreezeModelBlueprint<T>(
       name: name ?? this.name,
       columns: columns ?? this.columns.values.toList(),
       builder: builder,
+      typeConverters: typeConverters ?? this.typeConverters,
     );
   }
 
@@ -83,7 +87,11 @@ class BreezeModelBlueprint<M extends BreezeAbstractModel> {
     }
 
     if (!column.isNullable && value == null) {
-      throw Exception('[valueFromStorage] The value for column "$name" cannot be null.');
+      if (column.defaultValue != null) {
+        return column.defaultValue;
+      } else {
+        throw Exception('[valueFromStorage] The value for column "$name" cannot be null.');
+      }
     }
 
     if (value == null) {
