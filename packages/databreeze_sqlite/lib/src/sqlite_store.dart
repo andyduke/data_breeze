@@ -30,13 +30,25 @@ class BreezeSqliteRequest extends BreezeAbstractFetchRequest {
 
 class BreezeSqliteStore extends BreezeStore {
   final Logger? log;
+
+  /// Should return the path to the database or `null`
+  /// for an in-memory database.
   final Future<String?> Function() onPath;
+
+  /// This is called immediately after the database is
+  /// opened (before migrations, etc.).
+  ///
+  /// It can be used to set database operating parameters,
+  /// such as `PRAGMA`.
+  final Future<void> Function(SqliteConnection db)? onInit;
+
   final SqliteMigrations? migrations;
 
   BreezeSqliteStore({
     this.log,
     super.models,
     required this.onPath,
+    this.onInit,
     this.migrations,
     super.typeConverters,
   }) {
@@ -79,6 +91,8 @@ class BreezeSqliteStore extends BreezeStore {
   Future<void> initializeDatabase() async {
     // Create database
     final db = await createDatabase();
+
+    await onInit?.call(db);
 
     // Apply migrations
     final m = migrations;
