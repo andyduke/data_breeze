@@ -12,7 +12,6 @@ class BreezeModelColumn<T> {
   /// Model type
   Type get type => T;
 
-  // @protected
   bool get isNullable => null is T;
 
   const BreezeModelColumn(
@@ -20,11 +19,10 @@ class BreezeModelColumn<T> {
     this.isPrimaryKey = false,
     bool? isAutoGenerate,
     this.defaultValue,
-    // this.isNullable = false,
   }) : isAutoGenerate = isAutoGenerate ?? (isPrimaryKey ? true : false);
 }
 
-class BreezeModelBlueprint<M extends BreezeAbstractModel> {
+class BreezeModelBlueprint<M extends BreezeBaseModel> {
   static const defaultKey = 'id';
 
   final String name;

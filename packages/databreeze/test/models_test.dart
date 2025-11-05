@@ -14,7 +14,7 @@ abstract final class UploadTaskColumns {
 
 /// The base model, the foundation for the full model (R/W)
 /// and the view model (R/O).
-abstract class UploadTaskBase extends BreezeAbstractModel {
+abstract class UploadTaskBase extends BreezeBaseModel {
   abstract final String name;
   abstract final String? note;
   abstract final DateTime createdAt;
@@ -78,7 +78,7 @@ abstract final class UploadTaskWithProgressColumns {
   static const progress = 'progress';
 }
 
-class UploadTaskWithProgress extends UploadTaskBase with BreezeModelView<int> {
+class UploadTaskWithProgress extends UploadTaskBase with BreezeViewModel {
   final int id;
 
   @override

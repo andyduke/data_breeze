@@ -1,11 +1,12 @@
 import 'package:databreeze/src/model_blueprint.dart';
 import 'package:meta/meta.dart';
 
-abstract class BreezeAbstractModel {}
+abstract class BreezeBaseModel {}
 
-abstract mixin class BreezeModelView<K> implements BreezeAbstractModel {}
+@immutable
+abstract mixin class BreezeViewModel implements BreezeBaseModel {}
 
-abstract mixin class BreezeModel<K> implements BreezeAbstractModel {
+abstract mixin class BreezeModel<K> implements BreezeBaseModel {
   K? get id => _id;
   K? _id;
 

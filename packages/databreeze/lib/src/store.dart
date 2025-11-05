@@ -48,7 +48,7 @@ abstract class BreezeStore with BreezeStorageTypeConverters {
 
   // --- API
 
-  Future<M?> fetchWithRequest<M extends BreezeAbstractModel>(
+  Future<M?> fetchWithRequest<M extends BreezeBaseModel>(
     BreezeAbstractFetchRequest request, {
     BreezeModelBlueprint<M>? blueprint,
   }) async {
@@ -63,7 +63,7 @@ abstract class BreezeStore with BreezeStorageTypeConverters {
     return ((record != null) ? modelBlueprint.fromRecord(record, this) : null);
   }
 
-  Future<List<M>> fetchAllWithRequest<M extends BreezeAbstractModel>(
+  Future<List<M>> fetchAllWithRequest<M extends BreezeBaseModel>(
     BreezeAbstractFetchRequest request, {
     BreezeModelBlueprint<M>? blueprint,
   }) async {
@@ -80,7 +80,7 @@ abstract class BreezeStore with BreezeStorageTypeConverters {
     ];
   }
 
-  Future<M?> fetch<M extends BreezeAbstractModel>({
+  Future<M?> fetch<M extends BreezeBaseModel>({
     required BreezeFilterExpression filter,
     List<BreezeSortBy> sortBy = const [],
     BreezeModelBlueprint<M>? blueprint,
@@ -94,7 +94,7 @@ abstract class BreezeStore with BreezeStorageTypeConverters {
     );
   }
 
-  Future<List<M>> fetchAll<M extends BreezeAbstractModel>({
+  Future<List<M>> fetchAll<M extends BreezeBaseModel>({
     BreezeFilterExpression? filter,
     List<BreezeSortBy> sortBy = const [],
     // TODO: Pagination/limit
