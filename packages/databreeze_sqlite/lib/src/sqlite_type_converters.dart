@@ -1,6 +1,6 @@
 import 'package:databreeze/databreeze.dart';
 
-class BreezeSqliteBoolIntConverter extends BreezeTypeConverter<bool, int> {
+class BreezeSqliteBoolIntConverter extends BreezeBaseTypeConverter<bool, int> {
   @override
   bool toDart(int value) => (value == 1);
 
@@ -8,7 +8,7 @@ class BreezeSqliteBoolIntConverter extends BreezeTypeConverter<bool, int> {
   int toStorage(bool value) => (value ? 1 : 0);
 }
 
-class BreezeSqliteDurationIntConverter extends BreezeTypeConverter<Duration, int> {
+class BreezeSqliteDurationIntConverter extends BreezeBaseTypeConverter<Duration, int> {
   @override
   Duration toDart(int value) => Duration(milliseconds: value);
 
@@ -16,7 +16,7 @@ class BreezeSqliteDurationIntConverter extends BreezeTypeConverter<Duration, int
   int toStorage(Duration value) => value.inMilliseconds;
 }
 
-class BreezeSqliteDateTimeIntConverter extends BreezeTypeConverter<DateTime, int> {
+class BreezeSqliteDateTimeIntConverter extends BreezeBaseTypeConverter<DateTime, int> {
   @override
   DateTime toDart(int value) => DateTime.fromMillisecondsSinceEpoch(value);
 
@@ -24,7 +24,7 @@ class BreezeSqliteDateTimeIntConverter extends BreezeTypeConverter<DateTime, int
   int toStorage(DateTime value) => value.millisecondsSinceEpoch;
 }
 
-class BreezeSqliteDateTimeStringConverter extends BreezeTypeConverter<DateTime, String> {
+class BreezeSqliteDateTimeStringConverter extends BreezeBaseTypeConverter<DateTime, String> {
   @override
   DateTime toDart(String value) => DateTime.parse(value);
 

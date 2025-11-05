@@ -12,7 +12,7 @@ class TestStore extends BreezeSqliteStore {
   }) : super(onPath: () async => null);
 
   @override
-  Set<BreezeTypeConverter> get defaultTypeConverters => {
+  Set<BreezeBaseTypeConverter> get defaultTypeConverters => {
     ...super.defaultTypeConverters,
     XFileConverter(),
   };

@@ -1,4 +1,6 @@
-abstract class BreezeTypeConverter<DartType, StorageType> {
+abstract class BreezeBaseTypeConverter<DartType, StorageType> {
+  const BreezeBaseTypeConverter();
+
   DartType toDart(StorageType value);
 
   StorageType toStorage(DartType value);
@@ -35,20 +37,40 @@ abstract class BreezeTypeConverter<DartType, StorageType> {
   bool _isNullableType<T>() => _isType<T?>(T);
 
   @override
-  bool operator ==(covariant BreezeTypeConverter other) =>
+  bool operator ==(covariant BreezeBaseTypeConverter other) =>
       (dartType == other.dartType) && (storageType == other.storageType);
 
   @override
   int get hashCode => Object.hash(dartType, storageType);
 }
 
+class BreezeTypeConverter<DartType, StorageType> extends BreezeBaseTypeConverter<DartType, StorageType> {
+  final DartType Function(StorageType value) from;
+  final StorageType Function(DartType value) to;
+
+  const BreezeTypeConverter({
+    required this.from,
+    required this.to,
+  });
+
+  @override
+  DartType toDart(StorageType value) => from(value);
+
+  @override
+  StorageType toStorage(DartType value) => to(value);
+}
+
 mixin BreezeStorageTypeConverters {
-  Set<BreezeTypeConverter> get typeConverters;
+  Set<BreezeBaseTypeConverter> get typeConverters;
 
-  dynamic toDartValue(dynamic value, {required Type dartType}) {
+  dynamic toDartValue(dynamic value, {required Type dartType, Set<BreezeBaseTypeConverter> converters = const {}}) {
     final storageType = value.runtimeType;
+    final effectiveConverters = {
+      ...typeConverters,
+      ...converters,
+    };
 
-    for (final converter in typeConverters) {
+    for (final converter in effectiveConverters) {
       if (converter.canConvertToDart(storageType, dartType)) {
         return converter.toDart(value);
       }
@@ -56,8 +78,13 @@ mixin BreezeStorageTypeConverters {
     return null;
   }
 
-  dynamic toStorageValue(dynamic value, {required Type dartType}) {
-    for (final converter in typeConverters) {
+  dynamic toStorageValue(dynamic value, {required Type dartType, Set<BreezeBaseTypeConverter> converters = const {}}) {
+    final effectiveConverters = {
+      ...typeConverters,
+      ...converters,
+    };
+
+    for (final converter in effectiveConverters) {
       if (converter.canConvertToStorage(dartType)) {
         return converter.toStorage(value);
       }

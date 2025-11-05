@@ -27,7 +27,7 @@ class BreezeSqliteStore extends BreezeStore {
   }
 
   @override
-  final Set<BreezeTypeConverter> defaultTypeConverters = {
+  final Set<BreezeBaseTypeConverter> defaultTypeConverters = {
     BreezeSqliteBoolIntConverter(),
     BreezeSqliteDurationIntConverter(),
     // BreezeSqliteDateTimeIntConverter(),

@@ -13,7 +13,7 @@ class TestStore extends JsonStore {
   });
 
   @override
-  Set<BreezeTypeConverter> get defaultTypeConverters => {
+  Set<BreezeBaseTypeConverter> get defaultTypeConverters => {
     ...super.defaultTypeConverters,
     XFileConverter(),
   };

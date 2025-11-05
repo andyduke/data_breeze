@@ -28,12 +28,14 @@ class BreezeModelBlueprint<M extends BreezeModel> {
   final String key;
   final Map<String, BreezeModelColumn> columns;
   final M Function(BreezeDataRecord record) builder;
+  final Set<BreezeBaseTypeConverter> typeConverters;
 
   BreezeModelBlueprint({
     required this.name,
     this.key = defaultKey,
     required List<BreezeModelColumn> columns,
     required this.builder,
+    this.typeConverters = const {},
   }) : columns = {
          for (final col in columns) col.name: col,
        };
@@ -73,6 +75,7 @@ class BreezeModelBlueprint<M extends BreezeModel> {
       final result = converters.toDartValue(
         value,
         dartType: column.type,
+        converters: typeConverters,
       );
       return result ?? value;
     }
@@ -91,6 +94,7 @@ class BreezeModelBlueprint<M extends BreezeModel> {
       final result = converters.toStorageValue(
         value,
         dartType: column.type,
+        converters: typeConverters,
       );
       return result ?? value;
     }

@@ -14,13 +14,13 @@ abstract class BreezeStore with BreezeStorageTypeConverters {
   final Map<Type, BreezeModelBlueprint> blueprints;
 
   @override
-  late final Set<BreezeTypeConverter> typeConverters;
+  late final Set<BreezeBaseTypeConverter> typeConverters;
 
-  Set<BreezeTypeConverter> get defaultTypeConverters => {};
+  Set<BreezeBaseTypeConverter> get defaultTypeConverters => {};
 
   BreezeStore({
     Set<BreezeModelBlueprint> models = const {},
-    Set<BreezeTypeConverter> typeConverters = const {},
+    Set<BreezeBaseTypeConverter> typeConverters = const {},
   }) : blueprints = Map.fromIterable(models, key: (b) => b.type) {
     this.typeConverters = {...defaultTypeConverters, ...typeConverters};
   }

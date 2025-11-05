@@ -19,7 +19,7 @@ class XFile {
   int get hashCode => path.hashCode;
 }
 
-class XFileConverter extends BreezeTypeConverter<XFile, String> {
+class XFileConverter extends BreezeBaseTypeConverter<XFile, String> {
   @override
   XFile toDart(String value) => XFile(value);
 

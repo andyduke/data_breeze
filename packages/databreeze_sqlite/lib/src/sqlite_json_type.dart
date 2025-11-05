@@ -4,7 +4,7 @@ import 'package:sqlite_async/sqlite3_common.dart';
 
 typedef BreezeSqliteJsonB = Uint8List;
 
-class BreezeSqliteJsonListConverter<T> extends BreezeTypeConverter<List<T>, BreezeSqliteJsonB> {
+class BreezeSqliteJsonListConverter<T> extends BreezeBaseTypeConverter<List<T>, BreezeSqliteJsonB> {
   @override
   List<T> toDart(BreezeSqliteJsonB value) {
     final decoded = jsonb.decode(value);
