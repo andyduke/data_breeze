@@ -1,25 +1,14 @@
 import 'package:databreeze/src/model_blueprint.dart';
 import 'package:meta/meta.dart';
 
-abstract class BreezeAbstractModel<K> {
-  K? id;
-}
+abstract class BreezeAbstractModel {}
 
-// TODO: Remove the ID, since the view model may not have a key?
-abstract mixin class BreezeModelView<K> implements BreezeAbstractModel<K> {
-  @override
+abstract mixin class BreezeModelView<K> implements BreezeAbstractModel {}
+
+abstract mixin class BreezeModel<K> implements BreezeAbstractModel {
   K? get id => _id;
   K? _id;
-  @override
-  @internal
-  set id(K? newValue) => _id = newValue;
-}
 
-abstract mixin class BreezeModel<K> implements BreezeAbstractModel<K> {
-  @override
-  K? get id => _id;
-  K? _id;
-  @override
   @internal
   set id(K? newValue) => _id = newValue;
 

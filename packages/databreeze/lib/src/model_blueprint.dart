@@ -67,7 +67,11 @@ class BreezeModelBlueprint<M extends BreezeAbstractModel> {
   M fromRecord(Map<String, dynamic> record, BreezeStorageTypeConverters converters) {
     final typedRecord = fromRaw(record, converters);
     final result = builder(typedRecord);
-    result.id = typedRecord[key];
+
+    if (result is BreezeModel) {
+      result.id = typedRecord[key];
+    }
+
     return result;
   }
 

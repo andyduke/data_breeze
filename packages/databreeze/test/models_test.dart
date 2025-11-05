@@ -14,7 +14,7 @@ abstract final class UploadTaskColumns {
 
 /// The base model, the foundation for the full model (R/W)
 /// and the view model (R/O).
-abstract class UploadTaskBase extends BreezeAbstractModel<int> {
+abstract class UploadTaskBase extends BreezeAbstractModel {
   abstract final String name;
   abstract final String? note;
   abstract final DateTime createdAt;
@@ -79,6 +79,8 @@ abstract final class UploadTaskWithProgressColumns {
 }
 
 class UploadTaskWithProgress extends UploadTaskBase with BreezeModelView<int> {
+  final int id;
+
   @override
   final String name;
 
@@ -99,6 +101,7 @@ class UploadTaskWithProgress extends UploadTaskBase with BreezeModelView<int> {
   );
 
   UploadTaskWithProgress({
+    required this.id,
     required this.name,
     this.note,
     required this.createdAt,
@@ -106,6 +109,7 @@ class UploadTaskWithProgress extends UploadTaskBase with BreezeModelView<int> {
   });
 
   factory UploadTaskWithProgress.fromRecord(Map<String, dynamic> record) => UploadTaskWithProgress(
+    id: record[UploadTaskColumns.id],
     name: record[UploadTaskColumns.name] ?? 'n/a',
     note: record[UploadTaskColumns.note],
     createdAt: record[UploadTaskColumns.createdAt],
