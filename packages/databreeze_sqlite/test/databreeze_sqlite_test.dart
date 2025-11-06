@@ -1,5 +1,5 @@
 import 'package:databreeze/databreeze.dart';
-import 'package:databreeze_sqlite/src/sqlite_type_converters.dart';
+import 'package:databreeze_sqlite/databreeze_sqlite.dart';
 import 'package:sqlite_async/sqlite_async.dart';
 import 'package:test/test.dart';
 import 'package:logging/logging.dart';
@@ -25,7 +25,7 @@ Future<void> main() async {
         models: {
           Task.blueprint,
         },
-        migrations: emptyTaskMigration,
+        migrationStrategy: BreezeSqliteMigrations(emptyTaskMigration),
       );
 
       final newTask = Task(
@@ -63,7 +63,7 @@ Future<void> main() async {
         models: {
           Task.blueprint,
         },
-        migrations: singleTaskMigration,
+        migrationStrategy: BreezeSqliteMigrations(singleTaskMigration),
       );
 
       // final query = QueryTaskById(1);
@@ -82,7 +82,7 @@ Future<void> main() async {
         models: {
           Task.blueprint,
         },
-        migrations: singleTaskMigration,
+        migrationStrategy: BreezeSqliteMigrations(singleTaskMigration),
       );
 
       // final query = QueryTaskById(1);
@@ -122,7 +122,7 @@ Future<void> main() async {
         models: {
           Task.blueprint,
         },
-        migrations: tasksMigration,
+        migrationStrategy: BreezeSqliteMigrations(tasksMigration),
       );
 
       // final query = QueryTaskById(2);
@@ -160,7 +160,7 @@ Future<void> main() async {
         models: {
           Task.blueprint,
         },
-        migrations: tasksMigration,
+        migrationStrategy: BreezeSqliteMigrations(tasksMigration),
       );
 
       // final query = QueryAllTasks(sortBy: [BreezeSortBy(TaskColumns.createdAt)]);
@@ -182,7 +182,7 @@ Future<void> main() async {
         models: {
           Task.blueprint,
         },
-        migrations: tasksMigration,
+        migrationStrategy: BreezeSqliteMigrations(tasksMigration),
       );
 
       // final query = QueryAllTasks(sortBy: [BreezeSortBy(TaskColumns.name, BreezeSortDir.desc)]);
@@ -204,12 +204,14 @@ Future<void> main() async {
         models: {
           Task.blueprint,
         },
-        migrations: createMigrations([
-          createTaskTableSql,
-          "INSERT INTO tasks(id, name, note, created_at, file) VALUES(3, 'File 3', NULL, '2025-10-30 14:00:00+03:00', 'path/to/file3')",
-          "INSERT INTO tasks(id, name, note, created_at, file) VALUES(1, 'File 1', NULL, '2025-10-30 15:00:00+03:00', 'path/to/file1')",
-          "INSERT INTO tasks(id, name, note, created_at, file) VALUES(2, 'File 2', NULL, '2025-10-30 14:00:00+03:00', 'path/to/file2')",
-        ]),
+        migrationStrategy: BreezeSqliteMigrations(
+          createMigrations([
+            createTaskTableSql,
+            "INSERT INTO tasks(id, name, note, created_at, file) VALUES(3, 'File 3', NULL, '2025-10-30 14:00:00+03:00', 'path/to/file3')",
+            "INSERT INTO tasks(id, name, note, created_at, file) VALUES(1, 'File 1', NULL, '2025-10-30 15:00:00+03:00', 'path/to/file1')",
+            "INSERT INTO tasks(id, name, note, created_at, file) VALUES(2, 'File 2', NULL, '2025-10-30 14:00:00+03:00', 'path/to/file2')",
+          ]),
+        ),
       );
 
       // final query = QueryAllTasks(
@@ -246,8 +248,8 @@ Future<void> main() async {
         models: {
           TaskWithProgress.blueprint,
         },
-        migrations: SqliteMigrations()
-          ..add(
+        migrationStrategy: BreezeSqliteMigrations(
+          SqliteMigrations()..add(
             SqliteMigration(
               1,
               (tx) async {
@@ -275,6 +277,7 @@ CREATE TEMP TABLE task_progress(
               },
             ),
           ),
+        ),
       );
 
       final query = QueryAllTaskWithProgress();

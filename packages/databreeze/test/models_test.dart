@@ -21,12 +21,12 @@ abstract class UploadTaskBase extends BreezeBaseModel {
 
   static final blueprint = BreezeModelBlueprint<UploadTaskBase>(
     name: 'upload_tasks',
-    columns: [
+    columns: {
       BreezeModelColumn<int>(UploadTaskColumns.id, isPrimaryKey: true),
       BreezeModelColumn<String>(UploadTaskColumns.name),
       BreezeModelColumn<String?>(UploadTaskColumns.note),
       BreezeModelColumn<DateTime>(UploadTaskColumns.createdAt),
-    ],
+    },
     builder: UploadTask.fromRecord,
   );
 }
@@ -93,10 +93,10 @@ class UploadTaskWithProgress extends UploadTaskBase with BreezeViewModel {
   final double progress;
 
   static final blueprint = UploadTaskBase.blueprint.extend<UploadTaskWithProgress>(
-    columns: [
+    columns: {
       ...UploadTaskBase.blueprint.columns.values,
       BreezeModelColumn<double>(UploadTaskWithProgressColumns.progress),
-    ],
+    },
     builder: UploadTaskWithProgress.fromRecord,
   );
 
@@ -131,7 +131,10 @@ class User extends BreezeModel<int> {
 
   static final blueprint = BreezeModelBlueprint<User>(
     name: 'users',
-    columns: [BreezeModelColumn<int>(UserColumns.id, isPrimaryKey: true), BreezeModelColumn<String>(UserColumns.name)],
+    columns: {
+      BreezeModelColumn<int>(UserColumns.id, isPrimaryKey: true),
+      BreezeModelColumn<String>(UserColumns.name),
+    },
     builder: User.fromRecord,
   );
 

@@ -42,14 +42,12 @@ class BreezeSqliteStore extends BreezeStore {
   /// such as `PRAGMA`.
   final Future<void> Function(SqliteConnection db)? onInit;
 
-  final SqliteMigrations? migrations;
-
   BreezeSqliteStore({
     this.log,
     super.models,
     required this.onPath,
     this.onInit,
-    this.migrations,
+    super.migrationStrategy,
     super.typeConverters,
   }) {
     initializeDatabase();
@@ -92,17 +90,17 @@ class BreezeSqliteStore extends BreezeStore {
     // Create database
     final db = await createDatabase();
 
+    // Calling custom initializations, such as PRAGMA or
+    // setting database session parameters
     await onInit?.call(db);
 
     // Apply migrations
-    final m = migrations;
-    if (m != null) {
-      m.migrate(db).then((_) async {
-        _dbCompleter.complete(db);
-      });
-    } else {
-      _dbCompleter.complete(db);
+    if (migrationStrategy != null) {
+      await migrationStrategy?.migrate(this, db);
     }
+
+    // Complete database initialization
+    _dbCompleter.complete(db);
   }
 
   @override

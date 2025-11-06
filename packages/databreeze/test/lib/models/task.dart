@@ -68,13 +68,13 @@ class Task extends BreezeModel<int> {
     builder: Task.fromRecord,
     name: 'tasks',
     // key: 'id',
-    columns: [
+    columns: {
       BreezeModelColumn<int>(TaskColumns.id, isPrimaryKey: true),
       BreezeModelColumn<String>(TaskColumns.name),
       BreezeModelColumn<String?>(TaskColumns.note),
       BreezeModelColumn<DateTime>(TaskColumns.createdAt),
       BreezeModelColumn<XFile>(TaskColumns.file),
-    ],
+    },
   );
 
   @override

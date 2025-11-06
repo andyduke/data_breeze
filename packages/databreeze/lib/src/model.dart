@@ -34,7 +34,7 @@ abstract mixin class BreezeModel<K> implements BreezeBaseModel {
 
   @internal
   Map<String, dynamic> toRawRecord() => {
-    schema.key: id,
+    if (schema.key != null) schema.key!: id,
     ...toRecord(),
   };
 }

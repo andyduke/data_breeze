@@ -36,6 +36,10 @@ abstract class BreezeBaseTypeConverter<DartType, StorageType> {
   bool _isType<T>(Type t) => t == T;
   bool _isNullableType<T>() => _isType<T?>(T);
 
+  // TODO: Uniqueness is based solely on the Dart type, allowing you to override
+  //  the converter for model blueprints.
+  //  For example: for the entire SqliteStore, date storage is configured as INT,
+  //  but for a specific model, you need to override the date storage to TEXT.
   @override
   bool operator ==(covariant BreezeBaseTypeConverter other) =>
       (dartType == other.dartType) && (storageType == other.storageType);

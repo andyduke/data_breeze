@@ -7,6 +7,7 @@ class TestStore extends JsonStore {
   TestStore({
     super.log,
     super.models,
+    super.migrationStrategy,
     super.records,
     super.typeConverters,
     super.simulateLatency,

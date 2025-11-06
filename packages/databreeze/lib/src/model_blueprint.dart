@@ -1,45 +1,36 @@
-import 'dart:collection';
 import 'package:databreeze/src/model.dart';
+import 'package:databreeze/src/model_column.dart';
+import 'package:databreeze/src/model_schema.dart';
 import 'package:databreeze/src/type_converters.dart';
 import 'package:databreeze/src/types.dart';
 
-class BreezeModelColumn<T> {
-  final String name;
-  final bool isPrimaryKey;
-  final bool isAutoGenerate;
-  final T? defaultValue;
+typedef BreezeModelBlueprintBuilder<M extends BreezeBaseModel> = M Function(BreezeDataRecord record);
 
-  /// Model type
-  Type get type => T;
-
-  bool get isNullable => null is T;
-
-  const BreezeModelColumn(
-    this.name, {
-    this.isPrimaryKey = false,
-    bool? isAutoGenerate,
-    this.defaultValue,
-  }) : isAutoGenerate = isAutoGenerate ?? (isPrimaryKey ? true : false);
-}
-
-class BreezeModelBlueprint<M extends BreezeBaseModel> {
-  static const defaultKey = 'id';
-
-  final String name;
-  final String key;
-  final UnmodifiableMapView<String, BreezeModelColumn> columns;
-  final M Function(BreezeDataRecord record) builder;
+class BreezeModelBlueprint<M extends BreezeBaseModel> extends BreezeModelVersionedSchema {
+  final BreezeModelBlueprintBuilder<M> builder;
   final Set<BreezeBaseTypeConverter> typeConverters;
 
   BreezeModelBlueprint({
-    required this.name,
-    @Deprecated('Determine the key based on the column with the isPrimaryKey parameter.') this.key = defaultKey,
-    required List<BreezeModelColumn> columns,
+    required String name,
+    required Set<BreezeModelColumn> columns,
+    required BreezeModelBlueprintBuilder<M> builder,
+    Set<BreezeBaseTypeConverter> typeConverters = const {},
+  }) : this.versioned(
+         versions: {
+           BreezeModelSchemaVersion(
+             name: name,
+             columns: columns,
+           ),
+         },
+         builder: builder,
+         typeConverters: typeConverters,
+       );
+
+  BreezeModelBlueprint.versioned({
+    required Set<BreezeModelSchemaVersion> versions,
     required this.builder,
     this.typeConverters = const {},
-  }) : columns = UnmodifiableMapView({
-         for (final col in columns) col.name: col,
-       });
+  }) : super(versions);
 
   Type get type => M;
 
@@ -49,13 +40,13 @@ class BreezeModelBlueprint<M extends BreezeBaseModel> {
   /// Note: Allows copying only for inherited models.
   BreezeModelBlueprint<T> extend<T extends M>({
     String? name,
-    List<BreezeModelColumn>? columns,
+    Set<BreezeModelColumn>? columns,
     required T Function(Map<String, dynamic> raw) builder,
     Set<BreezeBaseTypeConverter>? typeConverters,
   }) {
     return BreezeModelBlueprint<T>(
       name: name ?? this.name,
-      columns: columns ?? this.columns.values.toList(),
+      columns: columns ?? this.columns.values.toSet(),
       builder: builder,
       typeConverters: typeConverters ?? this.typeConverters,
     );

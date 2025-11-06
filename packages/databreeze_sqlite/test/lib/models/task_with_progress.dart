@@ -44,14 +44,14 @@ class TaskWithProgress extends Task {
   static final blueprint = BreezeModelBlueprint<TaskWithProgress>(
     builder: TaskWithProgress.fromRecord,
     name: 'tasks',
-    columns: [
+    columns: {
       BreezeModelColumn<int>(TaskColumns.id, isPrimaryKey: true),
       BreezeModelColumn<String>(TaskColumns.name),
       BreezeModelColumn<String?>(TaskColumns.note),
       BreezeModelColumn<DateTime>(TaskColumns.createdAt),
       BreezeModelColumn<XFile>(TaskColumns.file),
       BreezeModelColumn<double?>('progress' /* transient: true - skip in migration */),
-    ],
+    },
   );
 
   double? progress;

@@ -52,9 +52,13 @@ class BreezeQueryById<M extends BreezeBaseModel> extends BreezeQuery<M, M?> {
 
   @override
   Future<M?> exec(BreezeStore store) async {
+    if (blueprint!.key == null) {
+      throw Exception('This model does not have a primary key field.');
+    }
+
     return store.fetch(
       blueprint: blueprint /* as BreezeModelBlueprint<M>*/,
-      filter: BreezeField(blueprint!.key).eq(id),
+      filter: BreezeField(blueprint!.key!).eq(id),
     );
   }
 }

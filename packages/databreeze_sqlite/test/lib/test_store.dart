@@ -7,7 +7,7 @@ class TestStore extends BreezeSqliteStore {
   TestStore({
     super.log,
     super.models,
-    super.migrations,
+    super.migrationStrategy,
     super.typeConverters,
   }) : super(onPath: () async => null);
 

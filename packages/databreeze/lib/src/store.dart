@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:databreeze/src/filter.dart';
+import 'package:databreeze/src/migration/migration_strategy.dart';
 import 'package:databreeze/src/model.dart';
 import 'package:databreeze/src/model_blueprint.dart';
 import 'package:databreeze/src/store_fetch_options.dart';
@@ -13,6 +14,8 @@ enum BreezeAggregationOp { count, avg, min, max }
 abstract class BreezeStore with BreezeStorageTypeConverters {
   final Map<Type, BreezeModelBlueprint> blueprints;
 
+  final BreezeMigrationStrategy? migrationStrategy;
+
   @override
   late final Set<BreezeBaseTypeConverter> typeConverters;
 
@@ -20,6 +23,7 @@ abstract class BreezeStore with BreezeStorageTypeConverters {
 
   BreezeStore({
     Set<BreezeModelBlueprint> models = const {},
+    this.migrationStrategy,
     Set<BreezeBaseTypeConverter> typeConverters = const {},
   }) : blueprints = Map.fromIterable(models, key: (b) => b.type) {
     this.typeConverters = {...defaultTypeConverters, ...typeConverters};
@@ -122,8 +126,12 @@ abstract class BreezeStore with BreezeStorageTypeConverters {
     if (!record.isFrozen) {
       final tableName = record.schema.name;
       final keyName = record.schema.key;
-      final rawRecord = record.schema.toRaw(record.toRawRecord(), this);
 
+      if (keyName == null) {
+        throw Exception('The "$M" model does not have a primary key field.');
+      }
+
+      final rawRecord = record.schema.toRaw(record.toRawRecord(), this);
       final newId = await addRecord(name: tableName, key: keyName, record: rawRecord);
 
       // TODO: Check key type?
@@ -153,6 +161,11 @@ abstract class BreezeStore with BreezeStorageTypeConverters {
       final tableName = record.schema.name;
       final keyName = record.schema.key;
       final keyValue = record.id;
+
+      if (keyName == null) {
+        throw Exception('The "$M" model does not have a primary key field.');
+      }
+
       final rawRecord = record.schema.toRaw(record.toRawRecord(), this);
 
       if (keyValue != null) {
@@ -181,6 +194,11 @@ abstract class BreezeStore with BreezeStorageTypeConverters {
       final tableName = record.schema.name;
       final keyName = record.schema.key;
       final keyValue = record.id;
+
+      if (keyName == null) {
+        throw Exception('The "$M" model does not have a primary key field.');
+      }
+
       final rawRecord = record.schema.toRaw(record.toRawRecord(), this);
 
       if (keyValue != null) {
