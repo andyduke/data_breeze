@@ -40,7 +40,6 @@ class QueryAllTaskWithProgress extends BreezeQuery<TaskWithProgress, List<TaskWi
 }
 
 class TaskWithProgress extends Task {
-  // TODO: How to inherit blueprint?
   static final blueprint = BreezeModelBlueprint<TaskWithProgress>(
     builder: TaskWithProgress.fromRecord,
     name: 'tasks',

@@ -19,7 +19,7 @@ Future<void> main() async {
         models: {
           MUser.blueprint,
         },
-        onPath: () async => null,
+        databaseFile: null,
         log: log,
         onInit: (db) => db.execute('PRAGMA temp_store=2'),
         migrationStrategy: BreezeSqliteAutomaticSchemaBasedMigration(
@@ -60,7 +60,7 @@ Future<void> main() async {
         models: {
           MUserRenamed.blueprint,
         },
-        onPath: () async => null,
+        databaseFile: null,
         log: log,
         onInit: (db) => db.execute('PRAGMA temp_store=2'),
         migrationStrategy: BreezeSqliteAutomaticSchemaBasedMigration(
@@ -101,7 +101,7 @@ Future<void> main() async {
         models: {
           MUserDeleted.blueprint,
         },
-        onPath: () async => null,
+        databaseFile: null,
         log: log,
         onInit: (db) => db.execute('PRAGMA temp_store=2'),
         migrationStrategy: BreezeSqliteAutomaticSchemaBasedMigration(
@@ -136,7 +136,7 @@ Future<void> main() async {
         models: {
           MUserAddColumn.blueprint,
         },
-        onPath: () async => null,
+        databaseFile: null,
         log: log,
         onInit: (db) => db.execute('PRAGMA temp_store=2'),
         migrationStrategy: BreezeSqliteAutomaticSchemaBasedMigration(
@@ -178,7 +178,7 @@ Future<void> main() async {
         models: {
           MUserDeleteColumn.blueprint,
         },
-        onPath: () async => null,
+        databaseFile: null,
         log: log,
         onInit: (db) => db.execute('PRAGMA temp_store=2'),
         migrationStrategy: BreezeSqliteAutomaticSchemaBasedMigration(
@@ -219,7 +219,7 @@ Future<void> main() async {
         models: {
           MUserRenameColumn.blueprint,
         },
-        onPath: () async => null,
+        databaseFile: null,
         log: log,
         onInit: (db) => db.execute('PRAGMA temp_store=2'),
         migrationStrategy: BreezeSqliteAutomaticSchemaBasedMigration(
@@ -260,7 +260,7 @@ Future<void> main() async {
         models: {
           MUserChangeColumnType.blueprint,
         },
-        onPath: () async => null,
+        databaseFile: null,
         log: log,
         onInit: (db) => db.execute('PRAGMA temp_store=2'),
         migrationStrategy: BreezeSqliteAutomaticSchemaBasedMigration(
@@ -301,7 +301,7 @@ Future<void> main() async {
         models: {
           MUserRenameOneAndAddAnotherColumn.blueprint,
         },
-        onPath: () async => null,
+        databaseFile: null,
         log: log,
         onInit: (db) => db.execute('PRAGMA temp_store=2'),
         migrationStrategy: BreezeSqliteAutomaticSchemaBasedMigration(
@@ -345,7 +345,7 @@ Future<void> main() async {
         models: {
           MUserWithHooks.blueprint,
         },
-        onPath: () async => null,
+        databaseFile: null,
         log: log,
         onInit: (db) => db.execute('PRAGMA temp_store=2'),
         migrationStrategy: BreezeSqliteAutomaticSchemaBasedMigration(
@@ -391,7 +391,7 @@ Future<void> main() async {
         models: {
           MUserRenamedWithHooks.blueprint,
         },
-        onPath: () async => null,
+        databaseFile: null,
         log: log,
         onInit: (db) => db.execute('PRAGMA temp_store=2'),
         migrationStrategy: BreezeSqliteAutomaticSchemaBasedMigration(
@@ -437,7 +437,7 @@ Future<void> main() async {
         models: {
           MUserDeletedWithHooks.blueprint,
         },
-        onPath: () async => null,
+        databaseFile: null,
         log: log,
         onInit: (db) => db.execute('PRAGMA temp_store=2'),
         migrationStrategy: BreezeSqliteAutomaticSchemaBasedMigration(
@@ -475,7 +475,7 @@ Future<void> main() async {
         models: {
           MUserAddColumnWithHooks.blueprint,
         },
-        onPath: () async => null,
+        databaseFile: null,
         log: log,
         onInit: (db) => db.execute('PRAGMA temp_store=2'),
         migrationStrategy: BreezeSqliteAutomaticSchemaBasedMigration(
@@ -522,7 +522,7 @@ Future<void> main() async {
         models: {
           MUserDeleteColumnWithHooks.blueprint,
         },
-        onPath: () async => null,
+        databaseFile: null,
         log: log,
         onInit: (db) => db.execute('PRAGMA temp_store=2'),
         migrationStrategy: BreezeSqliteAutomaticSchemaBasedMigration(
@@ -568,7 +568,7 @@ Future<void> main() async {
         models: {
           MUserRenameColumnWithHooks.blueprint,
         },
-        onPath: () async => null,
+        databaseFile: null,
         log: log,
         onInit: (db) => db.execute('PRAGMA temp_store=2'),
         migrationStrategy: BreezeSqliteAutomaticSchemaBasedMigration(
@@ -617,7 +617,7 @@ Future<void> main() async {
           MUserAddColumn.blueprint,
           MProgressTemp.blueprint,
         },
-        onPath: () async => null,
+        databaseFile: null,
         log: log,
         onInit: (db) => db.execute('PRAGMA temp_store=2'),
         migrationStrategy: BreezeSqliteAutomaticSchemaBasedMigration(
@@ -681,7 +681,7 @@ Future<void> main() async {
         models: {
           MProgressTempDeleteColumn.blueprint,
         },
-        onPath: () async => null,
+        databaseFile: null,
         log: log,
         onInit: (db) => db.execute('PRAGMA temp_store=2'),
         migrationStrategy: BreezeSqliteAutomaticSchemaBasedMigration(
@@ -710,7 +710,7 @@ Future<void> main() async {
         models: {
           MProgressAddTemporaryTag.blueprint,
         },
-        onPath: () async => null,
+        databaseFile: null,
         log: log,
         onInit: (db) => db.execute('PRAGMA temp_store=2'),
         migrationStrategy: BreezeSqliteAutomaticSchemaBasedMigration(
@@ -739,7 +739,7 @@ Future<void> main() async {
         models: {
           MProgressRemoveTemporaryTag.blueprint,
         },
-        onPath: () async => null,
+        databaseFile: null,
         log: log,
         onInit: (db) => db.execute('PRAGMA temp_store=2'),
         migrationStrategy: BreezeSqliteAutomaticSchemaBasedMigration(

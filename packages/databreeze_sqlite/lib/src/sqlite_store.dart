@@ -5,11 +5,12 @@ import 'package:databreeze_sqlite/src/sqlite_json_type.dart';
 import 'package:databreeze_sqlite/src/sqlite_type_converters.dart';
 import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:sqlite_async/sqlite3_common.dart';
 import 'package:sqlite_async/sqlite3.dart';
 import 'package:sqlite_async/sqlite_async.dart';
 import 'package:sqlite3/open.dart' as sqlite_open;
-import 'package:path/path.dart' as path;
+import 'package:path/path.dart' as p;
 
 class BreezeSqliteRequest extends BreezeAbstractFetchRequest {
   final String sql;
@@ -31,9 +32,14 @@ class BreezeSqliteRequest extends BreezeAbstractFetchRequest {
 class BreezeSqliteStore extends BreezeStore {
   final Logger? log;
 
-  /// Should return the path to the database or `null`
-  /// for an in-memory database.
-  final Future<String?> Function() onPath;
+  /// The database file name, or `null` for an in-memory database.
+  final String? databaseFile;
+
+  /// It should return the path to the database file.
+  ///
+  /// If it is null, the default database file location
+  /// (in the Application Documents folder) will be used.
+  final Future<String> Function()? databaseLocation;
 
   /// This is called immediately after the database is
   /// opened (before migrations, etc.).
@@ -45,7 +51,8 @@ class BreezeSqliteStore extends BreezeStore {
   BreezeSqliteStore({
     this.log,
     super.models,
-    required this.onPath,
+    required this.databaseFile,
+    this.databaseLocation,
     this.onInit,
     super.migrationStrategy,
     super.typeConverters,
@@ -67,11 +74,20 @@ class BreezeSqliteStore extends BreezeStore {
   };
 
   Future<SqliteConnection> createDatabase() async {
-    final location = await onPath();
+    late final String? path;
+    if (databaseFile != null) {
+      final dbLocation = (databaseLocation != null)
+          ? await databaseLocation!()
+          : await (getApplicationDocumentsDirectory().then((d) => d.path));
+      path = p.join(dbLocation, databaseFile);
+    } else {
+      path = null;
+    }
+
     final db = SqliteDatabase.withFactory(
-      (location != null)
+      (path != null)
           ? SqliteFileOpenFactory(
-              path: location,
+              path: path,
             )
           : SqliteInMemoryOpenFactory(
               sqliteOptions: SqliteOptions(
@@ -418,7 +434,7 @@ class SqliteInMemoryOpenFactory extends DefaultSqliteOpenFactory {
     for (var MapEntry(key: os, value: lib) in sqliteLib.entries) {
       sqlite_open.open.overrideFor(
         os,
-        () => DynamicLibrary.open(path.join(sqliteLibPath, lib)),
+        () => DynamicLibrary.open(p.join(sqliteLibPath, lib)),
       );
     }
 
@@ -469,7 +485,7 @@ class SqliteFileOpenFactory extends DefaultSqliteOpenFactory {
       for (var MapEntry(key: os, value: lib) in sqliteLib.entries) {
         sqlite_open.open.overrideFor(
           os,
-          () => DynamicLibrary.open(path.join(sqliteLibPath!, lib)),
+          () => DynamicLibrary.open(p.join(sqliteLibPath!, lib)),
         );
       }
     }
