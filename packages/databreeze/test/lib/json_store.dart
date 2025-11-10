@@ -14,7 +14,7 @@ class JsonFetchRequest extends BreezeAbstractFetchRequest {
   String toString() => '''JsonFetchRequest([test callback])''';
 }
 
-class JsonStore extends BreezeStore {
+class JsonStore extends BreezeStore with BreezeStoreFetch {
   static const _latency = Duration(milliseconds: 500);
 
   final Logger? log;

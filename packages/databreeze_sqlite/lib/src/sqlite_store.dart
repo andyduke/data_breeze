@@ -29,7 +29,7 @@ class BreezeSqliteRequest extends BreezeAbstractFetchRequest {
 )''';
 }
 
-class BreezeSqliteStore extends BreezeStore {
+class BreezeSqliteStore extends BreezeStore with BreezeStoreFetch {
   final Logger? log;
 
   /// The database file name, or `null` for an in-memory database.

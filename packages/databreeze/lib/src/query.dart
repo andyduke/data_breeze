@@ -26,11 +26,16 @@ abstract class BreezeQuery<M extends BreezeBaseModel, R> {
   bool autoUpdateWhen(BreezeStoreChange change);
 
   Future<R> fetch(BreezeStore store) {
+    beforeExec(store);
+    return exec(store);
+  }
+
+  @protected
+  @mustCallSuper
+  void beforeExec(BreezeStore store) {
     if (_blueprint == null && blueprint == null) {
       blueprint = store.blueprintOf(M) as BreezeModelBlueprint<M>?;
     }
-
-    return exec(store);
   }
 
   @protected
@@ -51,14 +56,21 @@ class BreezeQueryById<M extends BreezeBaseModel> extends BreezeQuery<M, M?> {
   bool autoUpdateWhen(BreezeStoreChange change) => autoUpdate && (change.entity == blueprint?.name && change.id == id);
 
   @override
-  Future<M?> exec(BreezeStore store) async {
-    if (blueprint!.key == null) {
+  void beforeExec(BreezeStore store) {
+    super.beforeExec(store);
+
+    if (blueprint?.key == null) {
       throw Exception('This model does not have a primary key field.');
     }
+  }
 
-    return store.fetch(
-      blueprint: blueprint /* as BreezeModelBlueprint<M>*/,
-      filter: BreezeField(blueprint!.key!).eq(id),
+  @override
+  Future<M?> exec(BreezeStore store) async {
+    return store.fetchWithRequest(
+      BreezeFetchRequest(
+        filter: BreezeField(blueprint!.key!).eq(id),
+      ),
+      blueprint: blueprint,
     );
   }
 }
@@ -80,10 +92,12 @@ class BreezeQueryAll<M extends BreezeBaseModel> extends BreezeQuery<M, List<M>> 
 
   @override
   Future<List<M>> exec(BreezeStore store) async {
-    return store.fetchAll(
-      blueprint: blueprint /* as BreezeModelBlueprint<M>*/,
-      filter: filter,
-      sortBy: sortBy,
+    return store.fetchAllWithRequest(
+      BreezeFetchRequest(
+        filter: filter,
+        sortBy: sortBy,
+      ),
+      blueprint: blueprint,
     );
   }
 }

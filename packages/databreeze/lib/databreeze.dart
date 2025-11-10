@@ -11,6 +11,7 @@ export 'src/filter.dart';
 export 'src/query.dart';
 export 'src/store_fetch_options.dart';
 export 'src/store_change.dart';
+export 'src/mixins/store_mixins.dart';
 export 'src/store.dart';
 
 export 'src/migration/migration_strategy.dart';

@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:databreeze/src/filter.dart';
 import 'package:databreeze/src/migration/migration_strategy.dart';
 import 'package:databreeze/src/model.dart';
 import 'package:databreeze/src/model_blueprint.dart';
@@ -82,35 +81,6 @@ abstract class BreezeStore with BreezeStorageTypeConverters {
     return [
       for (final record in records) modelBlueprint.fromRecord(record, this),
     ];
-  }
-
-  Future<M?> fetch<M extends BreezeBaseModel>({
-    required BreezeFilterExpression filter,
-    List<BreezeSortBy> sortBy = const [],
-    BreezeModelBlueprint<M>? blueprint,
-  }) {
-    return fetchWithRequest<M>(
-      BreezeFetchRequest(
-        filter: filter,
-        sortBy: sortBy,
-      ),
-      blueprint: blueprint,
-    );
-  }
-
-  Future<List<M>> fetchAll<M extends BreezeBaseModel>({
-    BreezeFilterExpression? filter,
-    List<BreezeSortBy> sortBy = const [],
-    // TODO: Pagination/limit
-    BreezeModelBlueprint<M>? blueprint,
-  }) {
-    return fetchAllWithRequest<M>(
-      BreezeFetchRequest(
-        filter: filter,
-        sortBy: sortBy,
-      ),
-      blueprint: blueprint,
-    );
   }
 
   Future<M> save<M extends BreezeModel>(M record) async {
