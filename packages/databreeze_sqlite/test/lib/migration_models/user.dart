@@ -38,7 +38,7 @@ class MUser extends BreezeModel<int> {
 class MUserRenamed extends BreezeModel<int> {
   static final blueprint = BreezeModelBlueprint.versioned(
     versions: {
-      BreezeModelSchemaVersion(
+      BreezeSqliteModelSchemaVersion(
         version: 1,
         name: 'users',
         columns: {
@@ -47,9 +47,10 @@ class MUserRenamed extends BreezeModel<int> {
         },
       ),
 
-      BreezeModelSchemaVersion(
+      BreezeSqliteModelSchemaVersion(
         version: 2,
         name: 'persons',
+        prevName: 'users',
         columns: {
           BreezeModelColumn<int>('id', isPrimaryKey: true),
           BreezeModelColumn<String>('name'),
@@ -81,7 +82,7 @@ class MUserRenamed extends BreezeModel<int> {
 class MUserDeleted extends BreezeModel<int> {
   static final blueprint = BreezeModelBlueprint.versioned(
     versions: {
-      BreezeModelSchemaVersion(
+      BreezeSqliteModelSchemaVersion(
         version: 1,
         name: 'users',
         columns: {
@@ -90,7 +91,7 @@ class MUserDeleted extends BreezeModel<int> {
         },
       ),
 
-      BreezeModelSchemaVersion.deleted(
+      BreezeSqliteModelSchemaVersion.deleted(
         version: 2,
         name: 'users',
       ),
@@ -117,10 +118,12 @@ class MUserDeleted extends BreezeModel<int> {
   };
 }
 
+// ---
+
 class MUserAddColumn extends BreezeModel<int> {
   static final blueprint = BreezeModelBlueprint.versioned(
     versions: {
-      BreezeModelSchemaVersion(
+      BreezeSqliteModelSchemaVersion(
         version: 1,
         name: 'users',
         columns: {
@@ -129,7 +132,7 @@ class MUserAddColumn extends BreezeModel<int> {
         },
       ),
 
-      BreezeModelSchemaVersion(
+      BreezeSqliteModelSchemaVersion(
         version: 2,
         name: 'users',
         columns: {
@@ -168,7 +171,7 @@ class MUserAddColumn extends BreezeModel<int> {
 class MUserDeleteColumn extends BreezeModel<int> {
   static final blueprint = BreezeModelBlueprint.versioned(
     versions: {
-      BreezeModelSchemaVersion(
+      BreezeSqliteModelSchemaVersion(
         version: 1,
         name: 'users',
         columns: {
@@ -178,7 +181,7 @@ class MUserDeleteColumn extends BreezeModel<int> {
         },
       ),
 
-      BreezeModelSchemaVersion(
+      BreezeSqliteModelSchemaVersion(
         version: 2,
         name: 'users',
         columns: {
@@ -212,7 +215,7 @@ class MUserDeleteColumn extends BreezeModel<int> {
 class MUserRenameColumn extends BreezeModel<int> {
   static final blueprint = BreezeModelBlueprint.versioned(
     versions: {
-      BreezeModelSchemaVersion(
+      BreezeSqliteModelSchemaVersion(
         version: 1,
         name: 'users',
         columns: {
@@ -221,7 +224,7 @@ class MUserRenameColumn extends BreezeModel<int> {
         },
       ),
 
-      BreezeModelSchemaVersion(
+      BreezeSqliteModelSchemaVersion(
         version: 2,
         name: 'users',
         columns: {
@@ -255,7 +258,7 @@ class MUserRenameColumn extends BreezeModel<int> {
 class MUserChangeColumnType extends BreezeModel<int> {
   static final blueprint = BreezeModelBlueprint.versioned(
     versions: {
-      BreezeModelSchemaVersion(
+      BreezeSqliteModelSchemaVersion(
         version: 1,
         name: 'users',
         columns: {
@@ -264,7 +267,7 @@ class MUserChangeColumnType extends BreezeModel<int> {
         },
       ),
 
-      BreezeModelSchemaVersion(
+      BreezeSqliteModelSchemaVersion(
         version: 2,
         name: 'users',
         columns: {
@@ -298,7 +301,7 @@ class MUserChangeColumnType extends BreezeModel<int> {
 class MUserRenameOneAndAddAnotherColumn extends BreezeModel<int> {
   static final blueprint = BreezeModelBlueprint.versioned(
     versions: {
-      BreezeModelSchemaVersion(
+      BreezeSqliteModelSchemaVersion(
         version: 1,
         name: 'users',
         columns: {
@@ -307,7 +310,7 @@ class MUserRenameOneAndAddAnotherColumn extends BreezeModel<int> {
         },
       ),
 
-      BreezeModelSchemaVersion(
+      BreezeSqliteModelSchemaVersion(
         version: 2,
         name: 'users',
         columns: {
@@ -340,5 +343,243 @@ class MUserRenameOneAndAddAnotherColumn extends BreezeModel<int> {
   Map<String, dynamic> toRecord() => {
     'firstName': firstName,
     'lastName': lastName,
+  };
+}
+
+// ---
+
+class MUserAddColumnWithHooks extends BreezeModel<int> {
+  static final blueprint = BreezeModelBlueprint.versioned(
+    versions: {
+      BreezeSqliteModelSchemaVersion(
+        version: 1,
+        name: 'users',
+        columns: {
+          BreezeModelColumn<int>('id', isPrimaryKey: true),
+          BreezeModelColumn<String>('name'),
+        },
+      ),
+
+      BreezeSqliteModelSchemaVersion(
+        version: 2,
+        name: 'users',
+        columns: {
+          BreezeModelColumn<int>('id', isPrimaryKey: true),
+          BreezeModelColumn<String>('name'),
+          BreezeModelColumn<int>('age'),
+        },
+        onBeforeMigrate: (db) async => db.execute('PRAGMA user_version = 1'),
+        onAfterMigrate: (db) async => db.execute('PRAGMA user_version = 2'),
+      ),
+    },
+    builder: MUserAddColumnWithHooks.fromRecord,
+  );
+
+  @override
+  BreezeModelBlueprint get schema => blueprint;
+
+  String name;
+  int age;
+
+  MUserAddColumnWithHooks({
+    required this.name,
+    required this.age,
+  });
+
+  factory MUserAddColumnWithHooks.fromRecord(BreezeDataRecord record) => MUserAddColumnWithHooks(
+    name: record['name'],
+    age: record['age'],
+  );
+
+  @override
+  Map<String, dynamic> toRecord() => {
+    'name': name,
+    'age': age,
+  };
+}
+
+// ---
+
+class MProgressTemp extends BreezeModel<int> {
+  static final blueprint = BreezeModelBlueprint.versioned(
+    versions: {
+      BreezeSqliteModelSchemaVersion(
+        version: 1,
+        name: 'progress',
+        columns: {
+          BreezeModelColumn<int>('id', isPrimaryKey: true),
+          BreezeModelColumn<double>('progress'),
+        },
+        tags: {#temporary},
+      ),
+
+      BreezeSqliteModelSchemaVersion(
+        version: 2,
+        name: 'progress',
+        columns: {
+          BreezeModelColumn<int>('id', isPrimaryKey: true),
+          BreezeModelColumn<double>('progress'),
+          BreezeModelColumn<String?>('error'),
+        },
+        tags: {#temporary},
+      ),
+    },
+    builder: MProgressTemp.fromRecord,
+  );
+
+  @override
+  BreezeModelBlueprint get schema => blueprint;
+
+  double progress;
+  String? error;
+
+  MProgressTemp({
+    required this.progress,
+    this.error,
+  });
+
+  factory MProgressTemp.fromRecord(BreezeDataRecord record) => MProgressTemp(
+    progress: record['progress'],
+    error: record['error'],
+  );
+
+  @override
+  Map<String, dynamic> toRecord() => {
+    'progress': progress,
+    'error': error,
+  };
+}
+
+class MProgressTempDeleteColumn extends BreezeModel<int> {
+  static final blueprint = BreezeModelBlueprint.versioned(
+    versions: {
+      BreezeSqliteModelSchemaVersion(
+        version: 1,
+        name: 'progress',
+        columns: {
+          BreezeModelColumn<int>('id', isPrimaryKey: true),
+          BreezeModelColumn<double>('progress'),
+          BreezeModelColumn<String?>('error'),
+        },
+        tags: {#temporary},
+      ),
+
+      BreezeSqliteModelSchemaVersion(
+        version: 2,
+        name: 'progress',
+        columns: {
+          BreezeModelColumn<int>('id', isPrimaryKey: true),
+          BreezeModelColumn<double>('progress'),
+        },
+        tags: {#temporary},
+      ),
+    },
+    builder: MProgressTempDeleteColumn.fromRecord,
+  );
+
+  @override
+  BreezeModelBlueprint get schema => blueprint;
+
+  double progress;
+
+  MProgressTempDeleteColumn({
+    required this.progress,
+  });
+
+  factory MProgressTempDeleteColumn.fromRecord(BreezeDataRecord record) => MProgressTempDeleteColumn(
+    progress: record['progress'],
+  );
+
+  @override
+  Map<String, dynamic> toRecord() => {
+    'progress': progress,
+  };
+}
+
+class MProgressAddTemporaryTag extends BreezeModel<int> {
+  static final blueprint = BreezeModelBlueprint.versioned(
+    versions: {
+      BreezeSqliteModelSchemaVersion(
+        version: 1,
+        name: 'progress',
+        columns: {
+          BreezeModelColumn<int>('id', isPrimaryKey: true),
+          BreezeModelColumn<double>('progress'),
+        },
+      ),
+
+      BreezeSqliteModelSchemaVersion(
+        version: 2,
+        name: 'progress',
+        columns: {
+          BreezeModelColumn<int>('id', isPrimaryKey: true),
+          BreezeModelColumn<double>('progress'),
+        },
+        tags: {#temporary},
+      ),
+    },
+    builder: MProgressAddTemporaryTag.fromRecord,
+  );
+
+  @override
+  BreezeModelBlueprint get schema => blueprint;
+
+  double progress;
+
+  MProgressAddTemporaryTag({
+    required this.progress,
+  });
+
+  factory MProgressAddTemporaryTag.fromRecord(BreezeDataRecord record) => MProgressAddTemporaryTag(
+    progress: record['progress'],
+  );
+
+  @override
+  Map<String, dynamic> toRecord() => {
+    'progress': progress,
+  };
+}
+
+class MProgressRemoveTemporaryTag extends BreezeModel<int> {
+  static final blueprint = BreezeModelBlueprint.versioned(
+    versions: {
+      BreezeSqliteModelSchemaVersion(
+        version: 1,
+        name: 'progress',
+        columns: {
+          BreezeModelColumn<int>('id', isPrimaryKey: true),
+          BreezeModelColumn<double>('progress'),
+        },
+        tags: {#temporary},
+      ),
+
+      BreezeSqliteModelSchemaVersion(
+        version: 2,
+        name: 'progress',
+        columns: {
+          BreezeModelColumn<int>('id', isPrimaryKey: true),
+          BreezeModelColumn<double>('progress'),
+        },
+      ),
+    },
+    builder: MProgressRemoveTemporaryTag.fromRecord,
+  );
+
+  @override
+  BreezeModelBlueprint get schema => blueprint;
+
+  double progress;
+
+  MProgressRemoveTemporaryTag({
+    required this.progress,
+  });
+
+  factory MProgressRemoveTemporaryTag.fromRecord(BreezeDataRecord record) => MProgressRemoveTemporaryTag(
+    progress: record['progress'],
+  );
+
+  @override
+  Map<String, dynamic> toRecord() => {
+    'progress': progress,
   };
 }

@@ -49,7 +49,7 @@ abstract class BreezeMigrationDelegate<D> {
   Future<int> getSchemaVersion(D db, String name, Logger? log);
   Future<void> setSchemaVersion(D db, String name, int? version, Logger? log);
 
-  Future<T> runInTransaction<T>(D db, Future<T> Function(D tx) callback);
+  Future<T> transaction<T>(D db, Logger? log, Future<T> Function(D tx) callback);
 
   BreezeMigration createTableMigration(BreezeBaseModelSchema schema, {required int version});
   BreezeMigration renameTableMigration(BreezeBaseModelSchema schema, {required int version});
@@ -77,8 +77,6 @@ abstract class BreezeMigrationManager<D> {
     BreezeMigrationBeforeVersionCallback<D>? onBeforeVersion,
     BreezeMigrationAfterVersionCallback<D>? onAfterVersion,
   }) async {
-    await delegate.prepare(db, log);
-
     final schemaName = schema.prevName ?? schema.name;
     final currentVersion = await delegate.getSchemaVersion(db, schemaName, log);
 
@@ -88,12 +86,21 @@ abstract class BreezeMigrationManager<D> {
       for (final migration in newMigrations) {
         await migration.apply(db, log);
 
-        if (schema.prevName != null) {
-          await delegate.setSchemaVersion(db, schema.prevName!, null, log);
-        }
+        final isDeleted = schema.isDeleted;
 
-        if (onAfterVersion?.call(db, currentVersion, migration.version, schema) ?? true) {
-          await delegate.setSchemaVersion(db, schema.name, migration.version, log);
+        // Update the schema version number in the database.
+        if (isDeleted) {
+          await delegate.setSchemaVersion(db, schema.name, null, log);
+        } else {
+          if (schema.prevName != null) {
+            await delegate.setSchemaVersion(db, schema.prevName!, null, log);
+          }
+
+          if (onAfterVersion?.call(db, currentVersion, migration.version, schema) ?? true) {
+            if (!isDeleted) {
+              await delegate.setSchemaVersion(db, schema.name, migration.version, log);
+            }
+          }
         }
       }
     }
@@ -108,8 +115,10 @@ abstract class BreezeMigrationManager<D> {
     BreezeMigrationAfterVersionCallback<D>? onAfterVersion,
   }) async {
     if (schemas.isNotEmpty) {
-      await delegate.runInTransaction(db, (tx) async {
+      await delegate.transaction(db, log, (tx) async {
         await onBefore?.call(tx);
+
+        await delegate.prepare(tx, log);
 
         for (final schema in schemas) {
           log?.info(

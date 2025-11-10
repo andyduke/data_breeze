@@ -19,12 +19,14 @@ class BreezeSqliteRebuildTableMigration extends BreezeSqliteMigration {
     final newName = to.name;
     final tempName = '${newName}_temp_v$version';
 
+    final options = to.tags.contains(#temporary) ? ' TEMP' : '';
+
     // Create temp table
     final newColumnsSql = <String>[];
     for (final column in to.columns.values) {
       newColumnsSql.add(BreezeSqliteMigration.createColumnSql(column));
     }
-    sql.add('''CREATE TABLE $tempName (
+    sql.add('''CREATE$options TABLE $tempName (
   ${newColumnsSql.join(',\n  ')}
 )''');
 

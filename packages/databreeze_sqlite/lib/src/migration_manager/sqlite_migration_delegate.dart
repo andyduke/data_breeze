@@ -53,8 +53,20 @@ CREATE TABLE IF NOT EXISTS $migrationsTableName (
   }
 
   @override
-  Future<T> runInTransaction<T>(SqliteWriteContext db, covariant Future<T> Function(SqliteWriteContext tx) callback) {
-    return db.writeTransaction(callback);
+  Future<T> transaction<T>(
+    SqliteWriteContext db,
+    Logger? log,
+    Future<T> Function(SqliteWriteContext tx) callback,
+  ) async {
+    log?.finer('BEGIN TRANSACTION');
+    try {
+      final result = await db.writeTransaction(callback);
+      log?.finer('COMMIT');
+      return result;
+    } catch (e) {
+      log?.finer('ROLLBACK');
+      rethrow;
+    }
   }
 
   @override

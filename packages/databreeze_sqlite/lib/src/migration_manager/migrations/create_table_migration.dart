@@ -18,7 +18,7 @@ class BreezeSqliteCreateTableMigration extends BreezeSqliteMigration {
     for (final column in schema.columns.values) {
       columnsSql.add(BreezeSqliteMigration.createColumnSql(column));
     }
-    final options = (schema.tag == #temporary) ? ' TEMP' : '';
+    final options = schema.tags.contains(#temporary) ? ' TEMP' : '';
 
     final sql =
         '''CREATE$options TABLE ${schema.name} (

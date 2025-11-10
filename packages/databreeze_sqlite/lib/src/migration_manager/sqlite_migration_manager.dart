@@ -56,7 +56,11 @@ class BreezeSqliteMigrationManager extends BreezeMigrationManager<SqliteWriteCon
 
       final tableRenamed = current.prevName != null && current.prevName != current.name;
 
-      final requiresRebuild = deletedCols.isNotEmpty || typeChanged;
+      final temporaryTagChanged =
+          current.tags.difference(previous.tags).contains(#temporary) ||
+          previous.tags.difference(current.tags).contains(#temporary);
+
+      final requiresRebuild = deletedCols.isNotEmpty || typeChanged || temporaryTagChanged;
 
       if (requiresRebuild) {
         migrations.add(delegate.rebuildTableMigration(previous, current, version: version));

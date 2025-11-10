@@ -36,7 +36,16 @@ class BreezeSqliteModelSchemaVersion extends BreezeModelSchemaVersion with Breez
     required super.name,
     super.prevName,
     required super.columns,
+    super.tags,
     this.onBeforeMigrate,
     this.onAfterMigrate,
   });
+
+  BreezeSqliteModelSchemaVersion.deleted({
+    required super.version,
+    required super.name,
+    super.tags,
+    this.onBeforeMigrate,
+    this.onAfterMigrate,
+  }) : super.deleted();
 }

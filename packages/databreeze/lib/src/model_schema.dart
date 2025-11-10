@@ -24,7 +24,7 @@ abstract interface class BreezeBaseModelSchema {
   ///
   /// For example, for SQLite you can specify the `#temporary`
   /// symbol to create a temporary table.
-  abstract final Object? tag;
+  abstract final Set<Object?> tags;
 
   const BreezeBaseModelSchema();
 }
@@ -46,14 +46,14 @@ class BreezeModelSchema implements BreezeBaseModelSchema {
   final bool isDeleted;
 
   @override
-  final Object? tag;
+  final Set<Object?> tags;
 
   BreezeModelSchema({
     required this.name,
     this.prevName,
     required Set<BreezeModelColumn> columns,
     this.isDeleted = false,
-    this.tag,
+    this.tags = const {},
   }) : columns = UnmodifiableMapView(
          {for (var column in columns) column.name: column},
        ),
@@ -74,13 +74,13 @@ class BreezeModelSchemaVersion extends BreezeModelSchema {
     required super.name,
     super.prevName,
     required super.columns,
-    super.tag,
+    super.tags,
   });
 
   BreezeModelSchemaVersion.deleted({
     required this.version,
     required super.name,
-    super.tag,
+    super.tags,
   }) : super(
          isDeleted: true,
          columns: const {},
@@ -118,5 +118,5 @@ class BreezeModelVersionedSchema implements BreezeBaseModelSchema {
   bool get isDeleted => latestVersion.isDeleted;
 
   @override
-  Object? get tag => latestVersion.tag;
+  Set<Object?> get tags => latestVersion.tags;
 }
