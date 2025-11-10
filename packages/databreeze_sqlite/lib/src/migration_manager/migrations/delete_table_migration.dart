@@ -1,15 +1,15 @@
-import 'package:databreeze_sqlite/src/migration_manager/migratable_model_schema.dart';
+import 'package:databreeze/databreeze.dart';
 import 'package:databreeze_sqlite/src/migration_manager/sqlite_migration.dart';
 
 class BreezeSqliteDeleteTableMigration extends BreezeSqliteMigration {
-  final BreezeSqliteMigratableModelSchema schema;
+  final BreezeBaseModelSchema schema;
 
   BreezeSqliteDeleteTableMigration(
     this.schema, {
     required super.version,
   }) : super(
-         onBeforeMigrate: schema.onBeforeMigrate,
-         onAfterMigrate: schema.onAfterMigrate,
+         onBeforeMigrate: BreezeSqliteMigration.sqliteSchemaOf(schema)?.onBeforeMigrate,
+         onAfterMigrate: BreezeSqliteMigration.sqliteSchemaOf(schema)?.onAfterMigrate,
        );
 
   @override

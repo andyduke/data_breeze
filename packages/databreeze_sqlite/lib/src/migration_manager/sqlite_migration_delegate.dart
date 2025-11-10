@@ -1,5 +1,4 @@
 import 'package:databreeze/databreeze.dart';
-import 'package:databreeze_sqlite/src/migration_manager/migratable_model_schema.dart';
 import 'package:databreeze_sqlite/src/migration_manager/migrations/create_table_migration.dart';
 import 'package:databreeze_sqlite/src/migration_manager/migrations/rename_table_migration.dart';
 import 'package:databreeze_sqlite/src/migration_manager/migrations/delete_table_migration.dart';
@@ -71,39 +70,39 @@ CREATE TABLE IF NOT EXISTS $migrationsTableName (
 
   @override
   BreezeMigration<SqliteWriteContext> createTableMigration(
-    covariant BreezeSqliteMigratableModelSchema schema, {
+    BreezeBaseModelSchema schema, {
     required int version,
   }) => BreezeSqliteCreateTableMigration(schema, version: version);
 
   @override
   BreezeMigration<SqliteWriteContext> renameTableMigration(
-    covariant BreezeSqliteMigratableModelSchema schema, {
+    BreezeBaseModelSchema schema, {
     required int version,
   }) => BreezeSqliteRenameTableMigration(schema, version: version);
 
   @override
   BreezeMigration<SqliteWriteContext> deleteTableMigration(
-    covariant BreezeSqliteMigratableModelSchema schema, {
+    BreezeBaseModelSchema schema, {
     required int version,
   }) => BreezeSqliteDeleteTableMigration(schema, version: version);
 
   @override
   BreezeMigration<SqliteWriteContext> rebuildTableMigration(
-    covariant BreezeSqliteMigratableModelSchema from,
-    covariant BreezeSqliteMigratableModelSchema to, {
+    BreezeBaseModelSchema from,
+    BreezeBaseModelSchema to, {
     required int version,
   }) => BreezeSqliteRebuildTableMigration(from, to, version: version);
 
   @override
   BreezeMigration<SqliteWriteContext> addColumnMigration(
-    covariant BreezeSqliteMigratableModelSchema schema,
+    BreezeBaseModelSchema schema,
     BreezeModelColumn column, {
     required int version,
   }) => BreezeSqliteAddColumnMigration(schema, column, version: version);
 
   @override
   BreezeMigration<SqliteWriteContext> renameColumnMigration(
-    covariant BreezeSqliteMigratableModelSchema schema,
+    BreezeBaseModelSchema schema,
     BreezeModelColumn column, {
     required int version,
   }) => BreezeSqliteRenameColumnMigration(schema, column, version: version);

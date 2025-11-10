@@ -194,7 +194,7 @@ class BreezeSqliteStore extends BreezeStore with BreezeStoreFetch {
 
     // --
 
-    log?.finest('Fetch All $request: $records');
+    log?.finest('FetchAll $request: $records');
 
     return records;
   }
@@ -282,7 +282,7 @@ class BreezeSqliteStore extends BreezeStore with BreezeStoreFetch {
   void _logQuery(String sql, [List<Object?> params = const []]) {
     // TODO: Make logging level configurable
     if (params.isNotEmpty) {
-      log?.finer('$sql -> ${_convertJsonParams(params)}');
+      log?.finer('$sql; -> ${_convertJsonParams(params)}');
     } else {
       log?.finer(sql);
     }

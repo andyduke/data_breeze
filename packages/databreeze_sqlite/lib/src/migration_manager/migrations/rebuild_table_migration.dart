@@ -1,15 +1,18 @@
-import 'package:databreeze_sqlite/src/migration_manager/migratable_model_schema.dart';
+import 'package:databreeze/databreeze.dart';
 import 'package:databreeze_sqlite/src/migration_manager/sqlite_migration.dart';
 
 class BreezeSqliteRebuildTableMigration extends BreezeSqliteMigration {
-  final BreezeSqliteMigratableModelSchema from;
-  final BreezeSqliteMigratableModelSchema to;
+  final BreezeBaseModelSchema from;
+  final BreezeBaseModelSchema to;
 
-  BreezeSqliteRebuildTableMigration(this.from, this.to, {required super.version})
-    : super(
-        onBeforeMigrate: to.onBeforeMigrate,
-        onAfterMigrate: to.onAfterMigrate,
-      );
+  BreezeSqliteRebuildTableMigration(
+    this.from,
+    this.to, {
+    required super.version,
+  }) : super(
+         onBeforeMigrate: BreezeSqliteMigration.sqliteSchemaOf(to)?.onBeforeMigrate,
+         onAfterMigrate: BreezeSqliteMigration.sqliteSchemaOf(to)?.onAfterMigrate,
+       );
 
   @override
   List<String> generate() {
