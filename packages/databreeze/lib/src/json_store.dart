@@ -1,20 +1,25 @@
 import 'package:collection/collection.dart';
-import 'package:databreeze/databreeze.dart';
+import 'package:databreeze/src/filter.dart';
+import 'package:databreeze/src/mixins/store_mixins.dart';
+import 'package:databreeze/src/model_blueprint.dart';
+import 'package:databreeze/src/store_fetch_options.dart';
+import 'package:databreeze/src/store.dart';
+import 'package:databreeze/src/types.dart';
 import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
 
-class JsonFetchRequest extends BreezeAbstractFetchRequest {
+class BreezeJsonFetchRequest extends BreezeAbstractFetchRequest {
   final bool Function(Map<String, dynamic> record) test;
 
-  const JsonFetchRequest({
+  const BreezeJsonFetchRequest({
     required this.test,
   });
 
   @override
-  String toString() => '''JsonFetchRequest([test callback])''';
+  String toString() => '''BreezeJsonFetchRequest([test callback])''';
 }
 
-class JsonStore extends BreezeStore with BreezeStoreFetch {
+class BreezeJsonStore extends BreezeStore with BreezeStoreFetch {
   static const _latency = Duration(milliseconds: 500);
 
   final Logger? log;
@@ -29,7 +34,7 @@ class JsonStore extends BreezeStore with BreezeStoreFetch {
 
   final bool simulateLatency;
 
-  JsonStore({
+  BreezeJsonStore({
     this.log,
     super.models,
     super.migrationStrategy,
@@ -50,7 +55,8 @@ class JsonStore extends BreezeStore with BreezeStoreFetch {
     }
 
     if (!records.containsKey(table)) {
-      throw Exception('Table "$table" not found.');
+      log?.finest('Fetch $request: null');
+      return null;
     }
 
     Iterable<Map<String, dynamic>> allRecords = records[table]!.values;
@@ -65,7 +71,7 @@ class JsonStore extends BreezeStore with BreezeStoreFetch {
         record = allRecords.firstWhereOrNull((entry) => applyFilter(entry, filter));
         break;
 
-      case JsonFetchRequest(test: final test):
+      case BreezeJsonFetchRequest(test: final test):
         record = allRecords.firstWhereOrNull((entry) => test(entry));
         break;
     }
@@ -87,7 +93,8 @@ class JsonStore extends BreezeStore with BreezeStoreFetch {
     }
 
     if (!records.containsKey(table)) {
-      throw Exception('Table "$table" not found.');
+      log?.finest('Fetch All $request: []');
+      return [];
     }
 
     Iterable<Map<String, dynamic>> allRecords = records[table]!.values;
@@ -105,7 +112,7 @@ class JsonStore extends BreezeStore with BreezeStoreFetch {
         }
         break;
 
-      case JsonFetchRequest(test: final test):
+      case BreezeJsonFetchRequest(test: final test):
         result = allRecords.where((entry) => test(entry));
         break;
     }

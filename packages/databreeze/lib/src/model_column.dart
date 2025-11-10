@@ -12,6 +12,8 @@ class BreezeModelColumn<T> {
 
   /// Are the values ​​in this column automatically generated
   /// in the database (e.g., auto-increment)?
+  ///
+  /// By default, the primary key is an auto-generated column.
   final bool isAutoGenerate;
 
   /// The default value; NULL is replaced with this value

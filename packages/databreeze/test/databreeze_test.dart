@@ -2,7 +2,6 @@ import 'package:databreeze/databreeze.dart';
 import 'package:test/test.dart';
 import 'package:logging/logging.dart';
 
-import 'lib/json_store.dart';
 import 'lib/model_types.dart';
 import 'lib/models/task.dart';
 import 'lib/test_store.dart';
@@ -142,7 +141,7 @@ Future<void> main() async {
       );
 
       final tasks = await store.fetchAllWithRequest<Task>(
-        JsonFetchRequest(test: (record) => record['id'] == 2),
+        BreezeJsonFetchRequest(test: (record) => record['id'] == 2),
       );
 
       expect(tasks, hasLength(1));
