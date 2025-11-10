@@ -8,3 +8,4 @@ workspace:
   - packages/databreeze
   - packages/databreeze_sqlite
   - packages/databreeze_flutter
+  - packages/databreeze_flutter/example
