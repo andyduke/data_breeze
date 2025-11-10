@@ -340,13 +340,135 @@ Future<void> main() async {
   });
 
   group('Hooks (beforeMigrate, afterMigrate)', () {
-    // TODO: Add new table
+    test('Add new table', () async {
+      final store = BreezeSqliteStore(
+        models: {
+          MUserWithHooks.blueprint,
+        },
+        onPath: () async => null,
+        log: log,
+        onInit: (db) => db.execute('PRAGMA temp_store=2'),
+        migrationStrategy: BreezeSqliteAutomaticSchemaBasedMigration(
+          log: log,
+        ),
+      );
 
-    // TODO: Rename table
+      final db = await store.database;
 
-    // TODO: Delete table
+      // Ensure that the table schema version in the database is correct.
+      await expectStoreTableRows(
+        store,
+        'SELECT * FROM ${BreezeSqliteMigrationDelegate.migrationsTableName} WHERE table_name = ?',
+        [MUserWithHooks.blueprint.name],
+        [
+          [
+            MUserWithHooks.blueprint.name,
+            MUserWithHooks.blueprint.latestVersion.version,
+          ],
+        ],
+        log: log,
+      );
 
-    // TODO: Rebuild table
+      // Ensure that the table structure in the database matches the schema.
+      await expectStoreTable(
+        store,
+        MUserWithHooks.blueprint.name,
+        [
+          (name: 'id', type: 'INT', notNull: true, defaultValue: null, primaryKey: true),
+          (name: 'name', type: 'TEXT', notNull: true, defaultValue: null, primaryKey: false),
+        ],
+        log: log,
+      );
+
+      // Make sure that both handlers (before and after) have been executed.
+      final res = await db.execute('PRAGMA user_version');
+      final row = res.rows.firstOrNull;
+      expect(row, equals([2]));
+    });
+
+    test('Rename table', () async {
+      final store = BreezeSqliteStore(
+        models: {
+          MUserRenamedWithHooks.blueprint,
+        },
+        onPath: () async => null,
+        log: log,
+        onInit: (db) => db.execute('PRAGMA temp_store=2'),
+        migrationStrategy: BreezeSqliteAutomaticSchemaBasedMigration(
+          log: log,
+        ),
+      );
+
+      final db = await store.database;
+
+      // Ensure that the table schema version in the database is correct.
+      await expectStoreTableRows(
+        store,
+        'SELECT * FROM ${BreezeSqliteMigrationDelegate.migrationsTableName} WHERE table_name = ?',
+        [MUserRenamedWithHooks.blueprint.name],
+        [
+          [
+            MUserRenamedWithHooks.blueprint.name,
+            MUserRenamedWithHooks.blueprint.latestVersion.version,
+          ],
+        ],
+        log: log,
+      );
+
+      // Ensure that the table structure in the database matches the schema.
+      await expectStoreTable(
+        store,
+        MUserRenamedWithHooks.blueprint.name,
+        [
+          (name: 'id', type: 'INT', notNull: true, defaultValue: null, primaryKey: true),
+          (name: 'name', type: 'TEXT', notNull: true, defaultValue: null, primaryKey: false),
+        ],
+        log: log,
+      );
+
+      // Make sure that both handlers (before and after) have been executed.
+      final res = await db.execute('PRAGMA user_version');
+      final row = res.rows.firstOrNull;
+      expect(row, equals([2]));
+    });
+
+    test('Delete table', () async {
+      final store = BreezeSqliteStore(
+        models: {
+          MUserDeletedWithHooks.blueprint,
+        },
+        onPath: () async => null,
+        log: log,
+        onInit: (db) => db.execute('PRAGMA temp_store=2'),
+        migrationStrategy: BreezeSqliteAutomaticSchemaBasedMigration(
+          log: log,
+        ),
+      );
+
+      final db = await store.database;
+
+      // Ensure that the table schema version in the database is correct.
+      await expectStoreTableRows(
+        store,
+        'SELECT * FROM ${BreezeSqliteMigrationDelegate.migrationsTableName} WHERE table_name = ?',
+        [MUserDeletedWithHooks.blueprint.name],
+        [],
+        log: log,
+      );
+
+      // Ensure that the table structure in the database matches the schema.
+      await expectStoreTable(
+        store,
+        MUserDeletedWithHooks.blueprint.name,
+        [],
+        log: log,
+      );
+
+      // Make sure that both handlers (before and after) have been executed.
+      final res = await db.execute('PRAGMA user_version');
+      final row = res.rows.firstOrNull;
+      expect(row, equals([2]));
+    });
 
     test('Add new column', () async {
       final store = BreezeSqliteStore(
@@ -389,12 +511,103 @@ Future<void> main() async {
         log: log,
       );
 
+      // Make sure that both handlers (before and after) have been executed.
       final res = await db.execute('PRAGMA user_version');
       final row = res.rows.firstOrNull;
       expect(row, equals([2]));
     });
 
-    // TODO: Rename column
+    test('Delete column', () async {
+      final store = BreezeSqliteStore(
+        models: {
+          MUserDeleteColumnWithHooks.blueprint,
+        },
+        onPath: () async => null,
+        log: log,
+        onInit: (db) => db.execute('PRAGMA temp_store=2'),
+        migrationStrategy: BreezeSqliteAutomaticSchemaBasedMigration(
+          log: log,
+        ),
+      );
+
+      final db = await store.database;
+
+      // Ensure that the table schema version in the database is correct.
+      await expectStoreTableRows(
+        store,
+        'SELECT * FROM ${BreezeSqliteMigrationDelegate.migrationsTableName} WHERE table_name = ?',
+        [MUserDeleteColumnWithHooks.blueprint.name],
+        [
+          [
+            MUserDeleteColumnWithHooks.blueprint.name,
+            MUserDeleteColumnWithHooks.blueprint.latestVersion.version,
+          ],
+        ],
+        log: log,
+      );
+
+      // Ensure that the table structure in the database matches the schema.
+      await expectStoreTable(
+        store,
+        MUserDeleteColumnWithHooks.blueprint.name,
+        [
+          (name: 'id', type: 'INT', notNull: true, defaultValue: null, primaryKey: true),
+          (name: 'name', type: 'TEXT', notNull: true, defaultValue: null, primaryKey: false),
+        ],
+        log: log,
+      );
+
+      // Make sure that both handlers (before and after) have been executed.
+      final res = await db.execute('PRAGMA user_version');
+      final row = res.rows.firstOrNull;
+      expect(row, equals([2]));
+    });
+
+    test('Rename column', () async {
+      final store = BreezeSqliteStore(
+        models: {
+          MUserRenameColumnWithHooks.blueprint,
+        },
+        onPath: () async => null,
+        log: log,
+        onInit: (db) => db.execute('PRAGMA temp_store=2'),
+        migrationStrategy: BreezeSqliteAutomaticSchemaBasedMigration(
+          log: log,
+        ),
+      );
+
+      final db = await store.database;
+
+      // Ensure that the table schema version in the database is correct.
+      await expectStoreTableRows(
+        store,
+        'SELECT * FROM ${BreezeSqliteMigrationDelegate.migrationsTableName} WHERE table_name = ?',
+        [MUserRenameColumnWithHooks.blueprint.name],
+        [
+          [
+            MUserRenameColumnWithHooks.blueprint.name,
+            MUserRenameColumnWithHooks.blueprint.latestVersion.version,
+          ],
+        ],
+        log: log,
+      );
+
+      // Ensure that the table structure in the database matches the schema.
+      await expectStoreTable(
+        store,
+        MUserRenameColumnWithHooks.blueprint.name,
+        [
+          (name: 'id', type: 'INT', notNull: true, defaultValue: null, primaryKey: true),
+          (name: 'name', type: 'TEXT', notNull: true, defaultValue: null, primaryKey: false),
+        ],
+        log: log,
+      );
+
+      // Make sure that both handlers (before and after) have been executed.
+      final res = await db.execute('PRAGMA user_version');
+      final row = res.rows.firstOrNull;
+      expect(row, equals([2]));
+    });
   });
 
   group('Schema tag', () {

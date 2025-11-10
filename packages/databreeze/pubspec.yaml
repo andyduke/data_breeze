@@ -1,6 +1,6 @@
 name: databreeze
 description: "A lightweight ORM version with support for various database backends and reactivity."
-version: 0.0.1
+version: 1.0.0-alpha.1
 # homepage:
 # repository: https://github.com/my_org/my_repo
 

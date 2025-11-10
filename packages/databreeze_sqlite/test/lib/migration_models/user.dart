@@ -120,6 +120,131 @@ class MUserDeleted extends BreezeModel<int> {
 
 // ---
 
+class MUserWithHooks extends BreezeModel<int> {
+  static final blueprint = BreezeModelBlueprint.versioned(
+    versions: {
+      BreezeSqliteModelSchemaVersion(
+        version: 1,
+        name: 'users',
+        columns: {
+          BreezeModelColumn<int>('id', isPrimaryKey: true),
+          BreezeModelColumn<String>('name'),
+        },
+        onBeforeMigrate: (db) async => db.execute('PRAGMA user_version = 1'),
+        onAfterMigrate: (db) async => db.execute('PRAGMA user_version = 2'),
+      ),
+    },
+    builder: MUserWithHooks.fromRecord,
+  );
+
+  @override
+  BreezeModelBlueprint get schema => blueprint;
+
+  String name;
+
+  MUserWithHooks({
+    required this.name,
+  });
+
+  factory MUserWithHooks.fromRecord(BreezeDataRecord record) => MUserWithHooks(
+    name: record['name'],
+  );
+
+  @override
+  Map<String, dynamic> toRecord() => {
+    'name': name,
+  };
+}
+
+class MUserRenamedWithHooks extends BreezeModel<int> {
+  static final blueprint = BreezeModelBlueprint.versioned(
+    versions: {
+      BreezeSqliteModelSchemaVersion(
+        version: 1,
+        name: 'users',
+        columns: {
+          BreezeModelColumn<int>('id', isPrimaryKey: true),
+          BreezeModelColumn<String>('name'),
+        },
+      ),
+
+      BreezeSqliteModelSchemaVersion(
+        version: 2,
+        name: 'persons',
+        prevName: 'users',
+        columns: {
+          BreezeModelColumn<int>('id', isPrimaryKey: true),
+          BreezeModelColumn<String>('name'),
+        },
+        onBeforeMigrate: (db) async => db.execute('PRAGMA user_version = 1'),
+        onAfterMigrate: (db) async => db.execute('PRAGMA user_version = 2'),
+      ),
+    },
+    builder: MUserRenamedWithHooks.fromRecord,
+  );
+
+  @override
+  BreezeModelBlueprint get schema => blueprint;
+
+  String name;
+
+  MUserRenamedWithHooks({
+    required this.name,
+  });
+
+  factory MUserRenamedWithHooks.fromRecord(BreezeDataRecord record) => MUserRenamedWithHooks(
+    name: record['name'],
+  );
+
+  @override
+  Map<String, dynamic> toRecord() => {
+    'name': name,
+  };
+}
+
+class MUserDeletedWithHooks extends BreezeModel<int> {
+  static final blueprint = BreezeModelBlueprint.versioned(
+    versions: {
+      BreezeSqliteModelSchemaVersion(
+        version: 1,
+        name: 'users',
+        columns: {
+          BreezeModelColumn<int>('id', isPrimaryKey: true),
+          BreezeModelColumn<String>('name'),
+        },
+      ),
+
+      BreezeSqliteModelSchemaVersion.deleted(
+        version: 2,
+        name: 'users',
+        onBeforeMigrate: (db) async => db.execute('PRAGMA user_version = 1'),
+        onAfterMigrate: (db) async => db.execute('PRAGMA user_version = 2'),
+      ),
+    },
+    builder: MUserDeletedWithHooks.fromRecord,
+  );
+
+  @override
+  BreezeModelBlueprint get schema => blueprint;
+
+  String name;
+
+  MUserDeletedWithHooks({
+    required this.name,
+  });
+
+  factory MUserDeletedWithHooks.fromRecord(BreezeDataRecord record) => MUserDeletedWithHooks(
+    name: record['name'],
+  );
+
+  @override
+  Map<String, dynamic> toRecord() => {
+    'name': name,
+  };
+}
+
+// ---
+
 class MUserAddColumn extends BreezeModel<int> {
   static final blueprint = BreezeModelBlueprint.versioned(
     versions: {
@@ -395,6 +520,97 @@ class MUserAddColumnWithHooks extends BreezeModel<int> {
   Map<String, dynamic> toRecord() => {
     'name': name,
     'age': age,
+  };
+}
+
+class MUserDeleteColumnWithHooks extends BreezeModel<int> {
+  static final blueprint = BreezeModelBlueprint.versioned(
+    versions: {
+      BreezeSqliteModelSchemaVersion(
+        version: 1,
+        name: 'users',
+        columns: {
+          BreezeModelColumn<int>('id', isPrimaryKey: true),
+          BreezeModelColumn<String>('name'),
+          BreezeModelColumn<int>('age'),
+        },
+      ),
+
+      BreezeSqliteModelSchemaVersion(
+        version: 2,
+        name: 'users',
+        columns: {
+          BreezeModelColumn<int>('id', isPrimaryKey: true),
+          BreezeModelColumn<String>('name'),
+        },
+        onBeforeMigrate: (db) async => db.execute('PRAGMA user_version = 1'),
+        onAfterMigrate: (db) async => db.execute('PRAGMA user_version = 2'),
+      ),
+    },
+    builder: MUserDeleteColumnWithHooks.fromRecord,
+  );
+
+  @override
+  BreezeModelBlueprint get schema => blueprint;
+
+  String name;
+
+  MUserDeleteColumnWithHooks({
+    required this.name,
+  });
+
+  factory MUserDeleteColumnWithHooks.fromRecord(BreezeDataRecord record) => MUserDeleteColumnWithHooks(
+    name: record['name'],
+  );
+
+  @override
+  Map<String, dynamic> toRecord() => {
+    'name': name,
+  };
+}
+
+class MUserRenameColumnWithHooks extends BreezeModel<int> {
+  static final blueprint = BreezeModelBlueprint.versioned(
+    versions: {
+      BreezeSqliteModelSchemaVersion(
+        version: 1,
+        name: 'users',
+        columns: {
+          BreezeModelColumn<int>('id', isPrimaryKey: true),
+          BreezeModelColumn<String>('firstName'),
+        },
+      ),
+
+      BreezeSqliteModelSchemaVersion(
+        version: 2,
+        name: 'users',
+        columns: {
+          BreezeModelColumn<int>('id', isPrimaryKey: true),
+          BreezeModelColumn<String>('name'),
+        },
+        onBeforeMigrate: (db) async => db.execute('PRAGMA user_version = 1'),
+        onAfterMigrate: (db) async => db.execute('PRAGMA user_version = 2'),
+      ),
+    },
+    builder: MUserRenameColumnWithHooks.fromRecord,
+  );
+
+  @override
+  BreezeModelBlueprint get schema => blueprint;
+
+  String name;
+
+  MUserRenameColumnWithHooks({
+    required this.name,
+  });
+
+  factory MUserRenameColumnWithHooks.fromRecord(BreezeDataRecord record) => MUserRenameColumnWithHooks(
+    name: record['name'],
+  );
+
+  @override
+  Map<String, dynamic> toRecord() => {
+    'name': name,
   };
 }
 

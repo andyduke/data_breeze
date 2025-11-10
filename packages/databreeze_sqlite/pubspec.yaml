@@ -1,6 +1,6 @@
 name: databreeze_sqlite
 description: "Implementation of a SQLite backend for DataBreeze."
-version: 0.0.1
+version: 1.0.0-alpha.1
 # homepage:
 # repository: https://github.com/my_org/my_repo
 
@@ -10,7 +10,7 @@ environment:
   sdk: ^3.8.1
 
 dependencies:
-  databreeze: ^0.0.1
+  databreeze:
 
   meta: ^1.16.0
   # collection: ^1.19.1

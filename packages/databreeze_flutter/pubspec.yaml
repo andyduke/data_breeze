@@ -1,6 +1,6 @@
 name: databreeze_flutter
 description: "A new Flutter package project."
-version: 0.0.1
+version: 1.0.0-alpha.1
 homepage:
 
 resolution: workspace
@@ -13,7 +13,7 @@ dependencies:
   flutter:
     sdk: flutter
 
-  databreeze: ^0.0.1
+  databreeze:
 
 dev_dependencies:
   flutter_test:
