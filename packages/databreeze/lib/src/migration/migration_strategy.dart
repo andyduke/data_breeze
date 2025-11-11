@@ -1,4 +1,6 @@
 import 'package:databreeze/src/migration/migration_manager.dart';
+import 'package:databreeze/src/model.dart';
+import 'package:databreeze/src/model_blueprint.dart';
 import 'package:databreeze/src/model_schema.dart';
 import 'package:databreeze/src/store.dart';
 
@@ -25,7 +27,9 @@ abstract class BreezeSchemaMigrationStrategy<D> extends BreezeMigrationStrategy<
 
   @override
   Future<void> migrate(BreezeStore store, [D? db]) async {
-    Iterable<BreezeBaseModelSchema> schemes = store.blueprints.values.whereType<BreezeBaseModelSchema>();
+    // Filter only models with a primary key (ignore view models).
+    Iterable<BreezeBaseModelSchema> schemes = store.blueprints.values.whereType<BreezeModelBlueprint<BreezeModel>>();
+
     if (filter != null) {
       schemes = schemes.where((blueprint) => filter!(blueprint));
     }
