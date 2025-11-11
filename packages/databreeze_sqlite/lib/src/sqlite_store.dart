@@ -247,14 +247,11 @@ class BreezeSqliteStore extends BreezeStore with BreezeStoreFetch {
     final values = rawRecord.values;
     final updateColumns = columns.where((c) => (c != key));
 
-    /*final result = */
     await executeSql(
       'INSERT INTO $name (${columns.join(', ')}) VALUES ($columnsPlaceholders) '
-      'ON CONFLICT($key) DO UPDATE SET ${updateColumns.map((k) => '$k = excluded.$k').join(', ')} '
-      'RETURNING $key',
+      'ON CONFLICT($key) DO UPDATE SET ${updateColumns.map((k) => '$k = excluded.$k').join(', ')}',
       values.toList(growable: false),
     );
-    // final lastInsertId = result.isNotEmpty ? result.first.values.first : null;
 
     // await executeSql(
     //   'UPDATE $name SET ${record.keys.map((k) => '$k = ?').join(', ')} WHERE $key = ?',

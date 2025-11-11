@@ -13,6 +13,7 @@ class BreezeModelBlueprint<M extends BreezeBaseModel> extends BreezeModelVersion
   BreezeModelBlueprint({
     required String name,
     required Set<BreezeModelColumn> columns,
+    Set<Object?> tags = const {},
     required BreezeModelBlueprintBuilder<M> builder,
     Set<BreezeBaseTypeConverter> typeConverters = const {},
   }) : this.versioned(
@@ -20,6 +21,7 @@ class BreezeModelBlueprint<M extends BreezeBaseModel> extends BreezeModelVersion
            BreezeModelSchemaVersion(
              name: name,
              columns: columns,
+             tags: tags,
            ),
          },
          builder: builder,

@@ -7,6 +7,7 @@ import 'package:logging/logging.dart';
 import 'lib/migrations/task_migrations.dart';
 import 'lib/model_types.dart';
 import 'lib/models/task.dart';
+import 'lib/models/task_progress.dart';
 import 'lib/models/task_with_progress.dart';
 import 'lib/test_store.dart';
 
@@ -292,6 +293,156 @@ CREATE TEMP TABLE task_progress(
       expect(tasks[1].id, equals(2));
       expect(tasks[1].name, equals('File 2'));
       expect(tasks[1].progress, isNull);
+    });
+  });
+
+  group('Upsert', () {
+    test('Save new record', () async {
+      final store = TestStore(
+        log: log,
+        models: {
+          Task.blueprint,
+        },
+        migrationStrategy: BreezeSqliteMigrations(emptyTaskMigration),
+      );
+
+      final newTask = Task(
+        name: 'File 1',
+        file: XFile('path/to/file1'),
+      )..id = 1;
+
+      await store.save(newTask);
+
+      expect(newTask.isNew, isFalse);
+      expect(newTask.id, isNotNull);
+
+      // ---
+
+      final db = await store.database;
+
+      final res = await db.execute('SELECT * FROM tasks');
+      final rows = res.rows;
+
+      log.finest('Actual rows: $rows');
+
+      expect(
+        rows,
+        equals(
+          [
+            [newTask.id, 'File 1', null, newTask.createdAt.toSqliteDateTime(), 'path/to/file1'],
+          ],
+        ),
+      );
+    });
+
+    test('Save existing record', () async {
+      final store = TestStore(
+        log: log,
+        models: {
+          Task.blueprint,
+        },
+        migrationStrategy: BreezeSqliteMigrations(singleTaskMigration),
+      );
+
+      final newTask = Task(
+        name: 'File 1*',
+        file: XFile('path/to/file1'),
+      )..id = 1;
+
+      await store.save(newTask);
+
+      // ---
+
+      final db = await store.database;
+
+      final res = await db.execute('SELECT * FROM tasks');
+      final rows = res.rows;
+
+      log.finest('Actual rows: $rows');
+
+      expect(
+        rows,
+        equals(
+          [
+            [newTask.id, 'File 1*', null, newTask.createdAt.toSqliteDateTime(), 'path/to/file1'],
+          ],
+        ),
+      );
+    });
+
+    test('Save new record (custom pk)', () async {
+      final store = TestStore(
+        log: log,
+        models: {
+          TaskProgress.blueprint,
+        },
+        migrationStrategy: BreezeSqliteMigrations(emptyTaskProgressMigration),
+        onInit: (db) => db.execute('PRAGMA temp_store=2'),
+      );
+
+      final newTaskProgress = TaskProgress(
+        id: 1,
+        progress: 0.2,
+      );
+
+      await store.save(newTaskProgress);
+
+      expect(newTaskProgress.isNew, isFalse);
+      expect(newTaskProgress.id, isNotNull);
+
+      // ---
+
+      final db = await store.database;
+
+      final res = await db.execute('SELECT * FROM task_progress');
+      final rows = res.rows;
+
+      log.finest('Actual rows: $rows');
+
+      expect(
+        rows,
+        equals(
+          [
+            [1, 0.2],
+          ],
+        ),
+      );
+    });
+
+    test('Save existing record (custom pk)', () async {
+      final store = TestStore(
+        log: log,
+        models: {
+          TaskProgress.blueprint,
+        },
+        migrationStrategy: BreezeSqliteMigrations(singleTaskProgressMigration),
+        onInit: (db) => db.execute('PRAGMA temp_store=2'),
+      );
+
+      final newTaskProgress = TaskProgress(
+        id: 1,
+        progress: 0.7,
+      );
+
+      await store.save(newTaskProgress);
+
+      // ---
+
+      final db = await store.database;
+
+      final res = await db.execute('SELECT * FROM task_progress');
+      final rows = res.rows;
+
+      log.finest('Actual rows: $rows');
+
+      expect(
+        rows,
+        equals(
+          [
+            [1, 0.7],
+          ],
+        ),
+      );
     });
   });
 }

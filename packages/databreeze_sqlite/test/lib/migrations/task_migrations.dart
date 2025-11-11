@@ -62,3 +62,34 @@ final tasksMigration = SqliteMigrations()
       },
     ),
   );
+
+// ---
+
+final createTaskProgressTableSql = '''CREATE TEMP TABLE task_progress(
+                    task_id INTEGER PRIMARY KEY,
+                    progress REAL
+                )''';
+
+final emptyTaskProgressMigration = SqliteMigrations()
+  ..add(
+    SqliteMigration(
+      1,
+      (tx) async {
+        await tx.execute(createTaskProgressTableSql);
+      },
+    ),
+  );
+
+final singleTaskProgressMigration = SqliteMigrations()
+  ..add(
+    SqliteMigration(
+      1,
+      (tx) async {
+        await tx.execute(createTaskProgressTableSql);
+
+        await tx.execute('''
+  INSERT INTO task_progress(task_id, progress) VALUES(1, 0.3)
+''');
+      },
+    ),
+  );

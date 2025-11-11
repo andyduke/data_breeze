@@ -9,6 +9,7 @@ class TestStore extends BreezeSqliteStore {
     super.models,
     super.migrationStrategy,
     super.typeConverters,
+    super.onInit,
   }) : super.inMemory();
 
   @override

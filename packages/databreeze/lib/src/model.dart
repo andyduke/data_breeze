@@ -7,11 +7,15 @@ abstract class BreezeBaseModel {}
 abstract mixin class BreezeViewModel implements BreezeBaseModel {}
 
 abstract mixin class BreezeModel<K> implements BreezeBaseModel {
+  /*
   K? get id => _id;
   K? _id;
 
   @internal
   set id(K? newValue) => _id = newValue;
+  */
+
+  K? id;
 
   @internal
   bool isFrozen = false;
