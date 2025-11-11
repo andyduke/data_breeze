@@ -9,7 +9,7 @@ class TestStore extends BreezeSqliteStore {
     super.models,
     super.migrationStrategy,
     super.typeConverters,
-  }) : super(databaseFile: null);
+  }) : super.inMemory();
 
   @override
   Set<BreezeBaseTypeConverter> get defaultTypeConverters => {

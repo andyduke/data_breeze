@@ -15,11 +15,10 @@ Future<void> main() async {
 
   group('Table changes', () {
     test('Add new table', () async {
-      final store = BreezeSqliteStore(
+      final store = BreezeSqliteStore.inMemory(
         models: {
           MUser.blueprint,
         },
-        databaseFile: null,
         log: log,
         onInit: (db) => db.execute('PRAGMA temp_store=2'),
         migrationStrategy: BreezeSqliteAutomaticSchemaBasedMigration(
@@ -56,11 +55,10 @@ Future<void> main() async {
     });
 
     test('Rename table', () async {
-      final store = BreezeSqliteStore(
+      final store = BreezeSqliteStore.inMemory(
         models: {
           MUserRenamed.blueprint,
         },
-        databaseFile: null,
         log: log,
         onInit: (db) => db.execute('PRAGMA temp_store=2'),
         migrationStrategy: BreezeSqliteAutomaticSchemaBasedMigration(
@@ -97,11 +95,10 @@ Future<void> main() async {
     });
 
     test('Delete table', () async {
-      final store = BreezeSqliteStore(
+      final store = BreezeSqliteStore.inMemory(
         models: {
           MUserDeleted.blueprint,
         },
-        databaseFile: null,
         log: log,
         onInit: (db) => db.execute('PRAGMA temp_store=2'),
         migrationStrategy: BreezeSqliteAutomaticSchemaBasedMigration(
@@ -132,11 +129,10 @@ Future<void> main() async {
 
   group('Column changes', () {
     test('Add new column', () async {
-      final store = BreezeSqliteStore(
+      final store = BreezeSqliteStore.inMemory(
         models: {
           MUserAddColumn.blueprint,
         },
-        databaseFile: null,
         log: log,
         onInit: (db) => db.execute('PRAGMA temp_store=2'),
         migrationStrategy: BreezeSqliteAutomaticSchemaBasedMigration(
@@ -174,11 +170,10 @@ Future<void> main() async {
     });
 
     test('Delete column', () async {
-      final store = BreezeSqliteStore(
+      final store = BreezeSqliteStore.inMemory(
         models: {
           MUserDeleteColumn.blueprint,
         },
-        databaseFile: null,
         log: log,
         onInit: (db) => db.execute('PRAGMA temp_store=2'),
         migrationStrategy: BreezeSqliteAutomaticSchemaBasedMigration(
@@ -215,11 +210,10 @@ Future<void> main() async {
     });
 
     test('Rename column', () async {
-      final store = BreezeSqliteStore(
+      final store = BreezeSqliteStore.inMemory(
         models: {
           MUserRenameColumn.blueprint,
         },
-        databaseFile: null,
         log: log,
         onInit: (db) => db.execute('PRAGMA temp_store=2'),
         migrationStrategy: BreezeSqliteAutomaticSchemaBasedMigration(
@@ -256,11 +250,10 @@ Future<void> main() async {
     });
 
     test('Change column type', () async {
-      final store = BreezeSqliteStore(
+      final store = BreezeSqliteStore.inMemory(
         models: {
           MUserChangeColumnType.blueprint,
         },
-        databaseFile: null,
         log: log,
         onInit: (db) => db.execute('PRAGMA temp_store=2'),
         migrationStrategy: BreezeSqliteAutomaticSchemaBasedMigration(
@@ -297,11 +290,10 @@ Future<void> main() async {
     });
 
     test('Rename column and add new column', () async {
-      final store = BreezeSqliteStore(
+      final store = BreezeSqliteStore.inMemory(
         models: {
           MUserRenameOneAndAddAnotherColumn.blueprint,
         },
-        databaseFile: null,
         log: log,
         onInit: (db) => db.execute('PRAGMA temp_store=2'),
         migrationStrategy: BreezeSqliteAutomaticSchemaBasedMigration(
@@ -341,11 +333,10 @@ Future<void> main() async {
 
   group('Hooks (beforeMigrate, afterMigrate)', () {
     test('Add new table', () async {
-      final store = BreezeSqliteStore(
+      final store = BreezeSqliteStore.inMemory(
         models: {
           MUserWithHooks.blueprint,
         },
-        databaseFile: null,
         log: log,
         onInit: (db) => db.execute('PRAGMA temp_store=2'),
         migrationStrategy: BreezeSqliteAutomaticSchemaBasedMigration(
@@ -387,11 +378,10 @@ Future<void> main() async {
     });
 
     test('Rename table', () async {
-      final store = BreezeSqliteStore(
+      final store = BreezeSqliteStore.inMemory(
         models: {
           MUserRenamedWithHooks.blueprint,
         },
-        databaseFile: null,
         log: log,
         onInit: (db) => db.execute('PRAGMA temp_store=2'),
         migrationStrategy: BreezeSqliteAutomaticSchemaBasedMigration(
@@ -433,11 +423,10 @@ Future<void> main() async {
     });
 
     test('Delete table', () async {
-      final store = BreezeSqliteStore(
+      final store = BreezeSqliteStore.inMemory(
         models: {
           MUserDeletedWithHooks.blueprint,
         },
-        databaseFile: null,
         log: log,
         onInit: (db) => db.execute('PRAGMA temp_store=2'),
         migrationStrategy: BreezeSqliteAutomaticSchemaBasedMigration(
@@ -471,11 +460,10 @@ Future<void> main() async {
     });
 
     test('Add new column', () async {
-      final store = BreezeSqliteStore(
+      final store = BreezeSqliteStore.inMemory(
         models: {
           MUserAddColumnWithHooks.blueprint,
         },
-        databaseFile: null,
         log: log,
         onInit: (db) => db.execute('PRAGMA temp_store=2'),
         migrationStrategy: BreezeSqliteAutomaticSchemaBasedMigration(
@@ -518,11 +506,10 @@ Future<void> main() async {
     });
 
     test('Delete column', () async {
-      final store = BreezeSqliteStore(
+      final store = BreezeSqliteStore.inMemory(
         models: {
           MUserDeleteColumnWithHooks.blueprint,
         },
-        databaseFile: null,
         log: log,
         onInit: (db) => db.execute('PRAGMA temp_store=2'),
         migrationStrategy: BreezeSqliteAutomaticSchemaBasedMigration(
@@ -564,11 +551,10 @@ Future<void> main() async {
     });
 
     test('Rename column', () async {
-      final store = BreezeSqliteStore(
+      final store = BreezeSqliteStore.inMemory(
         models: {
           MUserRenameColumnWithHooks.blueprint,
         },
-        databaseFile: null,
         log: log,
         onInit: (db) => db.execute('PRAGMA temp_store=2'),
         migrationStrategy: BreezeSqliteAutomaticSchemaBasedMigration(
@@ -612,12 +598,11 @@ Future<void> main() async {
 
   group('Schema tag', () {
     test('Temporary tag + Add new column', () async {
-      final store = BreezeSqliteStore(
+      final store = BreezeSqliteStore.inMemory(
         models: {
           MUserAddColumn.blueprint,
           MProgressTemp.blueprint,
         },
-        databaseFile: null,
         log: log,
         onInit: (db) => db.execute('PRAGMA temp_store=2'),
         migrationStrategy: BreezeSqliteAutomaticSchemaBasedMigration(
@@ -677,11 +662,10 @@ Future<void> main() async {
     });
 
     test('Temporary tag + Delete column (rebuild table)', () async {
-      final store = BreezeSqliteStore(
+      final store = BreezeSqliteStore.inMemory(
         models: {
           MProgressTempDeleteColumn.blueprint,
         },
-        databaseFile: null,
         log: log,
         onInit: (db) => db.execute('PRAGMA temp_store=2'),
         migrationStrategy: BreezeSqliteAutomaticSchemaBasedMigration(
@@ -706,11 +690,10 @@ Future<void> main() async {
     });
 
     test('Add temporary tag', () async {
-      final store = BreezeSqliteStore(
+      final store = BreezeSqliteStore.inMemory(
         models: {
           MProgressAddTemporaryTag.blueprint,
         },
-        databaseFile: null,
         log: log,
         onInit: (db) => db.execute('PRAGMA temp_store=2'),
         migrationStrategy: BreezeSqliteAutomaticSchemaBasedMigration(
@@ -735,11 +718,10 @@ Future<void> main() async {
     });
 
     test('Remove temporary tag', () async {
-      final store = BreezeSqliteStore(
+      final store = BreezeSqliteStore.inMemory(
         models: {
           MProgressRemoveTemporaryTag.blueprint,
         },
-        databaseFile: null,
         log: log,
         onInit: (db) => db.execute('PRAGMA temp_store=2'),
         migrationStrategy: BreezeSqliteAutomaticSchemaBasedMigration(

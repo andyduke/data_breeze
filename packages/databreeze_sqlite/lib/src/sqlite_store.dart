@@ -28,6 +28,8 @@ class BreezeSqliteRequest extends BreezeAbstractFetchRequest {
 )''';
 }
 
+typedef BreezeSqliteDatabaseLocation = Future<String> Function();
+
 class BreezeSqliteStore extends BreezeStore with BreezeStoreFetch {
   final Logger? log;
 
@@ -35,7 +37,7 @@ class BreezeSqliteStore extends BreezeStore with BreezeStoreFetch {
   final String? databaseFile;
 
   /// It should return the path to the database file if [databaseFile] is not null.
-  final Future<String> Function()? databaseLocation;
+  final BreezeSqliteDatabaseLocation? databaseLocation;
 
   /// This is called immediately after the database is
   /// opened (before migrations, etc.).
@@ -47,12 +49,23 @@ class BreezeSqliteStore extends BreezeStore with BreezeStoreFetch {
   BreezeSqliteStore({
     this.log,
     super.models,
-    required this.databaseFile,
-    this.databaseLocation,
+    required String this.databaseFile,
+    required BreezeSqliteDatabaseLocation this.databaseLocation,
     this.onInit,
     super.migrationStrategy,
     super.typeConverters,
   }) {
+    initializeDatabase();
+  }
+
+  BreezeSqliteStore.inMemory({
+    this.log,
+    super.models,
+    this.onInit,
+    super.migrationStrategy,
+    super.typeConverters,
+  }) : databaseFile = null,
+       databaseLocation = null {
     initializeDatabase();
   }
 

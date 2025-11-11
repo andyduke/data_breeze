@@ -45,8 +45,7 @@ class BreezeExampleApp extends StatelessWidget {
 
           // Sqlite store
           Provider<BreezeSqliteStore>(
-            create: (context) => BreezeSqliteStore(
-              databaseFile: null,
+            create: (context) => BreezeSqliteStore.inMemory(
               models: {
                 Task.blueprint,
               },
