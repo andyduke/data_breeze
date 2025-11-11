@@ -48,7 +48,7 @@ Future<void> main() async {
         store,
         MUser.blueprint.name,
         [
-          (name: 'id', type: 'INT', notNull: true, defaultValue: null, primaryKey: true),
+          (name: 'id', type: 'INTEGER', notNull: false, defaultValue: null, primaryKey: true),
           (name: 'name', type: 'TEXT', notNull: true, defaultValue: null, primaryKey: false),
         ],
         log: log,
@@ -89,7 +89,7 @@ Future<void> main() async {
         store,
         MUserRenamed.blueprint.name,
         [
-          (name: 'id', type: 'INT', notNull: true, defaultValue: null, primaryKey: true),
+          (name: 'id', type: 'INTEGER', notNull: false, defaultValue: null, primaryKey: true),
           (name: 'name', type: 'TEXT', notNull: true, defaultValue: null, primaryKey: false),
         ],
         log: log,
@@ -165,9 +165,9 @@ Future<void> main() async {
         store,
         MUserAddColumn.blueprint.name,
         [
-          (name: 'id', type: 'INT', notNull: true, defaultValue: null, primaryKey: true),
+          (name: 'id', type: 'INTEGER', notNull: false, defaultValue: null, primaryKey: true),
           (name: 'name', type: 'TEXT', notNull: true, defaultValue: null, primaryKey: false),
-          (name: 'age', type: 'INT', notNull: true, defaultValue: null, primaryKey: false),
+          (name: 'age', type: 'INTEGER', notNull: true, defaultValue: null, primaryKey: false),
         ],
         log: log,
       );
@@ -207,7 +207,7 @@ Future<void> main() async {
         store,
         MUserDeleteColumn.blueprint.name,
         [
-          (name: 'id', type: 'INT', notNull: true, defaultValue: null, primaryKey: true),
+          (name: 'id', type: 'INTEGER', notNull: false, defaultValue: null, primaryKey: true),
           (name: 'name', type: 'TEXT', notNull: true, defaultValue: null, primaryKey: false),
         ],
         log: log,
@@ -248,7 +248,7 @@ Future<void> main() async {
         store,
         MUserRenameColumn.blueprint.name,
         [
-          (name: 'id', type: 'INT', notNull: true, defaultValue: null, primaryKey: true),
+          (name: 'id', type: 'INTEGER', notNull: false, defaultValue: null, primaryKey: true),
           (name: 'name', type: 'TEXT', notNull: true, defaultValue: null, primaryKey: false),
         ],
         log: log,
@@ -289,7 +289,7 @@ Future<void> main() async {
         store,
         MUserChangeColumnType.blueprint.name,
         [
-          (name: 'id', type: 'INT', notNull: true, defaultValue: null, primaryKey: true),
+          (name: 'id', type: 'INTEGER', notNull: false, defaultValue: null, primaryKey: true),
           (name: 'code', type: 'TEXT', notNull: true, defaultValue: null, primaryKey: false),
         ],
         log: log,
@@ -330,7 +330,7 @@ Future<void> main() async {
         store,
         MUserRenameOneAndAddAnotherColumn.blueprint.name,
         [
-          (name: 'id', type: 'INT', notNull: true, defaultValue: null, primaryKey: true),
+          (name: 'id', type: 'INTEGER', notNull: false, defaultValue: null, primaryKey: true),
           (name: 'firstName', type: 'TEXT', notNull: true, defaultValue: null, primaryKey: false),
           (name: 'lastName', type: 'TEXT', notNull: true, defaultValue: null, primaryKey: false),
         ],
@@ -374,7 +374,7 @@ Future<void> main() async {
         store,
         MUserWithHooks.blueprint.name,
         [
-          (name: 'id', type: 'INT', notNull: true, defaultValue: null, primaryKey: true),
+          (name: 'id', type: 'INTEGER', notNull: false, defaultValue: null, primaryKey: true),
           (name: 'name', type: 'TEXT', notNull: true, defaultValue: null, primaryKey: false),
         ],
         log: log,
@@ -420,7 +420,7 @@ Future<void> main() async {
         store,
         MUserRenamedWithHooks.blueprint.name,
         [
-          (name: 'id', type: 'INT', notNull: true, defaultValue: null, primaryKey: true),
+          (name: 'id', type: 'INTEGER', notNull: false, defaultValue: null, primaryKey: true),
           (name: 'name', type: 'TEXT', notNull: true, defaultValue: null, primaryKey: false),
         ],
         log: log,
@@ -504,9 +504,9 @@ Future<void> main() async {
         store,
         MUserAddColumnWithHooks.blueprint.name,
         [
-          (name: 'id', type: 'INT', notNull: true, defaultValue: null, primaryKey: true),
+          (name: 'id', type: 'INTEGER', notNull: false, defaultValue: null, primaryKey: true),
           (name: 'name', type: 'TEXT', notNull: true, defaultValue: null, primaryKey: false),
-          (name: 'age', type: 'INT', notNull: true, defaultValue: null, primaryKey: false),
+          (name: 'age', type: 'INTEGER', notNull: true, defaultValue: null, primaryKey: false),
         ],
         log: log,
       );
@@ -551,7 +551,7 @@ Future<void> main() async {
         store,
         MUserDeleteColumnWithHooks.blueprint.name,
         [
-          (name: 'id', type: 'INT', notNull: true, defaultValue: null, primaryKey: true),
+          (name: 'id', type: 'INTEGER', notNull: false, defaultValue: null, primaryKey: true),
           (name: 'name', type: 'TEXT', notNull: true, defaultValue: null, primaryKey: false),
         ],
         log: log,
@@ -597,7 +597,7 @@ Future<void> main() async {
         store,
         MUserRenameColumnWithHooks.blueprint.name,
         [
-          (name: 'id', type: 'INT', notNull: true, defaultValue: null, primaryKey: true),
+          (name: 'id', type: 'INTEGER', notNull: false, defaultValue: null, primaryKey: true),
           (name: 'name', type: 'TEXT', notNull: true, defaultValue: null, primaryKey: false),
         ],
         log: log,
@@ -658,9 +658,9 @@ Future<void> main() async {
         store,
         MUserAddColumn.blueprint.name,
         [
-          (name: 'id', type: 'INT', notNull: true, defaultValue: null, primaryKey: true),
+          (name: 'id', type: 'INTEGER', notNull: false, defaultValue: null, primaryKey: true),
           (name: 'name', type: 'TEXT', notNull: true, defaultValue: null, primaryKey: false),
-          (name: 'age', type: 'INT', notNull: true, defaultValue: null, primaryKey: false),
+          (name: 'age', type: 'INTEGER', notNull: true, defaultValue: null, primaryKey: false),
         ],
         log: log,
       );
@@ -668,7 +668,7 @@ Future<void> main() async {
         store,
         MProgressTemp.blueprint.name,
         [
-          (name: 'id', type: 'INT', notNull: true, defaultValue: null, primaryKey: true),
+          (name: 'id', type: 'INTEGER', notNull: false, defaultValue: null, primaryKey: true),
           (name: 'progress', type: 'REAL', notNull: true, defaultValue: null, primaryKey: false),
           (name: 'error', type: 'TEXT', notNull: false, defaultValue: null, primaryKey: false),
         ],

@@ -5,7 +5,6 @@ import 'package:databreeze_sqlite/src/sqlite_json_type.dart';
 import 'package:databreeze_sqlite/src/sqlite_type_converters.dart';
 import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:sqlite_async/sqlite3_common.dart';
 import 'package:sqlite_async/sqlite3.dart';
 import 'package:sqlite_async/sqlite_async.dart';
@@ -35,10 +34,7 @@ class BreezeSqliteStore extends BreezeStore with BreezeStoreFetch {
   /// The database file name, or `null` for an in-memory database.
   final String? databaseFile;
 
-  /// It should return the path to the database file.
-  ///
-  /// If it is null, the default database file location
-  /// (in the Application Documents folder) will be used.
+  /// It should return the path to the database file if [databaseFile] is not null.
   final Future<String> Function()? databaseLocation;
 
   /// This is called immediately after the database is
@@ -76,9 +72,10 @@ class BreezeSqliteStore extends BreezeStore with BreezeStoreFetch {
   Future<SqliteConnection> createDatabase() async {
     late final String? path;
     if (databaseFile != null) {
-      final dbLocation = (databaseLocation != null)
-          ? await databaseLocation!()
-          : await (getApplicationDocumentsDirectory().then((d) => d.path));
+      if (databaseLocation == null) {
+        throw ArgumentError.notNull('databaseLocation');
+      }
+      final dbLocation = await databaseLocation!();
       path = p.join(dbLocation, databaseFile);
     } else {
       path = null;
@@ -230,10 +227,26 @@ class BreezeSqliteStore extends BreezeStore with BreezeStoreFetch {
     required dynamic keyValue,
     required Map<String, dynamic> record,
   }) async {
+    final hasPrimaryKey = record.containsKey(key) && (record[key] != null);
+    final rawRecord = hasPrimaryKey ? record : ({...record}..remove(key));
+    final columns = rawRecord.keys;
+    final columnsPlaceholders = List.filled(columns.length, '?').join(', ');
+    final values = rawRecord.values;
+    final updateColumns = columns.where((c) => (c != key));
+
+    /*final result = */
     await executeSql(
-      'UPDATE $name SET ${record.keys.map((k) => '$k = ?').join(', ')} WHERE $key = ?',
-      [...record.values, keyValue],
+      'INSERT INTO $name (${columns.join(', ')}) VALUES ($columnsPlaceholders) '
+      'ON CONFLICT($key) DO UPDATE SET ${updateColumns.map((k) => '$k = excluded.$k').join(', ')} '
+      'RETURNING $key',
+      values.toList(growable: false),
     );
+    // final lastInsertId = result.isNotEmpty ? result.first.values.first : null;
+
+    // await executeSql(
+    //   'UPDATE $name SET ${record.keys.map((k) => '$k = ?').join(', ')} WHERE $key = ?',
+    //   [...record.values, keyValue],
+    // );
 
     log?.finest('Update #$keyValue: $record');
   }
