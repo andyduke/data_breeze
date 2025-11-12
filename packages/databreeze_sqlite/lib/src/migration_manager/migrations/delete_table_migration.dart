@@ -6,6 +6,7 @@ class BreezeSqliteDeleteTableMigration extends BreezeSqliteMigration {
 
   BreezeSqliteDeleteTableMigration(
     this.schema, {
+    required super.typeConverters,
     required super.version,
   }) : super(
          onBeforeMigrate: BreezeSqliteMigration.sqliteSchemaOf(schema)?.onBeforeMigrate,

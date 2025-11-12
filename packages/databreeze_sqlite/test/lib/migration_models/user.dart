@@ -10,6 +10,7 @@ class MUser extends BreezeModel<int> {
         columns: {
           BreezeModelColumn<int>('id', isPrimaryKey: true),
           BreezeModelColumn<String>('name'),
+          BreezeModelColumn<DateTime?>('created_at'),
         },
       ),
     },
@@ -20,18 +21,22 @@ class MUser extends BreezeModel<int> {
   BreezeModelBlueprint get schema => blueprint;
 
   String name;
+  DateTime? createdAt;
 
   MUser({
     required this.name,
+    this.createdAt,
   });
 
   factory MUser.fromRecord(BreezeDataRecord record) => MUser(
     name: record['name'],
+    createdAt: record['created_at'],
   );
 
   @override
   Map<String, dynamic> toRecord() => {
     'name': name,
+    'created_at': createdAt,
   };
 }
 

@@ -5,6 +5,7 @@ import 'package:sqlite_async/sqlite_async.dart';
 class BreezeSqliteMigrationManager extends BreezeMigrationManager<SqliteWriteContext> {
   const BreezeSqliteMigrationManager({
     super.delegate = const BreezeSqliteMigrationDelegate(),
+    super.typeConverters,
     super.log,
   });
 
@@ -23,16 +24,24 @@ class BreezeSqliteMigrationManager extends BreezeMigrationManager<SqliteWriteCon
         BreezeModelSchemaVersion(version: final version) => version,
         _ => 1,
       };
+      final migrationTypeConverters = {
+        ...current.typeConverters,
+        ...typeConverters,
+      };
 
       // Delete table if model marked as deleted
       if (current.isDeleted) {
-        migrations.add(delegate.deleteTableMigration(current, version: version));
+        migrations.add(
+          delegate.deleteTableMigration(current, version: version, typeConverters: migrationTypeConverters),
+        );
         continue;
       }
 
       // Initial table creation
       if (i == 0) {
-        migrations.add(delegate.createTableMigration(current, version: version));
+        migrations.add(
+          delegate.createTableMigration(current, version: version, typeConverters: migrationTypeConverters),
+        );
         continue;
       }
 
@@ -63,18 +72,26 @@ class BreezeSqliteMigrationManager extends BreezeMigrationManager<SqliteWriteCon
       final requiresRebuild = deletedCols.isNotEmpty || typeChanged || temporaryTagChanged;
 
       if (requiresRebuild) {
-        migrations.add(delegate.rebuildTableMigration(previous, current, version: version));
+        migrations.add(
+          delegate.rebuildTableMigration(previous, current, version: version, typeConverters: migrationTypeConverters),
+        );
       } else {
         if (tableRenamed) {
-          migrations.add(delegate.renameTableMigration(current, version: version));
+          migrations.add(
+            delegate.renameTableMigration(current, version: version, typeConverters: migrationTypeConverters),
+          );
         }
 
         for (final col in renamedCols) {
-          migrations.add(delegate.renameColumnMigration(current, col, version: version));
+          migrations.add(
+            delegate.renameColumnMigration(current, col, version: version, typeConverters: migrationTypeConverters),
+          );
         }
 
         for (final col in addedCols) {
-          migrations.add(delegate.addColumnMigration(current, col, version: version));
+          migrations.add(
+            delegate.addColumnMigration(current, col, version: version, typeConverters: migrationTypeConverters),
+          );
         }
       }
     }

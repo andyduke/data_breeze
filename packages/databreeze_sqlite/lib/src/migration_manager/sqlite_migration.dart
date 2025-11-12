@@ -7,6 +7,7 @@ import 'package:sqlite_async/sqlite_async.dart';
 abstract class BreezeSqliteMigration extends BreezeMigration<SqliteWriteContext> {
   const BreezeSqliteMigration({
     required super.version,
+    required super.typeConverters,
     super.onBeforeMigrate,
     super.onAfterMigrate,
   });
@@ -37,8 +38,22 @@ abstract class BreezeSqliteMigration extends BreezeMigration<SqliteWriteContext>
   };
 
   @internal
-  static String createColumnSql(BreezeModelColumn column) {
-    final sqlType = _sqlTypes[column.type] ?? 'TEXT';
+  static String createColumnSql(
+    BreezeModelColumn column, [
+    Set<BreezeBaseTypeConverter> typeConverters = const {},
+  ]) {
+    final columnType = column.type;
+    Type storageType = columnType;
+
+    for (final typeConverter in typeConverters) {
+      if (typeConverter.isDartType(columnType)) {
+        storageType = typeConverter.storageType;
+      }
+    }
+
+    // print('### ${column.name}<${column.type}>: $storageType');
+
+    final sqlType = _sqlTypes[storageType] ?? 'TEXT';
     final nullable = (column.isPrimaryKey || column.isNullable) ? '' : ' NOT NULL';
     final pk = column.isPrimaryKey ? ' PRIMARY KEY' : '';
 

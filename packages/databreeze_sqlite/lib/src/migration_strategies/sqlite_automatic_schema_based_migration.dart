@@ -19,9 +19,11 @@ class BreezeSqliteAutomaticSchemaBasedMigration extends BreezeSchemaMigrationStr
   Future<void> migrateSchemas(
     Iterable<BreezeBaseModelSchema> schemas, [
     SqliteWriteContext? db,
+    Set<BreezeBaseTypeConverter> typeConverters = const {},
   ]) async {
     if (db != null) {
       final manager = BreezeSqliteMigrationManager(
+        typeConverters: typeConverters,
         log: log,
       );
       await manager.migrate(

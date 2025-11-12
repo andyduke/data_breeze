@@ -8,6 +8,7 @@ class BreezeSqliteRebuildTableMigration extends BreezeSqliteMigration {
   BreezeSqliteRebuildTableMigration(
     this.from,
     this.to, {
+    required super.typeConverters,
     required super.version,
   }) : super(
          onBeforeMigrate: BreezeSqliteMigration.sqliteSchemaOf(to)?.onBeforeMigrate,
@@ -27,7 +28,7 @@ class BreezeSqliteRebuildTableMigration extends BreezeSqliteMigration {
     // Create temp table
     final newColumnsSql = <String>[];
     for (final column in to.columns.values) {
-      newColumnsSql.add(BreezeSqliteMigration.createColumnSql(column));
+      newColumnsSql.add(BreezeSqliteMigration.createColumnSql(column, typeConverters));
     }
     sql.add('''CREATE$options TABLE $tempName (
   ${newColumnsSql.join(',\n  ')}

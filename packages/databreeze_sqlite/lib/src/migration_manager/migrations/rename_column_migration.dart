@@ -8,6 +8,7 @@ class BreezeSqliteRenameColumnMigration extends BreezeSqliteMigration {
   BreezeSqliteRenameColumnMigration(
     this.schema,
     this.column, {
+    required super.typeConverters,
     required super.version,
   }) : super(
          onBeforeMigrate: BreezeSqliteMigration.sqliteSchemaOf(schema)?.onBeforeMigrate,

@@ -1,5 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:databreeze/src/model_column.dart';
+import 'package:databreeze/src/type_converters.dart';
 
 abstract interface class BreezeBaseModelSchema {
   /// The name of the table in the database
@@ -26,6 +27,8 @@ abstract interface class BreezeBaseModelSchema {
   /// symbol to create a temporary table.
   abstract final Set<Object?> tags;
 
+  Set<BreezeBaseTypeConverter> get typeConverters;
+
   const BreezeBaseModelSchema();
 }
 
@@ -48,12 +51,16 @@ class BreezeModelSchema implements BreezeBaseModelSchema {
   @override
   final Set<Object?> tags;
 
+  @override
+  final Set<BreezeBaseTypeConverter> typeConverters;
+
   BreezeModelSchema({
     required this.name,
     this.prevName,
     required Set<BreezeModelColumn> columns,
     this.isDeleted = false,
     this.tags = const {},
+    this.typeConverters = const {},
   }) : columns = UnmodifiableMapView(
          {for (var column in columns) column.name: column},
        ),
@@ -75,6 +82,7 @@ class BreezeModelSchemaVersion extends BreezeModelSchema {
     super.prevName,
     required super.columns,
     super.tags,
+    super.typeConverters,
   });
 
   BreezeModelSchemaVersion.deleted({
@@ -119,4 +127,7 @@ class BreezeModelVersionedSchema implements BreezeBaseModelSchema {
 
   @override
   Set<Object?> get tags => latestVersion.tags;
+
+  @override
+  Set<BreezeBaseTypeConverter> get typeConverters => latestVersion.typeConverters;
 }

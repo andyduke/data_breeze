@@ -3,6 +3,7 @@ import 'package:databreeze/src/model.dart';
 import 'package:databreeze/src/model_blueprint.dart';
 import 'package:databreeze/src/model_schema.dart';
 import 'package:databreeze/src/store.dart';
+import 'package:databreeze/src/type_converters.dart';
 
 abstract class BreezeMigrationStrategy<D> {
   const BreezeMigrationStrategy();
@@ -34,9 +35,13 @@ abstract class BreezeSchemaMigrationStrategy<D> extends BreezeMigrationStrategy<
       schemes = schemes.where((blueprint) => filter!(blueprint));
     }
 
-    await migrateSchemas(schemes, db);
+    await migrateSchemas(schemes, db, store.typeConverters);
   }
 
   // @protected
-  Future<void> migrateSchemas(Iterable<BreezeBaseModelSchema> schemas, [D? db]);
+  Future<void> migrateSchemas(
+    Iterable<BreezeBaseModelSchema> schemas, [
+    D? db,
+    Set<BreezeBaseTypeConverter> typeConverters = const {},
+  ]);
 }

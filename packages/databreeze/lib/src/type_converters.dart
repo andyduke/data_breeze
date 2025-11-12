@@ -1,3 +1,6 @@
+typedef _Nullable<T> = T?;
+
+/// Converter types (DartType and StorageType) must not be nullable.
 abstract class BreezeBaseTypeConverter<DartType, StorageType> {
   const BreezeBaseTypeConverter();
 
@@ -6,12 +9,12 @@ abstract class BreezeBaseTypeConverter<DartType, StorageType> {
   StorageType toStorage(DartType value);
 
   bool isDartType(Type type) {
-    final result = (type == DartType) || ((type == Null) && _isNullableType<DartType>());
+    final result = (DartType == type) || (_Nullable<DartType> == type);
     return result;
   }
 
   bool isStorageType(Type type) {
-    final result = (type.toString() == StorageType.toString()) || ((type == Null) && _isNullableType<StorageType>());
+    final result = (StorageType == type) || (_Nullable<StorageType> == type);
     return result;
   }
 
@@ -32,9 +35,6 @@ abstract class BreezeBaseTypeConverter<DartType, StorageType> {
   Type get dartType => DartType;
 
   Type get storageType => StorageType;
-
-  bool _isType<T>(Type t) => t == T;
-  bool _isNullableType<T>() => _isType<T?>(T);
 
   // TODO: Uniqueness is based solely on the Dart type, allowing you to override
   //  the converter for model blueprints.

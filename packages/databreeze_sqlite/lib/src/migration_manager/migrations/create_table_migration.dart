@@ -6,6 +6,7 @@ class BreezeSqliteCreateTableMigration extends BreezeSqliteMigration {
 
   BreezeSqliteCreateTableMigration(
     this.schema, {
+    required super.typeConverters,
     required super.version,
   }) : super(
          onBeforeMigrate: BreezeSqliteMigration.sqliteSchemaOf(schema)?.onBeforeMigrate,
@@ -16,7 +17,7 @@ class BreezeSqliteCreateTableMigration extends BreezeSqliteMigration {
   List<String> generate() {
     final columnsSql = <String>[];
     for (final column in schema.columns.values) {
-      columnsSql.add(BreezeSqliteMigration.createColumnSql(column));
+      columnsSql.add(BreezeSqliteMigration.createColumnSql(column, typeConverters));
     }
     final options = schema.tags.contains(#temporary) ? ' TEMP' : '';
 

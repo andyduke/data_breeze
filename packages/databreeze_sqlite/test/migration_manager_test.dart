@@ -49,6 +49,7 @@ Future<void> main() async {
         [
           (name: 'id', type: 'INTEGER', notNull: false, defaultValue: null, primaryKey: true),
           (name: 'name', type: 'TEXT', notNull: true, defaultValue: null, primaryKey: false),
+          (name: 'created_at', type: 'TEXT', notNull: false, defaultValue: null, primaryKey: false),
         ],
         log: log,
       );

@@ -8,6 +8,7 @@ class BreezeSqliteAddColumnMigration extends BreezeSqliteMigration {
   BreezeSqliteAddColumnMigration(
     this.schema,
     this.column, {
+    required super.typeConverters,
     required super.version,
   }) : super(
          onBeforeMigrate: BreezeSqliteMigration.sqliteSchemaOf(schema)?.onBeforeMigrate,
@@ -16,7 +17,7 @@ class BreezeSqliteAddColumnMigration extends BreezeSqliteMigration {
 
   @override
   List<String> generate() {
-    final columnSql = BreezeSqliteMigration.createColumnSql(column);
+    final columnSql = BreezeSqliteMigration.createColumnSql(column, typeConverters);
     final sql = 'ALTER TABLE ${schema.name} ADD COLUMN $columnSql';
     return [sql];
   }

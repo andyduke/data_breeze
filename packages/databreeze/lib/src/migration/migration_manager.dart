@@ -1,16 +1,19 @@
 import 'package:databreeze/src/model_column.dart';
 import 'package:databreeze/src/model_schema.dart';
+import 'package:databreeze/src/type_converters.dart';
 import 'package:logging/logging.dart';
 
 typedef BreezeModelSchemaMigrateHandler<D> = Future<void> Function(D db);
 
 abstract class BreezeMigration<D> {
   final int version;
+  final Set<BreezeBaseTypeConverter> typeConverters;
   final BreezeModelSchemaMigrateHandler<D>? onBeforeMigrate;
   final BreezeModelSchemaMigrateHandler<D>? onAfterMigrate;
 
   const BreezeMigration({
     required this.version,
+    required this.typeConverters,
     this.onBeforeMigrate,
     this.onAfterMigrate,
   });
@@ -51,20 +54,49 @@ abstract class BreezeMigrationDelegate<D> {
 
   Future<T> transaction<T>(D db, Logger? log, Future<T> Function(D tx) callback);
 
-  BreezeMigration createTableMigration(BreezeBaseModelSchema schema, {required int version});
-  BreezeMigration renameTableMigration(BreezeBaseModelSchema schema, {required int version});
-  BreezeMigration deleteTableMigration(BreezeBaseModelSchema schema, {required int version});
-  BreezeMigration rebuildTableMigration(BreezeBaseModelSchema from, BreezeBaseModelSchema to, {required int version});
-  BreezeMigration addColumnMigration(BreezeBaseModelSchema schema, BreezeModelColumn column, {required int version});
-  BreezeMigration renameColumnMigration(BreezeBaseModelSchema schema, BreezeModelColumn column, {required int version});
+  BreezeMigration createTableMigration(
+    BreezeBaseModelSchema schema, {
+    required int version,
+    required Set<BreezeBaseTypeConverter> typeConverters,
+  });
+  BreezeMigration renameTableMigration(
+    BreezeBaseModelSchema schema, {
+    required int version,
+    required Set<BreezeBaseTypeConverter> typeConverters,
+  });
+  BreezeMigration deleteTableMigration(
+    BreezeBaseModelSchema schema, {
+    required int version,
+    required Set<BreezeBaseTypeConverter> typeConverters,
+  });
+  BreezeMigration rebuildTableMigration(
+    BreezeBaseModelSchema from,
+    BreezeBaseModelSchema to, {
+    required int version,
+    required Set<BreezeBaseTypeConverter> typeConverters,
+  });
+  BreezeMigration addColumnMigration(
+    BreezeBaseModelSchema schema,
+    BreezeModelColumn column, {
+    required int version,
+    required Set<BreezeBaseTypeConverter> typeConverters,
+  });
+  BreezeMigration renameColumnMigration(
+    BreezeBaseModelSchema schema,
+    BreezeModelColumn column, {
+    required int version,
+    required Set<BreezeBaseTypeConverter> typeConverters,
+  });
 }
 
 abstract class BreezeMigrationManager<D> {
   final BreezeMigrationDelegate<D> delegate;
+  final Set<BreezeBaseTypeConverter> typeConverters;
   final Logger? log;
 
   const BreezeMigrationManager({
     required this.delegate,
+    this.typeConverters = const {},
     this.log,
   });
 

@@ -72,38 +72,44 @@ CREATE TABLE IF NOT EXISTS $migrationsTableName (
   BreezeMigration<SqliteWriteContext> createTableMigration(
     BreezeBaseModelSchema schema, {
     required int version,
-  }) => BreezeSqliteCreateTableMigration(schema, version: version);
+    required Set<BreezeBaseTypeConverter> typeConverters,
+  }) => BreezeSqliteCreateTableMigration(schema, version: version, typeConverters: typeConverters);
 
   @override
   BreezeMigration<SqliteWriteContext> renameTableMigration(
     BreezeBaseModelSchema schema, {
     required int version,
-  }) => BreezeSqliteRenameTableMigration(schema, version: version);
+    required Set<BreezeBaseTypeConverter> typeConverters,
+  }) => BreezeSqliteRenameTableMigration(schema, version: version, typeConverters: typeConverters);
 
   @override
   BreezeMigration<SqliteWriteContext> deleteTableMigration(
     BreezeBaseModelSchema schema, {
     required int version,
-  }) => BreezeSqliteDeleteTableMigration(schema, version: version);
+    required Set<BreezeBaseTypeConverter> typeConverters,
+  }) => BreezeSqliteDeleteTableMigration(schema, version: version, typeConverters: typeConverters);
 
   @override
   BreezeMigration<SqliteWriteContext> rebuildTableMigration(
     BreezeBaseModelSchema from,
     BreezeBaseModelSchema to, {
     required int version,
-  }) => BreezeSqliteRebuildTableMigration(from, to, version: version);
+    required Set<BreezeBaseTypeConverter> typeConverters,
+  }) => BreezeSqliteRebuildTableMigration(from, to, version: version, typeConverters: typeConverters);
 
   @override
   BreezeMigration<SqliteWriteContext> addColumnMigration(
     BreezeBaseModelSchema schema,
     BreezeModelColumn column, {
     required int version,
-  }) => BreezeSqliteAddColumnMigration(schema, column, version: version);
+    required Set<BreezeBaseTypeConverter> typeConverters,
+  }) => BreezeSqliteAddColumnMigration(schema, column, version: version, typeConverters: typeConverters);
 
   @override
   BreezeMigration<SqliteWriteContext> renameColumnMigration(
     BreezeBaseModelSchema schema,
     BreezeModelColumn column, {
     required int version,
-  }) => BreezeSqliteRenameColumnMigration(schema, column, version: version);
+    required Set<BreezeBaseTypeConverter> typeConverters,
+  }) => BreezeSqliteRenameColumnMigration(schema, column, version: version, typeConverters: typeConverters);
 }
