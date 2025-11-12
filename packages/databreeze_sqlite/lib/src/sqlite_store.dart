@@ -289,6 +289,18 @@ class BreezeSqliteStore extends BreezeStore with BreezeStoreFetch {
     throw UnimplementedError();
   }
 
+  ({String sql, List<dynamic> params}) sqlWhereOf(BreezeFilterExpression? filter, {bool withPrefix = true}) {
+    final (whereSql, whereParams) = _buildWhere(filter);
+    final whereClause = whereSql.isNotEmpty ? 'WHERE $whereSql' : '';
+
+    return (
+      sql: withPrefix ? whereClause : whereSql,
+      params: whereParams,
+    );
+  }
+
+  // ---
+
   dynamic _tryCastJson(BreezeSqliteJsonB value) {
     try {
       return jsonb.decode(value);
