@@ -4,6 +4,7 @@ import 'package:databreeze/src/mixins/store_mixins.dart';
 import 'package:databreeze/src/model_blueprint.dart';
 import 'package:databreeze/src/store_fetch_options.dart';
 import 'package:databreeze/src/store.dart';
+import 'package:databreeze/src/type_converters.dart';
 import 'package:databreeze/src/types.dart';
 import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
@@ -48,6 +49,7 @@ class BreezeJsonStore extends BreezeStore with BreezeStoreFetch {
     required String table,
     required BreezeAbstractFetchRequest request,
     BreezeModelBlueprint? blueprint,
+    Set<BreezeBaseTypeConverter>? typeConverters = const {},
   }) async {
     if (simulateLatency) {
       // Simulate latency
@@ -86,6 +88,7 @@ class BreezeJsonStore extends BreezeStore with BreezeStoreFetch {
     required String table,
     BreezeAbstractFetchRequest? request,
     BreezeModelBlueprint? blueprint,
+    Set<BreezeBaseTypeConverter>? typeConverters = const {},
   }) async {
     if (simulateLatency) {
       // Simulate latency

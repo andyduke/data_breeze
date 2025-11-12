@@ -70,8 +70,8 @@ mixin BreezeStorageTypeConverters {
   dynamic toDartValue(dynamic value, {required Type dartType, Set<BreezeBaseTypeConverter> converters = const {}}) {
     final storageType = value.runtimeType;
     final effectiveConverters = {
-      ...typeConverters,
       ...converters,
+      ...typeConverters,
     };
 
     for (final converter in effectiveConverters) {
@@ -79,13 +79,13 @@ mixin BreezeStorageTypeConverters {
         return converter.toDart(value);
       }
     }
-    return null;
+    return value;
   }
 
   dynamic toStorageValue(dynamic value, {required Type dartType, Set<BreezeBaseTypeConverter> converters = const {}}) {
     final effectiveConverters = {
-      ...typeConverters,
       ...converters,
+      ...typeConverters,
     };
 
     for (final converter in effectiveConverters) {
@@ -93,6 +93,6 @@ mixin BreezeStorageTypeConverters {
         return converter.toStorage(value);
       }
     }
-    return null;
+    return value;
   }
 }

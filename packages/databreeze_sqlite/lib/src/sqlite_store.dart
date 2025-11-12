@@ -152,6 +152,7 @@ class BreezeSqliteStore extends BreezeStore with BreezeStoreFetch {
     required String table,
     required BreezeAbstractFetchRequest request,
     BreezeModelBlueprint? blueprint,
+    Set<BreezeBaseTypeConverter> typeConverters = const {},
   }) async {
     ResultSet? result;
     Map<String, dynamic>? record;
@@ -159,11 +160,11 @@ class BreezeSqliteStore extends BreezeStore with BreezeStoreFetch {
     switch (request) {
       case BreezeFetchRequest(filter: final filter, sortBy: final sortBy):
         final (:sql, :params) = buildSql(table, filter, sortBy, 1);
-        result = await executeSql(sql, params);
+        result = await executeSql(sql, params, typeConverters);
         break;
 
       case BreezeSqliteRequest(sql: final sql, params: final params):
-        result = await executeSql(sql, params);
+        result = await executeSql(sql, params, typeConverters);
         break;
     }
 
@@ -181,6 +182,7 @@ class BreezeSqliteStore extends BreezeStore with BreezeStoreFetch {
     required String table,
     BreezeAbstractFetchRequest? request,
     BreezeModelBlueprint? blueprint,
+    Set<BreezeBaseTypeConverter> typeConverters = const {},
   }) async {
     ResultSet? result;
     List<Map<String, dynamic>>? records;
@@ -188,11 +190,11 @@ class BreezeSqliteStore extends BreezeStore with BreezeStoreFetch {
     switch (request) {
       case BreezeFetchRequest(filter: final filter, sortBy: final sortBy):
         final (:sql, :params) = buildSql(table, filter, sortBy);
-        result = await executeSql(sql, params);
+        result = await executeSql(sql, params, typeConverters);
         break;
 
       case BreezeSqliteRequest(sql: final sql, params: final params):
-        result = await executeSql(sql, params);
+        result = await executeSql(sql, params, typeConverters);
         break;
     }
 
@@ -228,7 +230,7 @@ class BreezeSqliteStore extends BreezeStore with BreezeStoreFetch {
 
     final lastInsertId = result.isNotEmpty ? result.first.values.first : null;
 
-    log?.finest('Add #$lastInsertId: $record');
+    log?.finest('Added #$lastInsertId: $record');
 
     return lastInsertId;
   }
@@ -258,7 +260,7 @@ class BreezeSqliteStore extends BreezeStore with BreezeStoreFetch {
     //   [...record.values, keyValue],
     // );
 
-    log?.finest('Update #$keyValue: $record');
+    log?.finest('Updated #$keyValue: $record');
   }
 
   @override
@@ -273,7 +275,7 @@ class BreezeSqliteStore extends BreezeStore with BreezeStoreFetch {
       [keyValue],
     );
 
-    log?.finest('Delete #$keyValue: $record');
+    log?.finest('Deleted #$keyValue: $record');
   }
 
   @override
@@ -311,7 +313,11 @@ class BreezeSqliteStore extends BreezeStore with BreezeStoreFetch {
     }
   }
 
-  Future<ResultSet> executeSql(String sql, [List<Object?> parameters = const []]) async {
+  Future<ResultSet> executeSql(
+    String sql, [
+    List<Object?> parameters = const [],
+    Set<BreezeBaseTypeConverter> typeConverters = const {},
+  ]) async {
     final List<Object?> params = [];
     for (final param in parameters) {
       /*
@@ -323,7 +329,13 @@ class BreezeSqliteStore extends BreezeStore with BreezeStoreFetch {
       }
       */
 
-      params.add(param);
+      final paramValue = toStorageValue(
+        param,
+        dartType: param.runtimeType,
+        converters: typeConverters,
+      );
+
+      params.add(paramValue);
     }
 
     _logQuery(sql, params);

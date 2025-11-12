@@ -52,7 +52,7 @@ Future<void> main() async {
         rows,
         equals(
           [
-            [newTask.id, 'File 1', null, newTask.createdAt.toSqliteDateTime(), 'path/to/file1'],
+            [newTask.id, 'File 1', null, newTask.createdAt.toSqliteDateTime(), 'path/to/file1', 0],
           ],
         ),
       );
@@ -111,7 +111,7 @@ Future<void> main() async {
         rows,
         equals(
           [
-            [task.id, 'File 1*', null, task.createdAt.toSqliteDateTime(), 'path/to/file1'],
+            [task.id, 'File 1*', null, task.createdAt.toSqliteDateTime(), 'path/to/file1', 0],
           ],
         ),
       );
@@ -147,7 +147,7 @@ Future<void> main() async {
         rows,
         equals(
           [
-            [1, 'File 1', null, '2025-10-30 12:00:00+03:00', 'path/to/file1'],
+            [1, 'File 1', null, '2025-10-30 12:00:00+03:00', 'path/to/file1', 1],
           ],
         ),
       );
@@ -329,7 +329,7 @@ CREATE TEMP TABLE task_progress(
         rows,
         equals(
           [
-            [newTask.id, 'File 1', null, newTask.createdAt.toSqliteDateTime(), 'path/to/file1'],
+            [newTask.id, 'File 1', null, newTask.createdAt.toSqliteDateTime(), 'path/to/file1', 0],
           ],
         ),
       );
@@ -364,7 +364,7 @@ CREATE TEMP TABLE task_progress(
         rows,
         equals(
           [
-            [newTask.id, 'File 1*', null, newTask.createdAt.toSqliteDateTime(), 'path/to/file1'],
+            [newTask.id, 'File 1*', null, newTask.createdAt.toSqliteDateTime(), 'path/to/file1', 0],
           ],
         ),
       );
@@ -443,6 +443,48 @@ CREATE TEMP TABLE task_progress(
           ],
         ),
       );
+    });
+  });
+
+  group('Filter type converters', () {
+    test('Using store type converters (DateTime)', () async {
+      final store = TestStore(
+        log: log,
+        models: {
+          Task.blueprint,
+        },
+        migrationStrategy: BreezeSqliteMigrations(tasksMigration),
+      );
+
+      final query = BreezeQueryAll<Task>(
+        filter: BreezeField('created_at') > DateTime.parse('2025-10-30 11:00:00+03:00'),
+      );
+      final tasks = await query.fetch(store);
+
+      expect(tasks, hasLength(1));
+
+      expect(tasks.first.id, equals(1));
+      expect(tasks.first.name, equals('File 1'));
+    });
+
+    test('Using model blueprint type converters (TaskStatus)', () async {
+      final store = TestStore(
+        log: log,
+        models: {
+          Task.blueprint,
+        },
+        migrationStrategy: BreezeSqliteMigrations(tasksMigration),
+      );
+
+      final query = BreezeQueryAll<Task>(
+        filter: BreezeField('status').eq(TaskStatus.running),
+      );
+      final tasks = await query.fetch(store);
+
+      expect(tasks, hasLength(1));
+
+      expect(tasks.first.id, equals(1));
+      expect(tasks.first.name, equals('File 1'));
     });
   });
 }

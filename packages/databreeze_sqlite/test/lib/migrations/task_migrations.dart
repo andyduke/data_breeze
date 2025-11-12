@@ -18,7 +18,8 @@ final createTaskTableSql = '''CREATE TABLE tasks(
                     name TEXT,
                     note TEXT NULL,
                     created_at TEXT,
-                    file TEXT
+                    file TEXT,
+                    status INT DEFAULT 0
                 )''';
 
 final emptyTaskMigration = SqliteMigrations()
@@ -53,11 +54,11 @@ final tasksMigration = SqliteMigrations()
         await tx.execute(createTaskTableSql);
 
         await tx.execute('''
-  INSERT INTO tasks(id, name, note, created_at, file) VALUES(1, 'File 1', NULL, '2025-10-30 12:00:00+03:00', 'path/to/file1')
+  INSERT INTO tasks(id, name, note, created_at, file, status) VALUES(1, 'File 1', NULL, '2025-10-30 12:00:00+03:00', 'path/to/file1', 1)
 ''');
 
         await tx.execute('''
-  INSERT INTO tasks(id, name, note, created_at, file) VALUES(2, 'File 2', NULL, '2025-10-30 11:00:00+03:00', 'path/to/file2')
+  INSERT INTO tasks(id, name, note, created_at, file, status) VALUES(2, 'File 2', NULL, '2025-10-30 11:00:00+03:00', 'path/to/file2', 0)
 ''');
       },
     ),

@@ -62,7 +62,10 @@ final class TaskColumns {
   static const note = 'note';
   static const createdAt = 'created_at';
   static const file = 'file';
+  static const status = 'status';
 }
+
+enum TaskStatus { pending, running, success, error }
 
 class Task extends BreezeModel<int> {
   static final blueprint = BreezeModelBlueprint<Task>(
@@ -75,6 +78,13 @@ class Task extends BreezeModel<int> {
       BreezeModelColumn<String?>(TaskColumns.note),
       BreezeModelColumn<DateTime>(TaskColumns.createdAt),
       BreezeModelColumn<XFile>(TaskColumns.file),
+      BreezeModelColumn<TaskStatus>(TaskColumns.status),
+    },
+    typeConverters: {
+      BreezeTypeConverter<TaskStatus, int>(
+        from: (int value) => TaskStatus.values[value],
+        to: (TaskStatus value) => value.index,
+      ),
     },
   );
 
@@ -85,19 +95,22 @@ class Task extends BreezeModel<int> {
   String? note;
   DateTime createdAt;
   XFile file;
+  TaskStatus status;
 
   Task({
     required this.name,
     this.note,
     DateTime? createdAt,
     required this.file,
+    this.status = TaskStatus.pending,
   }) : createdAt = createdAt ?? DateTime.now();
 
   factory Task.fromRecord(BreezeDataRecord record) => Task(
-    name: record[TaskColumns.name] ?? 'n/a',
+    name: record[TaskColumns.name],
     note: record[TaskColumns.note],
     createdAt: record[TaskColumns.createdAt],
     file: record[TaskColumns.file],
+    status: record[TaskColumns.status],
   );
 
   @override
@@ -106,6 +119,7 @@ class Task extends BreezeModel<int> {
     TaskColumns.note: note,
     TaskColumns.createdAt: createdAt,
     TaskColumns.file: file,
+    TaskColumns.status: status,
   };
 
   @override
@@ -120,6 +134,7 @@ class Task extends BreezeModel<int> {
   name: $name,
   note: ${note ?? '<null>'},
   createdAt: $createdAt,
-  file: $file
+  file: $file,
+  status: $status
 )''';
 }

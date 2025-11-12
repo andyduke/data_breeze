@@ -47,7 +47,7 @@ extension BreezeSqliteDateTime on DateTime {
     String sec = _twoDigits(datetime.second);
     String ms = _threeDigits(datetime.millisecond);
 
-    return "$y-$m-${d}T$h:$min:$sec.$ms";
+    return "$y-$m-$d $h:$min:$sec.$ms";
   }
 
   static String _fourDigits(int n) {

@@ -25,7 +25,7 @@ abstract class BreezeStore with BreezeStorageTypeConverters {
     this.migrationStrategy,
     Set<BreezeBaseTypeConverter> typeConverters = const {},
   }) : blueprints = Map.fromIterable(models, key: (b) => b.type) {
-    this.typeConverters = {...defaultTypeConverters, ...typeConverters};
+    this.typeConverters = {...typeConverters, ...defaultTypeConverters};
   }
 
   void dispose() {}
@@ -61,6 +61,10 @@ abstract class BreezeStore with BreezeStorageTypeConverters {
       table: modelBlueprint.name,
       request: request,
       blueprint: modelBlueprint,
+      typeConverters: {
+        ...modelBlueprint.typeConverters,
+        ...typeConverters,
+      },
     );
 
     return ((record != null) ? modelBlueprint.fromRecord(record, this) : null);
@@ -76,6 +80,10 @@ abstract class BreezeStore with BreezeStorageTypeConverters {
       table: modelBlueprint.name,
       request: request,
       blueprint: modelBlueprint,
+      typeConverters: {
+        ...modelBlueprint.typeConverters,
+        ...typeConverters,
+      },
     );
 
     return [
@@ -226,16 +234,14 @@ abstract class BreezeStore with BreezeStorageTypeConverters {
     required String table,
     required BreezeAbstractFetchRequest request,
     BreezeModelBlueprint? blueprint,
-    // required BreezeFilterExpression filter,
-    // List<BreezeSortBy> sortBy = const [],
+    Set<BreezeBaseTypeConverter> typeConverters = const {},
   });
 
   Future<List<BreezeDataRecord>> fetchAllRecords({
     required String table,
     BreezeAbstractFetchRequest? request,
     BreezeModelBlueprint? blueprint,
-    // BreezeFilterExpression? filter,
-    // List<BreezeSortBy> sortBy = const [],
+    Set<BreezeBaseTypeConverter> typeConverters = const {},
   });
 
   @protected
