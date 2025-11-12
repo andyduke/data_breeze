@@ -59,7 +59,7 @@ class BreezeModelBlueprint<M extends BreezeBaseModel> extends BreezeModelVersion
     final typedRecord = fromRaw(record, converters);
     final result = builder(typedRecord);
 
-    if (result is BreezeModel) {
+    if ((result is BreezeModel) && (key != null)) {
       result.id = typedRecord[key];
     }
 
