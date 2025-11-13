@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:collection/collection.dart';
 
 // https://dartpad.dev/?id=b06a6b71203972a5332e6c2f7724bb93
 
@@ -113,5 +114,17 @@ class BreezeResultError<T> extends BreezeResult<T> {
   @override
   bool operator ==(covariant BreezeResultError<T> other) {
     return (other.error == error) && (other.stackTrace == stackTrace);
+  }
+}
+
+// ---
+
+extension BreezeResultList<T> on BreezeResult<List<T>> {
+  T? find(bool Function(T entry) test) {
+    if (this case BreezeResultSuccess<List<T>>(data: var list)) {
+      return list.firstWhereOrNull(test);
+    } else {
+      return null;
+    }
   }
 }

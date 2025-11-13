@@ -13,6 +13,7 @@ dependencies:
   flutter:
     sdk: flutter
 
+  collection: ^1.19.1
   databreeze:
 
 dev_dependencies:
