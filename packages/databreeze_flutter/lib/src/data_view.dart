@@ -93,7 +93,7 @@ class _BreezeDataViewState<T> extends State<BreezeDataView<T>> {
     final loadingBuilder = widget.loadingBuilder ?? settings.loadingBuilder;
     final errorBuilder = widget.errorBuilder ?? settings.errorBuilder;
 
-    return switch (controller.data) {
+    return switch (controller.result) {
       BreezeResultSuccess<T>(data: var d) => widget.builder(context, d),
       BreezeResultError<T>(error: var e, stackTrace: var s) => errorBuilder(context, e, s, _reload),
       _ => loadingBuilder(context),

@@ -1,5 +1,4 @@
 import 'package:databreeze/databreeze.dart';
-import 'package:databreeze_flutter/src/data_result.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:databreeze_flutter/databreeze_flutter.dart';
 
@@ -62,18 +61,18 @@ class MockStore extends BreezeStore {
 }
 
 class MockBreezeDataQueryController<T> extends BreezeDataQueryController<T> {
-  final T result;
+  final T mockResult;
 
   MockBreezeDataQueryController({
     required super.source,
     required super.query,
     super.autoUpdate,
     super.refetchOnAutoUpdate,
-    required this.result,
+    required this.mockResult,
   });
 
   @override
-  Future<T> doFetch([bool isReload = false]) async => result;
+  Future<T> doFetch([bool isReload = false]) async => mockResult;
 }
 
 class Item extends BreezeModel<int> {
@@ -98,12 +97,12 @@ Future<void> main() async {
     final controller = MockBreezeDataQueryController<List<Item>>(
       source: MockStore(),
       query: BreezeQueryAll<Item>(),
-      result: [item],
+      mockResult: [item],
       autoUpdate: false,
     );
 
     await controller.fetch();
 
-    expect(controller.data?.find((item) => item.name == 'Test'), equals(item));
+    expect(controller.result?.find((item) => item.name == 'Test'), equals(item));
   });
 }
