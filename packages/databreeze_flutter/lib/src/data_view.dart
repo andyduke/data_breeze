@@ -14,6 +14,7 @@ typedef BreezeDataViewErrorBuilder =
 
 class BreezeDataView<T> extends StatefulWidget {
   final BreezeBaseDataController<T> controller;
+  final bool autoFetch;
   final BreezeDataViewBuilder<T> builder;
   final WidgetBuilder? loadingBuilder;
   final BreezeDataViewErrorBuilder? errorBuilder;
@@ -21,6 +22,7 @@ class BreezeDataView<T> extends StatefulWidget {
   const BreezeDataView({
     super.key,
     required this.controller,
+    this.autoFetch = true,
     required this.builder,
     this.loadingBuilder,
     this.errorBuilder,
@@ -39,7 +41,10 @@ class _BreezeDataViewState<T> extends State<BreezeDataView<T>> {
 
     controller = widget.controller;
     _attachController();
-    _fetch();
+
+    if (widget.autoFetch) {
+      _fetch();
+    }
   }
 
   @override
