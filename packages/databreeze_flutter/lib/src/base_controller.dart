@@ -1,8 +1,20 @@
 import 'package:databreeze_flutter/src/data_result.dart';
 import 'package:flutter/foundation.dart';
 
+typedef BreezeBaseDataControllerFilterDataCallback<T> = Future<T> Function(T data, bool isReload);
+typedef BreezeBaseDataControllerDataCallback<T> = Future<void> Function(T data, bool isReload);
+typedef BreezeBaseDataControllerErrorCallback = void Function(Object error, StackTrace? stackTrace);
+
 abstract class BreezeBaseDataController<T> extends ChangeNotifier {
-  BreezeBaseDataController();
+  final BreezeBaseDataControllerFilterDataCallback<T>? onFilterData;
+  final BreezeBaseDataControllerDataCallback<T>? onData;
+  final BreezeBaseDataControllerErrorCallback? onError;
+
+  BreezeBaseDataController({
+    this.onFilterData,
+    this.onData,
+    this.onError,
+  });
 
   bool get hasData => (data != null);
 
@@ -31,10 +43,19 @@ abstract class BreezeBaseDataController<T> extends ChangeNotifier {
     }
 
     try {
-      final result = await doFetch(isReload);
+      T result = await doFetch(isReload);
+
+      if (onFilterData != null) {
+        result = await onFilterData!(result, isReload);
+      }
+
       _result = BreezeResultSuccess<T>(result);
+
+      onData?.call(result, isReload);
     } catch (error, stackTrace) {
       _result = BreezeResultError<T>(error, stackTrace);
+
+      onError?.call(error, stackTrace);
     } finally {
       notifyListeners();
     }

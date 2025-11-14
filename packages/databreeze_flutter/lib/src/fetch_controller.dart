@@ -7,6 +7,9 @@ class BreezeDataFetchController<T> extends BreezeBaseDataController<T> {
 
   BreezeDataFetchController({
     required this.onFetch,
+    super.onFilterData,
+    super.onData,
+    super.onError,
   });
 
   @override

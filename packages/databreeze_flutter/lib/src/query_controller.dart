@@ -4,21 +4,36 @@ import 'package:databreeze_flutter/src/base_controller.dart';
 
 class BreezeDataQueryController<T> extends BreezeBaseDataController<T> {
   final BreezeStore source;
-  final BreezeQuery query;
   final bool autoUpdate;
   final bool refetchOnAutoUpdate;
 
   BreezeDataQueryController({
     required this.source,
-    required this.query,
+    required BreezeQuery query,
     this.autoUpdate = true,
     this.refetchOnAutoUpdate = false,
-  });
+    super.onFilterData,
+    super.onData,
+    super.onError,
+  }) : _queryBuilder = (() => query);
+
+  BreezeDataQueryController.builder({
+    required this.source,
+    required BreezeQuery Function() queryBuilder,
+    this.autoUpdate = true,
+    this.refetchOnAutoUpdate = false,
+    super.onFilterData,
+    super.onData,
+    super.onError,
+  }) : _queryBuilder = queryBuilder;
+
+  final BreezeQuery Function() _queryBuilder;
 
   StreamSubscription<BreezeStoreChange>? _subscription;
 
   @override
   Future<T> doFetch([bool isReload = false]) async {
+    final query = _queryBuilder();
     final result = await query.fetch(source);
 
     if (autoUpdate) {
