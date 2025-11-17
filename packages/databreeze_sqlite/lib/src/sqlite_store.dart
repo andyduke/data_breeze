@@ -370,7 +370,9 @@ class BreezeSqliteStore extends BreezeStore with BreezeStoreFetch {
     } catch (error, stackTrace) {
       onError?.call(error, stackTrace);
 
-      rethrow;
+      // Rethrow the exception with a new stack trace pointing to where the request was called
+      // ignore: use_rethrow_when_possible
+      throw error;
     }
   }
 
