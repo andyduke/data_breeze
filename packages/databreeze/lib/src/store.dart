@@ -10,10 +10,14 @@ import 'package:meta/meta.dart';
 
 enum BreezeAggregationOp { count, avg, min, max }
 
+typedef BreezeStoreErrorCallback = void Function(Object error, StackTrace? stackTrace);
+
 abstract class BreezeStore with BreezeStorageTypeConverters {
   final Map<Type, BreezeModelBlueprint> blueprints;
 
   final BreezeMigrationStrategy? migrationStrategy;
+
+  final BreezeStoreErrorCallback? onError;
 
   @override
   late final Set<BreezeBaseTypeConverter> typeConverters;
@@ -24,6 +28,7 @@ abstract class BreezeStore with BreezeStorageTypeConverters {
     Set<BreezeModelBlueprint> models = const {},
     this.migrationStrategy,
     Set<BreezeBaseTypeConverter> typeConverters = const {},
+    this.onError,
   }) : blueprints = Map.fromIterable(models, key: (b) => b.type) {
     this.typeConverters = {...typeConverters, ...defaultTypeConverters};
   }

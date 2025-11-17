@@ -42,6 +42,7 @@ class BreezeJsonStore extends BreezeStore with BreezeStoreFetch {
     Map<String, Map<int, Map<String, dynamic>>>? records,
     super.typeConverters,
     this.simulateLatency = false,
+    super.onError,
   }) : records = records ?? {};
 
   @override
@@ -166,7 +167,9 @@ class BreezeJsonStore extends BreezeStore with BreezeStoreFetch {
     }
 
     if (!records.containsKey(name)) {
-      throw Exception('Table "$name" not found.');
+      final exception = Exception('Table "$name" not found.');
+      onError?.call(exception, StackTrace.current);
+      throw exception;
     }
 
     records[name]![keyValue] = record;
@@ -187,7 +190,9 @@ class BreezeJsonStore extends BreezeStore with BreezeStoreFetch {
     }
 
     if (!records.containsKey(name)) {
-      throw Exception('Table "$name" not found.');
+      final exception = Exception('Table "$name" not found.');
+      onError?.call(exception, StackTrace.current);
+      throw exception;
     }
 
     records[name]!.remove(keyValue);

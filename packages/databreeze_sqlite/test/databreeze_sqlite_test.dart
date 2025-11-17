@@ -1,5 +1,6 @@
 import 'package:databreeze/databreeze.dart';
 import 'package:databreeze_sqlite/databreeze_sqlite.dart';
+import 'package:sqlite_async/sqlite3_common.dart';
 import 'package:sqlite_async/sqlite_async.dart';
 import 'package:test/test.dart';
 import 'package:logging/logging.dart';
@@ -485,6 +486,79 @@ CREATE TEMP TABLE task_progress(
 
       expect(tasks.first.id, equals(1));
       expect(tasks.first.name, equals('File 1'));
+    });
+  });
+
+  group('Error handling', () {
+    test('W/o onError handler', () async {
+      final store = TestStore(
+        log: log,
+        models: {
+          Task.blueprint,
+        },
+        migrationStrategy: BreezeSqliteMigrations(singleTaskMigration),
+      );
+
+      final query = BreezeQueryWhere<Task>(
+        BreezeField('not_exist').eq(1),
+      );
+
+      Task? task;
+      try {
+        task = await query.fetch(store);
+      } catch (error) {
+        expect(error, isA<SqliteException>());
+        expect(
+          error.toString(),
+          r'''SqliteException(1): while preparing statement, no such column: not_exist, SQL logic error (code 1)
+  Causing statement (at position 26): SELECT * FROM tasks WHERE not_exist = ? LIMIT 1''',
+        );
+      }
+
+      expect(task, isNull);
+    });
+
+    test('With onError handler', () async {
+      Object? actualError;
+
+      final store = TestStore(
+        log: log,
+        models: {
+          Task.blueprint,
+        },
+        migrationStrategy: BreezeSqliteMigrations(singleTaskMigration),
+        onError: (error, stackTrace) {
+          actualError = error;
+
+          // print('Error: $error');
+          // print('$stackTrace');
+        },
+      );
+
+      final query = BreezeQueryWhere<Task>(
+        BreezeField('not_exist').eq(1),
+      );
+
+      Task? task;
+      try {
+        task = await query.fetch(store);
+      } catch (error) {
+        expect(error, isA<SqliteException>());
+        expect(
+          error.toString(),
+          r'''SqliteException(1): while preparing statement, no such column: not_exist, SQL logic error (code 1)
+  Causing statement (at position 26): SELECT * FROM tasks WHERE not_exist = ? LIMIT 1''',
+        );
+
+        expect(actualError, isA<SqliteException>());
+        expect(
+          actualError.toString(),
+          error.toString(),
+        );
+      }
+
+      expect(task, isNull);
+      expect(actualError, isA<SqliteException>());
     });
   });
 }

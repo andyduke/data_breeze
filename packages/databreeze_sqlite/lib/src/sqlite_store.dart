@@ -54,6 +54,7 @@ class BreezeSqliteStore extends BreezeStore with BreezeStoreFetch {
     this.onInit,
     super.migrationStrategy,
     super.typeConverters,
+    super.onError,
   }) {
     initializeDatabase();
   }
@@ -64,6 +65,7 @@ class BreezeSqliteStore extends BreezeStore with BreezeStoreFetch {
     this.onInit,
     super.migrationStrategy,
     super.typeConverters,
+    super.onError,
   }) : databaseFile = null,
        databaseLocation = null {
     initializeDatabase();
@@ -356,13 +358,20 @@ class BreezeSqliteStore extends BreezeStore with BreezeStoreFetch {
 
     _logQuery(sql, params);
 
-    final result = await database.then(
-      (db) => db.execute(
-        sql,
-        params,
-      ),
-    );
-    return result;
+    try {
+      final result = await database.then(
+        (db) => db.execute(
+          sql,
+          params,
+        ),
+      );
+
+      return result;
+    } catch (error, stackTrace) {
+      onError?.call(error, stackTrace);
+
+      rethrow;
+    }
   }
 
   @protected
