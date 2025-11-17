@@ -31,6 +31,8 @@ class BreezeDataQueryController<T> extends BreezeBaseDataController<T> {
 
   StreamSubscription<BreezeStoreChange>? _subscription;
 
+  bool _autoUpdatePaused = false;
+
   @override
   Future<T> doFetch([bool isReload = false]) async {
     final query = _queryBuilder();
@@ -40,12 +42,16 @@ class BreezeDataQueryController<T> extends BreezeBaseDataController<T> {
       // Subscribe to store changes
       _subscription ??= source.changes
           .where((event) => (event.store == source && query.autoUpdateWhen(event)))
-          .listen(
-            (_) => fetch(isReload: !refetchOnAutoUpdate),
-          );
+          .listen(_sourceUpdated);
     }
 
     return result;
+  }
+
+  Future<void> _sourceUpdated(_) async {
+    if (!_autoUpdatePaused) {
+      await fetch(isReload: !refetchOnAutoUpdate);
+    }
   }
 
   @override
@@ -54,5 +60,23 @@ class BreezeDataQueryController<T> extends BreezeBaseDataController<T> {
     _subscription?.cancel();
 
     super.dispose();
+  }
+
+  void pauseAutoUpdate() {
+    if (autoUpdate) {
+      _autoUpdatePaused = true;
+    }
+  }
+
+  void resumeAutoUpdate({bool forceUpdate = false}) {
+    if (autoUpdate) {
+      _autoUpdatePaused = false;
+
+      if (forceUpdate) {
+        unawaited(
+          _sourceUpdated(null),
+        );
+      }
+    }
   }
 }
