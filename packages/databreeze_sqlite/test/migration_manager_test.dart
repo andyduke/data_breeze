@@ -630,12 +630,7 @@ Future<void> main() async {
         store,
         'SELECT * FROM ${BreezeSqliteMigrationDelegate.migrationsTableName} WHERE table_name = ?',
         [MProgressTemp.blueprint.name],
-        [
-          [
-            MProgressTemp.blueprint.name,
-            MProgressTemp.blueprint.latestVersion.version,
-          ],
-        ],
+        [],
         log: log,
       );
 

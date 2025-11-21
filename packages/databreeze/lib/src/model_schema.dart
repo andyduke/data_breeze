@@ -27,6 +27,12 @@ abstract interface class BreezeBaseModelSchema {
   /// symbol to create a temporary table.
   abstract final Set<Object?> tags;
 
+  /// Is the schema permanent?
+  ///
+  /// If the schema is temporary, the migration manager will
+  /// not record the version number after applying migrations.
+  abstract final bool isPermanent;
+
   Set<BreezeBaseTypeConverter> get typeConverters;
 
   const BreezeBaseModelSchema();
@@ -50,6 +56,9 @@ class BreezeModelSchema implements BreezeBaseModelSchema {
 
   @override
   final Set<Object?> tags;
+
+  @override
+  bool get isPermanent => !tags.contains(#temporary);
 
   @override
   final Set<BreezeBaseTypeConverter> typeConverters;
@@ -127,6 +136,9 @@ class BreezeModelVersionedSchema implements BreezeBaseModelSchema {
 
   @override
   Set<Object?> get tags => latestVersion.tags;
+
+  @override
+  bool get isPermanent => latestVersion.isPermanent;
 
   @override
   Set<BreezeBaseTypeConverter> get typeConverters => latestVersion.typeConverters;

@@ -119,11 +119,12 @@ abstract class BreezeMigrationManager<D> {
         await migration.apply(db, log);
 
         final isDeleted = schema.isDeleted;
+        final isPermanent = schema.isPermanent;
 
         // Update the schema version number in the database.
         if (isDeleted) {
           await delegate.setSchemaVersion(db, schema.name, null, log);
-        } else {
+        } else if (isPermanent) {
           if (schema.prevName != null) {
             await delegate.setSchemaVersion(db, schema.prevName!, null, log);
           }
