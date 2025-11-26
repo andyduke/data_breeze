@@ -46,6 +46,13 @@ class BreezeOrFilter extends BreezeFilterExpression {
   const BreezeOrFilter(this.left, this.right);
 }
 
+/// A logical NOT filter inverting an expression.
+class BreezeNotFilter extends BreezeFilterExpression {
+  final BreezeFilterExpression expression;
+
+  const BreezeNotFilter(this.expression);
+}
+
 /// Extension methods for combining filters using `&` and `|`.
 extension BreezeFilterOps on BreezeFilterExpression {
   /// Combines this filter with [other] using logical AND.
@@ -53,6 +60,9 @@ extension BreezeFilterOps on BreezeFilterExpression {
 
   /// Combines this filter with [other] using logical OR.
   BreezeFilterExpression operator |(BreezeFilterExpression other) => BreezeOrFilter(this, other);
+
+  /// Inverts this filter using logical NOT.
+  BreezeFilterExpression operator ~() => BreezeNotFilter(this);
 }
 
 /// Represents a field in a query, used to build filter expressions.

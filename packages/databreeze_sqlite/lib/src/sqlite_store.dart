@@ -405,6 +405,7 @@ class BreezeSqliteStore extends BreezeStore with BreezeStoreFetch {
       BreezeInFilter f => _buildIn(f),
       BreezeAndFilter f => _combineFilter('AND', f.left, f.right),
       BreezeOrFilter f => _combineFilter('OR', f.left, f.right),
+      BreezeNotFilter f => _buildNot(f.expression),
       _ => ('', []),
     };
   }
@@ -448,6 +449,15 @@ class BreezeSqliteStore extends BreezeStore with BreezeStoreFetch {
     return (
       '($leftSql $op $rightSql)',
       [...leftArgs, ...rightArgs],
+    );
+  }
+
+  (String, List<dynamic>) _buildNot(BreezeFilterExpression expression) {
+    final (notSql, notArgs) = _buildWhere(expression);
+    final sql = (notSql.startsWith('(') && notSql.endsWith(')')) ? notSql : '($notSql)';
+    return (
+      'NOT $sql',
+      [...notArgs],
     );
   }
 

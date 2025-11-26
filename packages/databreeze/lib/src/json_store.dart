@@ -212,6 +212,7 @@ class BreezeJsonStore extends BreezeStore with BreezeStoreFetch {
   }
 
   @protected
+  @visibleForTesting
   bool applyFilter(Map<String, dynamic> entry, BreezeFilterExpression? filter) {
     if (filter is BreezeComparisonFilter) {
       final value = entry[filter.field];
@@ -257,6 +258,8 @@ class BreezeJsonStore extends BreezeStore with BreezeStoreFetch {
       return applyFilter(entry, filter.left) && applyFilter(entry, filter.right);
     } else if (filter is BreezeOrFilter) {
       return applyFilter(entry, filter.left) || applyFilter(entry, filter.right);
+    } else if (filter is BreezeNotFilter) {
+      return !applyFilter(entry, filter.expression);
     } else if (filter == null) {
       // Do nothing
       return true;
