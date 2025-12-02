@@ -5,7 +5,7 @@ typedef BreezeBaseDataControllerFilterDataCallback<T> = Future<T> Function(T dat
 typedef BreezeBaseDataControllerDataCallback<T> = Future<void> Function(T data, bool isReload);
 typedef BreezeBaseDataControllerErrorCallback = void Function(Object error, StackTrace? stackTrace);
 
-abstract class BreezeBaseDataController<T> extends ChangeNotifier {
+abstract class BreezeBaseDataController<T> with ChangeNotifier {
   final BreezeBaseDataControllerFilterDataCallback<T>? onFilterData;
   final BreezeBaseDataControllerDataCallback<T>? onData;
   final BreezeBaseDataControllerErrorCallback? onError;
