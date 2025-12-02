@@ -8,6 +8,8 @@ typedef BreezeModelBlueprintBuilder<M extends BreezeBaseModel> = M Function(Bree
 
 class BreezeModelBlueprint<M extends BreezeBaseModel> extends BreezeModelVersionedSchema {
   final BreezeModelBlueprintBuilder<M> builder;
+
+  @override
   final Set<BreezeBaseTypeConverter> typeConverters;
 
   BreezeModelBlueprint({

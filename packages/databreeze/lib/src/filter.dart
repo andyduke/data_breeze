@@ -66,11 +66,7 @@ extension BreezeFilterOps on BreezeFilterExpression {
 }
 
 /// Represents a field in a query, used to build filter expressions.
-class BreezeField {
-  final String name;
-
-  const BreezeField(this.name);
-
+extension type const BreezeField(String name) implements String {
   /// Creates a filter for equality.
   BreezeFilterExpression eq(dynamic value) => BreezeComparisonFilter(name, '==', value);
 

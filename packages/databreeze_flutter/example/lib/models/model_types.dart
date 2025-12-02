@@ -6,6 +6,7 @@ class XFile {
   XFile(this.path);
 
   Future<void> delete() async {
+    // ignore: avoid_print
     print('### Delete file: $path');
   }
 }
