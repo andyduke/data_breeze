@@ -33,17 +33,27 @@ class BreezeDataView<T> extends StatefulWidget {
 }
 
 class _BreezeDataViewState<T> extends State<BreezeDataView<T>> {
-  late BreezeBaseDataController<T> controller;
+  late BreezeBaseDataController<T> _controller;
+
+  bool _initialized = false;
 
   @override
   void initState() {
     super.initState();
 
-    controller = widget.controller;
-    _attachController();
+    _attachController(widget.controller);
+  }
 
-    if (widget.autoFetch) {
-      _fetch();
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    if (!_initialized) {
+      _initialized = true;
+
+      if (widget.autoFetch) {
+        _fetch();
+      }
     }
   }
 
@@ -53,8 +63,7 @@ class _BreezeDataViewState<T> extends State<BreezeDataView<T>> {
 
     if (widget.controller != oldWidget.controller) {
       _detachController();
-      controller = widget.controller;
-      _attachController();
+      _attachController(widget.controller);
     }
   }
 
@@ -65,12 +74,13 @@ class _BreezeDataViewState<T> extends State<BreezeDataView<T>> {
     super.dispose();
   }
 
-  void _attachController() {
-    controller.addListener(_updated);
+  void _attachController(BreezeBaseDataController<T> newController) {
+    _controller = newController;
+    _controller.addListener(_updated);
   }
 
   void _detachController() {
-    controller.removeListener(_updated);
+    _controller.removeListener(_updated);
   }
 
   void _updated() {
@@ -80,11 +90,11 @@ class _BreezeDataViewState<T> extends State<BreezeDataView<T>> {
   }
 
   Future<void> _fetch() async {
-    await controller.fetch();
+    await _controller.fetch();
   }
 
   void _reload() {
-    controller.fetch();
+    _controller.fetch();
   }
 
   @override
@@ -93,7 +103,7 @@ class _BreezeDataViewState<T> extends State<BreezeDataView<T>> {
     final loadingBuilder = widget.loadingBuilder ?? settings.loadingBuilder;
     final errorBuilder = widget.errorBuilder ?? settings.errorBuilder;
 
-    return switch (controller.result) {
+    return switch (_controller.result) {
       BreezeResultSuccess<T>(data: var d) => widget.builder(context, d),
       BreezeResultError<T>(error: var e, stackTrace: var s) => errorBuilder(context, e, s, _reload),
       _ => loadingBuilder(context),
