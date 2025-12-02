@@ -7,14 +7,6 @@ abstract class BreezeBaseModel {}
 abstract mixin class BreezeViewModel implements BreezeBaseModel {}
 
 abstract mixin class BreezeModel<K> implements BreezeBaseModel {
-  /*
-  K? get id => _id;
-  K? _id;
-
-  @internal
-  set id(K? newValue) => _id = newValue;
-  */
-
   K? id;
 
   @internal
@@ -41,4 +33,10 @@ abstract mixin class BreezeModel<K> implements BreezeBaseModel {
     if (schema.key != null) schema.key!: id,
     ...toRecord(),
   };
+
+  @override
+  bool operator ==(covariant BreezeModel<K> other) => id == other.id;
+
+  @override
+  int get hashCode => id.hashCode;
 }
