@@ -238,9 +238,9 @@ abstract class BreezeStore with BreezeStorageTypeConverters {
     BreezeAbstractFetchRequest? request,
   ]) => aggregate<T>(name, BreezeAggregationOp.max, column, request);
 
-  Future<void> close() async {}
-
   // --- To implement
+
+  Future<void> close() async {}
 
   Future<BreezeDataRecord?> fetchRecord({
     required String table,
@@ -280,7 +280,7 @@ abstract class BreezeStore with BreezeStorageTypeConverters {
   });
 
   @protected
-  Future<T?> aggregate<T>(
+  Future<T?> aggregate<T extends num>(
     String name,
     BreezeAggregationOp op,
     String column, [

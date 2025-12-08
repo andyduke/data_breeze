@@ -281,7 +281,7 @@ class BreezeSqliteStore extends BreezeStore with BreezeStoreFetch {
   }
 
   @override
-  Future<T?> aggregate<T>(
+  Future<T?> aggregate<T extends num>(
     String name,
     BreezeAggregationOp op,
     String column, [
@@ -313,11 +313,20 @@ class BreezeSqliteStore extends BreezeStore with BreezeStoreFetch {
         break;
     }
 
-    final value = result.isNotEmpty ? (result.first.values.first as T?) : null;
+    final rawValue = result.isNotEmpty ? (result.first.values.first as num?) : null;
+
+    late final num? value;
+    if (T == int) {
+      value = rawValue?.toInt();
+    } else if (T == double) {
+      value = rawValue?.toDouble();
+    } else {
+      value = rawValue;
+    }
 
     log?.finest('Aggregate "$name" $operator${(request != null) ? ' $request' : ''} = $value');
 
-    return value;
+    return value as T?;
   }
 
   ({String sql, List<dynamic> params}) sqlWhereOf(

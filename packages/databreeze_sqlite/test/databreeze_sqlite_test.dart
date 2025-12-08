@@ -645,7 +645,7 @@ CREATE TEMP TABLE task_progress(
         ),
       );
 
-      final prices = await store.sum<double>('products', 'price');
+      final prices = await store.sum<int>('products', 'price');
 
       expect(prices, equals(25));
     });

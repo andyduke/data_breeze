@@ -202,7 +202,7 @@ class BreezeJsonStore extends BreezeStore with BreezeStoreFetch {
   }
 
   @override
-  Future<T?> aggregate<T>(
+  Future<T?> aggregate<T extends num>(
     String name,
     BreezeAggregationOp op,
     String column, [
