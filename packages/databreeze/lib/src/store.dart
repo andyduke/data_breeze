@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:databreeze/src/filter.dart';
 import 'package:databreeze/src/migration/migration_strategy.dart';
 import 'package:databreeze/src/model.dart';
 import 'package:databreeze/src/model_blueprint.dart';
@@ -209,34 +210,58 @@ abstract class BreezeStore with BreezeStorageTypeConverters {
 
   Future<T> count<T extends num>(
     String name,
-    String column, [
-    // TODO: filter & sortBy or request?
-    BreezeAbstractFetchRequest? request,
-  ]) => aggregate<T>(name, BreezeAggregationOp.count, column, request).then((value) => (value ?? 0) as T);
+    String column, {
+    BreezeFilterExpression? filter,
+  }) => aggregate<T>(
+    name,
+    BreezeAggregationOp.count,
+    column,
+    BreezeFetchRequest(filter: filter),
+  ).then((value) => (value ?? 0) as T);
 
   Future<T> sum<T extends num>(
     String name,
-    String column, [
-    BreezeAbstractFetchRequest? request,
-  ]) => aggregate<T>(name, BreezeAggregationOp.sum, column, request).then((value) => (value ?? 0) as T);
+    String column, {
+    BreezeFilterExpression? filter,
+  }) => aggregate<T>(
+    name,
+    BreezeAggregationOp.sum,
+    column,
+    BreezeFetchRequest(filter: filter),
+  ).then((value) => (value ?? 0) as T);
 
   Future<T?> average<T extends num>(
     String name,
-    String column, [
-    BreezeAbstractFetchRequest? request,
-  ]) => aggregate<T>(name, BreezeAggregationOp.avg, column, request);
+    String column, {
+    BreezeFilterExpression? filter,
+  }) => aggregate<T>(
+    name,
+    BreezeAggregationOp.avg,
+    column,
+    BreezeFetchRequest(filter: filter),
+  );
 
   Future<T?> min<T extends num>(
     String name,
-    String column, [
-    BreezeAbstractFetchRequest? request,
-  ]) => aggregate<T>(name, BreezeAggregationOp.min, column, request);
+    String column, {
+    BreezeFilterExpression? filter,
+  }) => aggregate<T>(
+    name,
+    BreezeAggregationOp.min,
+    column,
+    BreezeFetchRequest(filter: filter),
+  );
 
   Future<T?> max<T extends num>(
     String name,
-    String column, [
-    BreezeAbstractFetchRequest? request,
-  ]) => aggregate<T>(name, BreezeAggregationOp.max, column, request);
+    String column, {
+    BreezeFilterExpression? filter,
+  }) => aggregate<T>(
+    name,
+    BreezeAggregationOp.max,
+    column,
+    BreezeFetchRequest(filter: filter),
+  );
 
   // --- To implement
 

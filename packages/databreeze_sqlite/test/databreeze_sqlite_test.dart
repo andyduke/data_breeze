@@ -726,9 +726,7 @@ CREATE TEMP TABLE task_progress(
       final prices = await store.sum<double>(
         'products',
         'price',
-        BreezeFetchRequest(
-          filter: BreezeField('price') >= 10,
-        ),
+        filter: BreezeField('price') >= 10,
       );
 
       expect(prices, equals(25));
