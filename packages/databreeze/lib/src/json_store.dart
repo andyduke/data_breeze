@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'package:collection/collection.dart';
 import 'package:databreeze/src/filter.dart';
 import 'package:databreeze/src/mixins/store_mixins.dart';
@@ -202,13 +203,87 @@ class BreezeJsonStore extends BreezeStore with BreezeStoreFetch {
 
   @override
   Future<T?> aggregate<T>(
-    String entity,
+    String name,
     BreezeAggregationOp op,
     String column, [
     BreezeAbstractFetchRequest? request,
-  ]) {
-    // TODO: implement aggregate
-    throw UnimplementedError();
+  ]) async {
+    if (simulateLatency) {
+      // Simulate latency
+      await Future.delayed(_latency);
+    }
+
+    if (!records.containsKey(name)) {
+      final exception = Exception('Table "$name" not found.');
+      onError?.call(exception, StackTrace.current);
+      throw exception;
+    }
+
+    final table = records[name]!;
+    T? result;
+
+    switch (op) {
+      case BreezeAggregationOp.count:
+        num value = 0;
+
+        for (final record in table.values) {
+          if (record[column] != null) {
+            value++;
+          }
+        }
+
+        result = value as T;
+
+      case BreezeAggregationOp.sum:
+        num value = 0;
+
+        for (final record in table.values) {
+          if (record[column] != null) {
+            value += record[column];
+          }
+        }
+
+        result = value as T;
+
+      case BreezeAggregationOp.avg:
+        if (table.values.isNotEmpty) {
+          num value = 0;
+
+          for (final record in table.values) {
+            if (record[column] != null) {
+              value += record[column];
+            }
+          }
+
+          result = (value / table.values.length) as T;
+        }
+
+      case BreezeAggregationOp.min:
+        num? value;
+
+        for (final record in table.values) {
+          if (record[column] != null) {
+            value = (value == null) ? record[column] : math.min(value, record[column]);
+          }
+        }
+
+        result = value as T;
+
+      case BreezeAggregationOp.max:
+        num? value;
+
+        for (final record in table.values) {
+          if (record[column] != null) {
+            value = (value == null) ? record[column] : math.max(value, record[column]);
+          }
+        }
+
+        result = value as T;
+    }
+
+    log?.finest('$name $op($column) = $result');
+
+    return result;
   }
 
   @protected

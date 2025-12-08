@@ -161,7 +161,7 @@ class BreezeSqliteStore extends BreezeStore with BreezeStoreFetch {
 
     switch (request) {
       case BreezeFetchRequest(filter: final filter, sortBy: final sortBy):
-        final (:sql, :params) = buildSql(table, filter, sortBy, 1);
+        final (:sql, :params) = buildSql(table, filter: filter, sortBy: sortBy, limit: 1);
         result = await executeSql(sql, params, typeConverters);
         break;
 
@@ -191,7 +191,7 @@ class BreezeSqliteStore extends BreezeStore with BreezeStoreFetch {
 
     switch (request) {
       case BreezeFetchRequest(filter: final filter, sortBy: final sortBy):
-        final (:sql, :params) = buildSql(table, filter, sortBy);
+        final (:sql, :params) = buildSql(table, filter: filter, sortBy: sortBy);
         result = await executeSql(sql, params, typeConverters);
         break;
 
@@ -282,13 +282,42 @@ class BreezeSqliteStore extends BreezeStore with BreezeStoreFetch {
 
   @override
   Future<T?> aggregate<T>(
-    String entity,
+    String name,
     BreezeAggregationOp op,
     String column, [
     BreezeAbstractFetchRequest? request,
-  ]) {
-    // TODO: implement aggregate
-    throw UnimplementedError();
+  ]) async {
+    final operator = switch (op) {
+      BreezeAggregationOp.count => 'COUNT($column)',
+      BreezeAggregationOp.sum => 'TOTAL($column)',
+      BreezeAggregationOp.avg => 'AVG($column)',
+      BreezeAggregationOp.min => 'MIN($column)',
+      BreezeAggregationOp.max => 'MAX($column)',
+    };
+
+    ResultSet? result;
+
+    switch (request) {
+      case BreezeFetchRequest(filter: final filter, sortBy: final sortBy):
+        final (:sql, :params) = buildSql(name, columns: operator, filter: filter, sortBy: sortBy);
+        result = await executeSql(sql, params, typeConverters);
+        break;
+
+      case BreezeSqliteRequest(sql: final sql, params: final params):
+        result = await executeSql(sql, params, typeConverters);
+        break;
+
+      default:
+        final (:sql, :params) = buildSql(name, columns: operator);
+        result = await executeSql(sql, params, typeConverters);
+        break;
+    }
+
+    final value = result.isNotEmpty ? (result.first.values.first as T?) : null;
+
+    log?.finest('Aggregate "$name" $operator${(request != null) ? ' $request' : ''} = $value');
+
+    return value;
   }
 
   ({String sql, List<dynamic> params}) sqlWhereOf(
@@ -378,12 +407,13 @@ class BreezeSqliteStore extends BreezeStore with BreezeStoreFetch {
 
   @protected
   ({String sql, List<dynamic> params}) buildSql(
-    String table, [
+    String table, {
+    String columns = '*',
     BreezeFilterExpression? filter,
     List<BreezeSortBy> sortBy = const [],
     int? limit,
     int? offset,
-  ]) {
+  }) {
     final (whereSql, whereParams) = _buildWhere(filter);
     final whereClause = whereSql.isNotEmpty ? ' WHERE $whereSql' : '';
 
@@ -393,7 +423,7 @@ class BreezeSqliteStore extends BreezeStore with BreezeStoreFetch {
     final limitClause = _buildLimit(limit, offset);
 
     return (
-      sql: 'SELECT * FROM $table$whereClause$orderClause$limitClause',
+      sql: 'SELECT $columns FROM $table$whereClause$orderClause$limitClause',
       params: [...whereParams, ...orderParams],
     );
   }

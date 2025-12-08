@@ -1,18 +1,5 @@
 import 'package:sqlite_async/sqlite_async.dart';
 
-SqliteMigrations createMigrations(List<String> migrations) {
-  return SqliteMigrations()..add(
-    SqliteMigration(
-      1,
-      (tx) async {
-        for (final sql in migrations) {
-          await tx.execute(sql);
-        }
-      },
-    ),
-  );
-}
-
 final createTaskTableSql = '''CREATE TABLE tasks(
                     id INTEGER PRIMARY KEY,
                     name TEXT,

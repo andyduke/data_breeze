@@ -8,7 +8,7 @@ import 'package:databreeze/src/type_converters.dart';
 import 'package:databreeze/src/types.dart';
 import 'package:meta/meta.dart';
 
-enum BreezeAggregationOp { count, avg, min, max }
+enum BreezeAggregationOp { count, sum, avg, min, max }
 
 typedef BreezeStoreErrorCallback = void Function(Object error, StackTrace? stackTrace);
 
@@ -207,29 +207,36 @@ abstract class BreezeStore with BreezeStorageTypeConverters {
     return record;
   }
 
-  Future<int> count(
-    String entity,
+  Future<T> count<T extends num>(
+    String name,
     String column, [
+    // TODO: filter & sortBy or request?
     BreezeAbstractFetchRequest? request,
-  ]) => aggregate<int>(entity, BreezeAggregationOp.count, column, request).then((value) => value ?? 0);
+  ]) => aggregate<T>(name, BreezeAggregationOp.count, column, request).then((value) => (value ?? 0) as T);
 
-  Future<num> average(
-    String entity,
+  Future<T> sum<T extends num>(
+    String name,
     String column, [
     BreezeAbstractFetchRequest? request,
-  ]) => aggregate<num>(entity, BreezeAggregationOp.avg, column, request).then((value) => value ?? 0);
+  ]) => aggregate<T>(name, BreezeAggregationOp.sum, column, request).then((value) => (value ?? 0) as T);
 
-  Future<num> min(
-    String entity,
+  Future<T?> average<T extends num>(
+    String name,
     String column, [
     BreezeAbstractFetchRequest? request,
-  ]) => aggregate<num>(entity, BreezeAggregationOp.min, column, request).then((value) => value ?? 0);
+  ]) => aggregate<T>(name, BreezeAggregationOp.avg, column, request);
 
-  Future<num> max(
-    String entity,
+  Future<T?> min<T extends num>(
+    String name,
     String column, [
     BreezeAbstractFetchRequest? request,
-  ]) => aggregate<num>(entity, BreezeAggregationOp.max, column, request).then((value) => value ?? 0);
+  ]) => aggregate<T>(name, BreezeAggregationOp.min, column, request);
+
+  Future<T?> max<T extends num>(
+    String name,
+    String column, [
+    BreezeAbstractFetchRequest? request,
+  ]) => aggregate<T>(name, BreezeAggregationOp.max, column, request);
 
   Future<void> close() async {}
 
@@ -274,7 +281,7 @@ abstract class BreezeStore with BreezeStorageTypeConverters {
 
   @protected
   Future<T?> aggregate<T>(
-    String entity,
+    String name,
     BreezeAggregationOp op,
     String column, [
     BreezeAbstractFetchRequest? request,

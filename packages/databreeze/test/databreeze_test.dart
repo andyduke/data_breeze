@@ -3,6 +3,7 @@ import 'package:test/test.dart';
 import 'package:logging/logging.dart';
 
 import 'lib/model_types.dart';
+import 'lib/models/product.dart';
 import 'lib/models/task.dart';
 import 'lib/test_store.dart';
 
@@ -456,6 +457,143 @@ Future<void> main() async {
 
       expect(tasks[2].id, equals(1));
       expect(tasks[2].name, equals('File 1'));
+    });
+  });
+
+  group('Aggregate', () {
+    test('COUNT', () async {
+      final store = TestStore(
+        log: log,
+        models: {
+          Product.blueprint,
+        },
+        records: {
+          'products': {
+            1: {
+              'id': 1,
+              'name': 'Product 1',
+              'price': null,
+            },
+            2: {
+              'id': 2,
+              'name': 'Product 2',
+              'price': 10,
+            },
+          },
+        },
+      );
+
+      final prices = await store.count('products', 'price');
+
+      expect(prices, equals(1));
+    });
+
+    test('SUM', () async {
+      final store = TestStore(
+        log: log,
+        models: {
+          Product.blueprint,
+        },
+        records: {
+          'products': {
+            1: {
+              'id': 1,
+              'name': 'Product 1',
+              'price': 15,
+            },
+            2: {
+              'id': 2,
+              'name': 'Product 2',
+              'price': 10,
+            },
+          },
+        },
+      );
+
+      final prices = await store.sum<int>('products', 'price');
+
+      expect(prices, equals(25));
+    });
+
+    test('AVG', () async {
+      final store = TestStore(
+        log: log,
+        models: {
+          Product.blueprint,
+        },
+        records: {
+          'products': {
+            1: {
+              'id': 1,
+              'name': 'Product 1',
+              'price': 15,
+            },
+            2: {
+              'id': 2,
+              'name': 'Product 2',
+              'price': 10,
+            },
+          },
+        },
+      );
+
+      final prices = await store.average<double>('products', 'price');
+
+      expect(prices, equals(12.5));
+    });
+
+    test('MIN', () async {
+      final store = TestStore(
+        log: log,
+        models: {
+          Product.blueprint,
+        },
+        records: {
+          'products': {
+            1: {
+              'id': 1,
+              'name': 'Product 1',
+              'price': 15,
+            },
+            2: {
+              'id': 2,
+              'name': 'Product 2',
+              'price': 10,
+            },
+          },
+        },
+      );
+
+      final prices = await store.min<int>('products', 'price');
+
+      expect(prices, equals(10));
+    });
+
+    test('MAX', () async {
+      final store = TestStore(
+        log: log,
+        models: {
+          Product.blueprint,
+        },
+        records: {
+          'products': {
+            1: {
+              'id': 1,
+              'name': 'Product 1',
+              'price': 15,
+            },
+            2: {
+              'id': 2,
+              'name': 'Product 2',
+              'price': 10,
+            },
+          },
+        },
+      );
+
+      final prices = await store.max<int>('products', 'price');
+
+      expect(prices, equals(15));
     });
   });
 }

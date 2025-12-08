@@ -3,6 +3,19 @@ import 'package:logging/logging.dart';
 import 'package:sqlite_async/sqlite_async.dart';
 import 'package:test/test.dart';
 
+SqliteMigrations createMigrations(List<String> migrations) {
+  return SqliteMigrations()..add(
+    SqliteMigration(
+      1,
+      (tx) async {
+        for (final sql in migrations) {
+          await tx.execute(sql);
+        }
+      },
+    ),
+  );
+}
+
 Future<void> expectTableRows(
   SqliteWriteContext db,
   String sql,

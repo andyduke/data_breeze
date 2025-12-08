@@ -5,12 +5,15 @@ import 'package:sqlite_async/sqlite_async.dart';
 import 'package:test/test.dart';
 import 'package:logging/logging.dart';
 
+import 'lib/migrations/product_migration.dart';
 import 'lib/migrations/task_migrations.dart';
 import 'lib/model_types.dart';
+import 'lib/models/product.dart';
 import 'lib/models/task.dart';
 import 'lib/models/task_progress.dart';
 import 'lib/models/task_with_progress.dart';
 import 'lib/test_store.dart';
+import 'lib/test_utils.dart';
 
 Future<void> main() async {
   Logger.root.level = Level.ALL;
@@ -605,6 +608,130 @@ CREATE TEMP TABLE task_progress(
 
       expect(task, isNull);
       expect(actualError, isA<SqliteException>());
+    });
+  });
+
+  group('Aggregation', () {
+    test('COUNT', () async {
+      final store = TestStore(
+        log: log,
+        models: {
+          Product.blueprint,
+        },
+        migrationStrategy: BreezeSqliteMigrations(
+          createProductsMigration([
+            {'id': 1, 'name': 'Product 1', 'price': null},
+            {'id': 2, 'name': 'Product 2', 'price': 15},
+          ]),
+        ),
+      );
+
+      final prices = await store.count('products', 'price');
+
+      expect(prices, equals(1));
+    });
+
+    test('SUM', () async {
+      final store = TestStore(
+        log: log,
+        models: {
+          Product.blueprint,
+        },
+        migrationStrategy: BreezeSqliteMigrations(
+          createProductsMigration([
+            {'id': 1, 'name': 'Product 1', 'price': 10},
+            {'id': 2, 'name': 'Product 2', 'price': 15},
+          ]),
+        ),
+      );
+
+      final prices = await store.sum<double>('products', 'price');
+
+      expect(prices, equals(25));
+    });
+
+    test('AVG', () async {
+      final store = TestStore(
+        log: log,
+        models: {
+          Product.blueprint,
+        },
+        migrationStrategy: BreezeSqliteMigrations(
+          createProductsMigration([
+            {'id': 1, 'name': 'Product 1', 'price': 10},
+            {'id': 2, 'name': 'Product 2', 'price': 15},
+          ]),
+        ),
+      );
+
+      final prices = await store.average<double>('products', 'price');
+
+      expect(prices, equals(12.5));
+    });
+
+    test('MIN', () async {
+      final store = TestStore(
+        log: log,
+        models: {
+          Product.blueprint,
+        },
+        migrationStrategy: BreezeSqliteMigrations(
+          createProductsMigration([
+            {'id': 1, 'name': 'Product 1', 'price': 10},
+            {'id': 2, 'name': 'Product 2', 'price': 15},
+          ]),
+        ),
+      );
+
+      final prices = await store.min<double>('products', 'price');
+
+      expect(prices, equals(10));
+    });
+
+    test('MAX', () async {
+      final store = TestStore(
+        log: log,
+        models: {
+          Product.blueprint,
+        },
+        migrationStrategy: BreezeSqliteMigrations(
+          createProductsMigration([
+            {'id': 1, 'name': 'Product 1', 'price': 10},
+            {'id': 2, 'name': 'Product 2', 'price': 15},
+          ]),
+        ),
+      );
+
+      final prices = await store.max<double>('products', 'price');
+
+      expect(prices, equals(15));
+    });
+
+    test('SUM with Filter', () async {
+      final store = TestStore(
+        log: log,
+        models: {
+          Product.blueprint,
+        },
+        migrationStrategy: BreezeSqliteMigrations(
+          createProductsMigration([
+            {'id': 1, 'name': 'Product 1', 'price': 10},
+            {'id': 2, 'name': 'Product 2', 'price': 15},
+            {'id': 3, 'name': 'Product 3', 'price': 7},
+            {'id': 4, 'name': 'Product 4', 'price': null},
+          ]),
+        ),
+      );
+
+      final prices = await store.sum<double>(
+        'products',
+        'price',
+        BreezeFetchRequest(
+          filter: BreezeField('price') >= 10,
+        ),
+      );
+
+      expect(prices, equals(25));
     });
   });
 }
