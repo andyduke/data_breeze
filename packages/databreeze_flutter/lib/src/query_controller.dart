@@ -91,6 +91,8 @@ class BreezeDataQueryController<T> extends BreezeBaseDataController<T> {
 
   @override
   void dispose() {
+    _autoUpdatePaused = true;
+
     // Cancel store changes subscription
     _subscription?.cancel();
     _subscription = null;

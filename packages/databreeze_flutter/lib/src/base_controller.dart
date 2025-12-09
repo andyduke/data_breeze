@@ -33,6 +33,24 @@ abstract class BreezeBaseDataController<T> with ChangeNotifier {
   BreezeResult<T>? get result => _result;
   BreezeResult<T>? _result;
 
+  bool _disposed = false;
+
+  @override
+  void dispose() {
+    if (!_disposed) {
+      _disposed = true;
+
+      super.dispose();
+    }
+  }
+
+  @override
+  void notifyListeners() {
+    if (!_disposed) {
+      super.notifyListeners();
+    }
+  }
+
   @protected
   Future<T> doFetch([bool isReload = false]);
 
