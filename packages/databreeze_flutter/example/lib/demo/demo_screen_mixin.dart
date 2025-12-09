@@ -67,6 +67,8 @@ mixin DemoScreenMixin<T extends StatefulWidget> on State<T> {
     await store.delete(task);
   }
 
+  Widget? bottomBar() => null;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -120,6 +122,7 @@ mixin DemoScreenMixin<T extends StatefulWidget> on State<T> {
           ),
         ),
       ),
+      bottomNavigationBar: bottomBar(),
     );
   }
 }

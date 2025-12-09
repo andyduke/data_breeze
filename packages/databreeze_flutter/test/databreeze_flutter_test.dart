@@ -10,7 +10,12 @@ class MockStore extends BreezeStore {
   }
 
   @override
-  Future<T?> aggregate<T>(String name, BreezeAggregationOp op, String column, [BreezeAbstractFetchRequest? request]) {
+  Future<T?> aggregate<T extends num>(
+    String name,
+    BreezeAggregationOp op,
+    String column, [
+    BreezeAbstractFetchRequest? request,
+  ]) {
     // TODO: implement aggregate
     throw UnimplementedError();
   }

@@ -2,6 +2,7 @@ import 'package:databreeze_flutter_example/home_screen.dart';
 import 'package:databreeze_flutter_example/demo/kvm/kvm_store.dart';
 import 'package:databreeze_flutter_example/models/model_types.dart';
 import 'package:databreeze_flutter_example/models/task.dart';
+import 'package:databreeze_flutter_example/models/task_stats.dart';
 import 'package:databreeze_sqlite/databreeze_sqlite.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -48,6 +49,7 @@ class BreezeExampleApp extends StatelessWidget {
             create: (context) => BreezeSqliteStore.inMemory(
               models: {
                 Task.blueprint,
+                TaskStatsModel.blueprint,
               },
               log: dbLog,
               migrationStrategy: BreezeSqliteAutomaticSchemaBasedMigration(
