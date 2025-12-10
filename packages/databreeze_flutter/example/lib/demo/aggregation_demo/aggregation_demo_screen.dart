@@ -6,19 +6,20 @@ import 'package:databreeze_sqlite/databreeze_sqlite.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class ListNAggScreen extends StatefulWidget {
-  const ListNAggScreen({
+class AggregationDemoScreen extends StatefulWidget {
+  const AggregationDemoScreen({
     super.key,
   });
 
   @override
-  State<ListNAggScreen> createState() => _ListNAggScreenState();
+  State<AggregationDemoScreen> createState() => _AggregationDemoScreenState();
 }
 
-class _ListNAggScreenState extends State<ListNAggScreen> with DemoScreenMixin {
+class _AggregationDemoScreenState extends State<AggregationDemoScreen> with DemoScreenMixin {
   @override
   late final BreezeStore store = context.read<BreezeSqliteStore>();
 
+  /// Query controller with aggregate function
   late final countController = BreezeDataQueryController<TaskStats>(
     source: store,
     query: TaskStatsQuery(),
@@ -32,7 +33,7 @@ class _ListNAggScreenState extends State<ListNAggScreen> with DemoScreenMixin {
   }
 
   @override
-  final String title = 'List & Aggregate Fn Demo';
+  final String title = 'List with Aggregation Fn Demo';
 
   @override
   Future<void> showDetails(int id) async {
