@@ -42,6 +42,8 @@ import 'package:meta/meta.dart';
 ///     required this.text,
 ///   });
 ///
+///   BreezeModelBlueprint get schema => NoteModel.blueprint;
+///
 ///   @override
 ///   Map<String, dynamic> toRecord() => {
 ///     NoteModel.title: title,
@@ -65,6 +67,18 @@ import 'package:meta/meta.dart';
 ///   filter: NoteModel.title.contains('tasks'),
 /// );
 /// final notes = query.fetch(store);
+/// ```
+///
+/// #### Configuring a Model in a Store
+///
+/// For a model to be available in a store, its "blueprint" must be
+/// specified when instantiating the store:
+/// ```dart
+/// final store = BreezeSqliteStore.inMemory(
+///   models: {
+///     NoteModel.blueprint,
+///   },
+/// );
 /// ```
 /// {@endtemplate}
 ///
