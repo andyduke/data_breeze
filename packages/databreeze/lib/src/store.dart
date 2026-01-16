@@ -13,18 +13,74 @@ enum BreezeAggregationOp { count, sum, avg, min, max }
 
 typedef BreezeStoreErrorCallback = void Function(Object error, StackTrace? stackTrace);
 
+/// {@template breeze.store.description}
+///
+/// An interface class that provides the ability to
+/// store data represented by models.
+///
+/// This class is a base class and does not directly
+/// implement data storage.
+///
+/// > *For storing data in **SQLite**, you can use the store*
+/// > *implementation provided by the [BreezeSqliteStore] class.*
+///
+/// This class can be used to implement data storage in
+/// remote databases such as MySQL, Postgres, and Mongo,
+/// as well as for accessing data through various
+/// external APIs.
+///
+/// {@endtemplate}
 abstract class BreezeStore with BreezeStorageTypeConverters {
+  /// "Blueprints" of models that this store can work with.
   final Map<Type, BreezeModelBlueprint> blueprints;
 
+  /// {@template breeze.store.migrationStrategy}
+  /// Strategy for migrating the structure and data of
+  /// this store when the structure of the models changes.
+  /// {@endtemplate}
   final BreezeMigrationStrategy? migrationStrategy;
 
+  /// {@template breeze.store.onError}
+  /// Called when an error occurs in the store.
+  /// {@endtemplate}
+  ///
+  /// For example, for an SQL database, when an
+  /// error occurs executing an SQL query.
   final BreezeStoreErrorCallback? onError;
 
+  /// Data type converters supported by this store.
+  ///
+  /// They are used to convert Dart data types,
+  /// as well as complex data types represented by
+  /// objects in your application, into data types
+  /// that can be stored by the underlying
+  /// backend (such as a database).
+  ///
+  /// This property contains all supported store
+  /// type converters, including converters from
+  /// [defaultTypeConverters] and those passed
+  /// in the store constructor.
   @override
   late final Set<BreezeBaseTypeConverter> typeConverters;
 
+  /// Default data type converters.
+  ///
+  /// In a store implementation, this property must
+  /// be overridden to add support for data types
+  /// specific to that store implementation.
+  ///
+  /// For example, for SQLite, this property returns
+  /// converters for the DateTime type.
   Set<BreezeBaseTypeConverter> get defaultTypeConverters => {};
 
+  /// {@macro breeze.store.description}
+  ///
+  /// * [models] - A list of model "blueprints" that this store can work with.
+  /// * [migrationStrategy] -
+  ///   {@macro breeze.store.migrationStrategy}
+  /// * [typeConverters] - Type converters that are supported by this store.
+  /// * [onError] -
+  ///   {@macro breeze.store.onError}
   BreezeStore({
     Set<BreezeModelBlueprint> models = const {},
     this.migrationStrategy,
