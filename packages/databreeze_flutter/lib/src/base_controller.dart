@@ -55,8 +55,10 @@ abstract class BreezeBaseDataController<T> with ChangeNotifier {
   Future<T> doFetch([bool isReload = false]);
 
   Future<void> fetch({bool isReload = false}) async {
+    if (_result is BreezeResultPending<T>) return;
+
     if (!isReload) {
-      _result = null;
+      _result = BreezeResultPending();
       notifyListeners();
     }
 

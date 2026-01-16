@@ -13,10 +13,13 @@ abstract class BreezeResult<T> {
 
   const BreezeResult();
 
+  const factory BreezeResult.pending() = BreezeResultPending;
+
   const factory BreezeResult.success(T data) = BreezeResultSuccess;
 
   const factory BreezeResult.error(Object error, [StackTrace? stackTrace]) = BreezeResultError;
 
+  /*
   /// Wrap a [computation] function in a try/catch and return an [BreezeResult] with
   /// either a value or an error, based on whether an exception was thrown or not.
   static FutureOr<BreezeResult<T>> guard<T>(FutureOr<T> Function() computation) async {
@@ -45,6 +48,41 @@ abstract class BreezeResult<T> {
   R? whenError<R>(
     BreezeErrorCallback<R> whenError,
   );
+  */
+}
+
+class BreezeResultPending<T> extends BreezeResult<T> {
+  const BreezeResultPending();
+
+  @override
+  bool get hasData => false;
+
+  @override
+  bool get hasError => false;
+
+  /*
+  @override
+  R when<R>(
+    BreezeSuccessCallback<R, T> whenSuccess,
+    BreezeErrorCallback<R> whenError,
+  ) => whenSuccess();
+
+  @override
+  R whenSuccess<R>(BreezeSuccessCallback<R, T> whenSuccess) {
+    return whenSuccess();
+  }
+
+  @override
+  R? whenError<R>(BreezeErrorCallback<R> whenError) => null;
+  */
+
+  @override
+  int get hashCode => null.hashCode;
+
+  @override
+  bool operator ==(covariant BreezeResult<T> other) {
+    return (other is BreezeResultPending<T>);
+  }
 }
 
 class BreezeResultSuccess<T> extends BreezeResult<T> {
@@ -58,6 +96,7 @@ class BreezeResultSuccess<T> extends BreezeResult<T> {
   @override
   bool get hasError => false;
 
+  /*
   @override
   R when<R>(
     BreezeSuccessCallback<R, T> whenSuccess,
@@ -71,6 +110,7 @@ class BreezeResultSuccess<T> extends BreezeResult<T> {
 
   @override
   R? whenError<R>(BreezeErrorCallback<R> whenError) => null;
+  */
 
   @override
   int get hashCode => data.hashCode;
@@ -96,6 +136,7 @@ class BreezeResultError<T> extends BreezeResult<T> {
   @override
   bool get hasError => true;
 
+  /*
   @override
   R when<R>(
     BreezeSuccessCallback<R, T> whenSuccess,
@@ -107,6 +148,7 @@ class BreezeResultError<T> extends BreezeResult<T> {
 
   @override
   R whenError<R>(BreezeErrorCallback<R> whenError) => whenError(error, stackTrace);
+  */
 
   @override
   int get hashCode => Object.hash(error, stackTrace);
