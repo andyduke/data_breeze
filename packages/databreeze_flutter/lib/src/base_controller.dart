@@ -71,7 +71,7 @@ abstract class BreezeBaseDataController<T> with ChangeNotifier {
 
       _result = BreezeResultSuccess<T>(result);
 
-      onData?.call(result, isReload);
+      await onData?.call(result, isReload);
     } catch (error, stackTrace) {
       _result = BreezeResultError<T>(error, stackTrace);
 
