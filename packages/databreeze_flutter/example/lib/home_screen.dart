@@ -1,6 +1,7 @@
 import 'package:databreeze_flutter_example/demo/fetch/fetch_demo_screen.dart';
 import 'package:databreeze_flutter_example/demo/kvm/kvm_demo_screen.dart';
 import 'package:databreeze_flutter_example/demo/aggregation_demo/aggregation_demo_screen.dart';
+import 'package:databreeze_flutter_example/demo/multi_view_demo/multi_view_demo_screen.dart';
 import 'package:databreeze_flutter_example/demo/sqlite/sqlite_demo_screen.dart';
 import 'package:flutter/material.dart';
 
@@ -20,6 +21,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     (icon: Icons.local_offer_rounded, title: 'KVM', body: KvmDemoScreen()),
     (icon: Icons.storage, title: 'Sqlite', body: SqliteDemoScreen()),
     (icon: Icons.summarize_outlined, title: 'Agg', body: AggregationDemoScreen()),
+    (icon: Icons.horizontal_split_rounded, title: 'Multi View', body: MultiViewDemoScreen()),
     // TODO: Pagination demo
   ];
 

@@ -1,8 +1,12 @@
 import 'package:databreeze_flutter_example/home_screen.dart';
 import 'package:databreeze_flutter_example/demo/kvm/kvm_store.dart';
+import 'package:databreeze_flutter_example/models/folder.dart';
 import 'package:databreeze_flutter_example/models/model_types.dart';
+import 'package:databreeze_flutter_example/models/note.dart';
 import 'package:databreeze_flutter_example/models/task.dart';
 import 'package:databreeze_flutter_example/models/task_stats.dart';
+import 'package:databreeze_flutter_example/stores/db_store.dart';
+import 'package:databreeze_flutter_example/stores/kvm_store.dart';
 import 'package:databreeze_sqlite/databreeze_sqlite.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -35,10 +39,7 @@ class BreezeExampleApp extends StatelessWidget {
         providers: [
           // KVM Store
           Provider<KvmStore>(
-            create: (context) => KvmStore(
-              models: {
-                Task.blueprint,
-              },
+            create: (context) => KvmDemoStore(
               log: kvmLog,
             ),
             dispose: (context, store) => store.close(),
@@ -46,17 +47,7 @@ class BreezeExampleApp extends StatelessWidget {
 
           // Sqlite store
           Provider<BreezeSqliteStore>(
-            create: (context) => BreezeSqliteStore.inMemory(
-              models: {
-                Task.blueprint,
-                TaskStatsModel.blueprint,
-              },
-              log: dbLog,
-              migrationStrategy: BreezeSqliteAutomaticSchemaBasedMigration(
-                log: dbLog,
-              ),
-              typeConverters: modelTypeConverters,
-            ),
+            create: (context) => DbDemoStore(log: dbLog),
             dispose: (context, store) => store.close(),
           ),
         ],

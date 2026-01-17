@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:databreeze/databreeze.dart';
 
 class XFile {
@@ -19,6 +20,10 @@ class XFileConverter extends BreezeBaseTypeConverter<XFile, String> {
   String toStorage(XFile value) => value.path;
 }
 
-final modelTypeConverters = {
+final modelTypeConverters = <BreezeBaseTypeConverter>{
   XFileConverter(),
+  BreezeTypeConverter<Color, int>(
+    from: (value) => Color(value),
+    to: (value) => value.toARGB32(),
+  ),
 };
