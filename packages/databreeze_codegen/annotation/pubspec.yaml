@@ -1,0 +1,16 @@
+name: databreeze_annotation
+description: Annotation for generating DataBreeze code using `databreeze_gen`.
+version: 1.0.0
+# repository: https://github.com/my_org/my_repo
+
+resolution: workspace
+
+environment:
+  sdk: ^3.8.1
+
+dependencies:
+  meta: ^1.17.0
+
+dev_dependencies:
+  lints: ^6.1.0
+  test: ^1.29.0

@@ -1,0 +1,21 @@
+name: databreeze_generator
+description: A starting point for Dart libraries or applications.
+version: 1.0.0
+publish_to: 'none'
+# repository: https://github.com/my_org/my_repo
+
+resolution: workspace
+
+environment:
+  sdk: ^3.8.1
+
+dependencies:
+  databreeze_annotation:
+  collection: ^1.19.1
+  build: ^4.0.4
+  source_gen: ^4.2.0
+  analyzer: ^10.0.0
+
+dev_dependencies:
+  lints: ^6.1.0
+  test: ^1.29.0

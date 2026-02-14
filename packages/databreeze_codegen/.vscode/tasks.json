@@ -1,0 +1,22 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "dart",
+			"command": "dart",
+			"cwd": "generator/example",
+			"args": [
+				"run",
+				"build_runner",
+				"build",
+				"-d"
+			],
+			"problemMatcher": [],
+			"label": "DataBreeze Generator",
+			"detail": "generator/example",
+			"presentation": {
+				"reveal": "silent",
+			}
+		}
+	]
+}

@@ -2,10 +2,13 @@ name: _
 publish_to: none
 
 environment:
-  sdk: ^3.8.1
+  sdk: ^3.9.0
 
 workspace:
   - packages/databreeze
   - packages/databreeze_sqlite
   - packages/databreeze_flutter
   - packages/databreeze_flutter/example
+  - packages/databreeze_codegen/annotation
+  - packages/databreeze_codegen/generator
+  - packages/databreeze_codegen/generator/example
