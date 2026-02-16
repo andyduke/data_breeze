@@ -96,8 +96,46 @@ ${fields.map((f) => "    ${className}Model.${f.name}: _self.${f.name},").join('\
   List<FieldInfo> _collectFields(ClassElement element, {required String primaryKey}) {
     final fields = <FieldInfo>[];
 
+    /*
+    for (final getter in element.getters) {
+      if (getter.isPrivate || getter.isStatic || !getter.isOriginDeclaration) continue;
+
+      if (element.lookUpSetter(name: getter.lookupName ?? getter.name!, library: element.library) != null) {
+        // Get @BzColumn annotation
+        final columnAnn = const TypeChecker.typeNamed(BzColumn).firstAnnotationOf(getter, throwOnUnresolved: false);
+        final columnName = columnAnn == null
+            ? camelToSnake(getter.name!)
+            : ConstantReader(columnAnn).read('name').literalValue as String;
+
+        // Skip transient fields from BreezeModel
+        final transientAnn = const TypeChecker.typeNamed(
+          BzTransient,
+        ).firstAnnotationOf(getter, throwOnUnresolved: false);
+        if (transientAnn != null) continue;
+
+        print('[${element.displayName}] Getter: ${getter.name}, type: ${getter.returnType.element?.displayName}');
+
+        // Add getter+setter as a model field
+        fields.add(
+          FieldInfo(
+            name: getter.name!,
+            typeStr: getter.returnType.element?.displayName ?? 'dynamic',
+            isNullable: getter.returnType.nullabilitySuffix != NullabilitySuffix.none,
+            columnName: columnName,
+            isPrimaryKey: getter.name == primaryKey,
+          ),
+        );
+      }
+    }
+    */
+
     for (final field in element.fields) {
-      if (field.isStatic) continue;
+      if (field.isStatic || // Skip Static fields
+          field.isPrivate || // Skip private fields
+          (field.setter == null) // Skip readonly fields
+          ) {
+        continue;
+      }
 
       // Get @BzColumn annotation
       final columnAnn = const TypeChecker.typeNamed(BzColumn).firstAnnotationOf(field, throwOnUnresolved: false);
@@ -109,7 +147,9 @@ ${fields.map((f) => "    ${className}Model.${f.name}: _self.${f.name},").join('\
       final transientAnn = const TypeChecker.typeNamed(BzTransient).firstAnnotationOf(field, throwOnUnresolved: false);
       if (transientAnn != null) continue;
 
-      // Assume public instance fields are model fields
+      // print('[${element.displayName}] Prop: ${field.name}, type: ${field.type.element?.displayName}');
+
+      // Add a class property as a model field
       fields.add(
         FieldInfo(
           name: field.name!,
@@ -186,7 +226,7 @@ ${fields.map((f) => "    ${className}Model.${f.name}: _self.${f.name},").join('\
 
         final missingFields = schemaFieldNames.where((e) => !fieldNames.contains(e));
         if (missingFields.isNotEmpty) {
-          throw Exception('''The model fields do not match the schema.
+          throw Exception('''The model "$className" fields do not match the schema.
 The model is missing fields: ${missingFields.join(', ')}.''');
         }
 
@@ -195,7 +235,7 @@ The model is missing fields: ${missingFields.join(', ')}.''');
 
         final extraFields = fieldNames.where((e) => !schemaFieldNames.contains(e));
         if (extraFields.isNotEmpty) {
-          throw Exception('''The model fields do not match the schema.
+          throw Exception('''The model "$className" fields do not match the schema.
 The schema does not specify the model fields: ${extraFields.join(', ')}.''');
         }
       }
