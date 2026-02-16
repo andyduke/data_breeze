@@ -17,6 +17,7 @@ mixin PaperModel {
           BreezeModelColumn<String>('title'),
           BreezeModelColumn<String>('text'),
           BreezeModelColumn<DateTime>('updated_at'),
+          BreezeModelColumn<String>('version_tag'),
         },
       ),
     },
@@ -27,12 +28,14 @@ mixin PaperModel {
     title: map[PaperModel.title],
     text: map[PaperModel.text],
     updatedAt: map[PaperModel.updatedAt],
+    versionTag: map[PaperModel.versionTag],
   );
 
   static const id = BreezeField('id');
   static const title = BreezeField('title');
   static const text = BreezeField('text');
   static const updatedAt = BreezeField('updated_at');
+  static const versionTag = BreezeField('version_tag');
 
   // ---
 
@@ -44,5 +47,6 @@ mixin PaperModel {
     PaperModel.title: _self.title,
     PaperModel.text: _self.text,
     PaperModel.updatedAt: _self.updatedAt,
+    PaperModel.versionTag: _self._versionTag,
   };
 }

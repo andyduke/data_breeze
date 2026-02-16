@@ -70,7 +70,7 @@ mixin ${className}Model {
   $blueprint
 
   static $className fromRecord(Map<String, dynamic> map) => $className(
-${fields.map((f) => "    ${f.name}: map[${className}Model.${f.name}],").join('\n')}
+${fields.map((f) => "    ${f.constructorName}: map[${className}Model.${f.name}],").join('\n')}
   );
 
   static const id = BreezeField('$primaryKey');
@@ -83,7 +83,7 @@ ${fields.map((f) => "  static const ${f.name} = BreezeField('${f.columnName}');"
   BreezeModelBlueprint get schema => ${className}Model.blueprint;
 
   Map<String, dynamic> toRecord() => {
-${fields.map((f) => "    ${className}Model.${f.name}: _self.${f.name},").join('\n')}
+${fields.map((f) => "    ${className}Model.${f.name}: _self.${f.accessorName},").join('\n')}
   };
 }
 ''';
@@ -131,7 +131,6 @@ ${fields.map((f) => "    ${className}Model.${f.name}: _self.${f.name},").join('\
 
     for (final field in element.fields) {
       if (field.isStatic || // Skip Static fields
-          field.isPrivate || // Skip private fields
           (field.setter == null) // Skip readonly fields
           ) {
         continue;
@@ -139,9 +138,12 @@ ${fields.map((f) => "    ${className}Model.${f.name}: _self.${f.name},").join('\
 
       // Get @BzColumn annotation
       final columnAnn = const TypeChecker.typeNamed(BzColumn).firstAnnotationOf(field, throwOnUnresolved: false);
-      final columnName = columnAnn == null
+      final columnName = (columnAnn == null)
           ? camelToSnake(field.name!)
           : ConstantReader(columnAnn).read('name').literalValue as String;
+
+      // Skip a private property that does not have a field name annotation
+      if (columnAnn == null && field.isPrivate) continue;
 
       // Skip transient fields from BreezeModel
       final transientAnn = const TypeChecker.typeNamed(BzTransient).firstAnnotationOf(field, throwOnUnresolved: false);
@@ -149,10 +151,14 @@ ${fields.map((f) => "    ${className}Model.${f.name}: _self.${f.name},").join('\
 
       // print('[${element.displayName}] Prop: ${field.name}, type: ${field.type.element?.displayName}');
 
+      final publicName = field.isPrivate ? field.name!.substring(1) : field.name!;
+
       // Add a class property as a model field
       fields.add(
         FieldInfo(
-          name: field.name!,
+          constructorName: publicName,
+          name: publicName,
+          accessorName: field.name!,
           typeStr: field.type.element?.displayName ?? 'dynamic',
           isNullable: field.type.nullabilitySuffix != NullabilitySuffix.none,
           columnName: columnName,

@@ -13,6 +13,7 @@ part 'paper.g.dart';
       BzSchemaChange.column('title', String),
       BzSchemaChange.column('text', String),
       BzSchemaChange.column('updated_at', DateTime),
+      BzSchemaChange.column('version_tag', String),
     ]),
   ],
 )
@@ -24,6 +25,7 @@ class Paper extends BreezeModel<int> with PaperModel {
   set title(String value) {
     if (_title != value) {
       _title = value;
+      _versionTag = null;
     }
   }
 
@@ -31,7 +33,12 @@ class Paper extends BreezeModel<int> with PaperModel {
 
   DateTime updatedAt;
 
-  String get versionTag => '($title)';
+  String get displayName => title.toUpperCase();
+
+  @BzColumn(name: 'version_tag')
+  String? _versionTag;
+  String get versionTag => _versionTag ??= _calcVersionTag();
+  String _calcVersionTag() => '($title)';
 
   @BzTransient()
   bool flag = false;
@@ -40,5 +47,7 @@ class Paper extends BreezeModel<int> with PaperModel {
     required String title,
     required this.text,
     required this.updatedAt,
-  }) : _title = title;
+    String? versionTag,
+  }) : _title = title,
+       _versionTag = versionTag;
 }

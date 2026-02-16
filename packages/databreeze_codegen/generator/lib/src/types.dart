@@ -2,14 +2,32 @@ import 'package:databreeze_generator/src/helpers.dart';
 import 'package:databreeze_generator/src/utils.dart';
 
 class FieldInfo {
+  /// The name of the constructor parameter for this property
+  /// (may not match the property name if it is encapsulated
+  /// by a getter and setter)
+  final String constructorName;
+
+  /// The public name of the property
+  ///
+  /// If the property is encapsulated by a getter and setter,
+  /// this will be the name of the getter.
   final String name;
+
+  /// The name of the property getter
+  ///
+  /// If the property is encapsulated by a getter and setter,
+  /// this will be the property's private name.
+  final String accessorName;
+
   final String typeStr;
   final bool isNullable;
   final String? columnName;
   final bool isPrimaryKey;
 
   const FieldInfo({
+    required this.constructorName,
     required this.name,
+    required this.accessorName,
     required this.typeStr,
     required this.isNullable,
     this.columnName,
