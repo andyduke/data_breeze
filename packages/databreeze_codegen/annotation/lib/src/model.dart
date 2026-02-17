@@ -25,7 +25,7 @@ class BzColumn {
   });
 }
 
-@Target({TargetKind.field})
+@Target({TargetKind.field, TargetKind.getter})
 class BzTransient {
   const BzTransient();
 }
