@@ -25,14 +25,15 @@ class FieldInfo {
   final bool isPrimaryKey;
 
   const FieldInfo({
-    required this.constructorName,
+    String? constructorName,
+    String? accessorName,
     required this.name,
-    required this.accessorName,
     required this.typeStr,
     required this.isNullable,
     this.columnName,
     this.isPrimaryKey = false,
-  });
+  }) : constructorName = constructorName ?? name,
+       accessorName = accessorName ?? name;
 }
 
 extension type const CopyValue(String str) implements String {
