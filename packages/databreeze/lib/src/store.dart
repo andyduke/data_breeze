@@ -337,6 +337,20 @@ abstract class BreezeStore with BreezeStorageTypeConverters {
     Set<BreezeBaseTypeConverter> typeConverters = const {},
   });
 
+  Future<dynamic> fetchColumnWithRequest({
+    required String table,
+    required String column,
+    required BreezeAbstractFetchRequest request,
+    Set<BreezeBaseTypeConverter> typeConverters = const {},
+  });
+
+  Future<List> fetchColumnAllWithRequest({
+    required String table,
+    required String column,
+    required BreezeAbstractFetchRequest request,
+    Set<BreezeBaseTypeConverter> typeConverters = const {},
+  });
+
   @protected
   Future<dynamic> addRecord({
     required String name,

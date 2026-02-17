@@ -54,6 +54,28 @@ class MockStore extends BreezeStore {
   }
 
   @override
+  Future<dynamic> fetchColumnWithRequest({
+    required String table,
+    required String column,
+    required BreezeAbstractFetchRequest request,
+    Set<BreezeBaseTypeConverter<dynamic, dynamic>> typeConverters = const {},
+  }) async {
+    // TODO: implement fetchColumnWithRequest
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<List<dynamic>> fetchColumnAllWithRequest({
+    required String table,
+    required String column,
+    required BreezeAbstractFetchRequest request,
+    Set<BreezeBaseTypeConverter<dynamic, dynamic>> typeConverters = const {},
+  }) async {
+    // TODO: implement fetchAllColumnWithRequest
+    throw UnimplementedError();
+  }
+
+  @override
   Future<void> updateRecord({
     required String name,
     required String key,

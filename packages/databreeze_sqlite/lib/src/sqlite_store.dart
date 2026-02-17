@@ -214,6 +214,70 @@ class BreezeSqliteStore extends BreezeStore with BreezeStoreFetch {
   }
 
   @override
+  Future<dynamic> fetchColumnWithRequest({
+    required String table,
+    required String column,
+    required BreezeAbstractFetchRequest request,
+    Set<BreezeBaseTypeConverter<dynamic, dynamic>> typeConverters = const {},
+  }) async {
+    ResultSet? result;
+    dynamic columnValue;
+
+    switch (request) {
+      case BreezeFetchRequest(filter: final filter, sortBy: final sortBy):
+        final (:sql, :params) = buildSql(table, columns: column, filter: filter, sortBy: sortBy, limit: 1);
+        result = await executeSql(sql, params, typeConverters);
+        break;
+
+      case BreezeSqliteRequest(sql: final sql, params: final params):
+        result = await executeSql(sql, params, typeConverters);
+        break;
+    }
+
+    if (result != null) {
+      columnValue = result.isNotEmpty ? result.first.values.first : null;
+    }
+
+    log?.finest('Fetch column $request: $columnValue');
+
+    return columnValue;
+  }
+
+  @override
+  Future<List<dynamic>> fetchColumnAllWithRequest({
+    required String table,
+    required String column,
+    required BreezeAbstractFetchRequest request,
+    Set<BreezeBaseTypeConverter<dynamic, dynamic>> typeConverters = const {},
+  }) async {
+    ResultSet? result;
+    List<dynamic>? values;
+
+    switch (request) {
+      case BreezeFetchRequest(filter: final filter, sortBy: final sortBy):
+        final (:sql, :params) = buildSql(table, columns: column, filter: filter, sortBy: sortBy);
+        result = await executeSql(sql, params, typeConverters);
+        break;
+
+      case BreezeSqliteRequest(sql: final sql, params: final params):
+        result = await executeSql(sql, params, typeConverters);
+        break;
+    }
+
+    if (result != null) {
+      values = result.map((r) => r.values.first).toList(growable: false);
+    } else {
+      values = [];
+    }
+
+    // --
+
+    log?.finest('FetchAll column $request: $values');
+
+    return values;
+  }
+
+  @override
   Future<dynamic> addRecord({
     required String name,
     required String key,

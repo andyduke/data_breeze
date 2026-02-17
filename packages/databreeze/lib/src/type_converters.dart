@@ -67,7 +67,11 @@ class BreezeTypeConverter<DartType, StorageType> extends BreezeBaseTypeConverter
 mixin BreezeStorageTypeConverters {
   Set<BreezeBaseTypeConverter> get typeConverters;
 
-  dynamic toDartValue(dynamic value, {required Type dartType, Set<BreezeBaseTypeConverter> converters = const {}}) {
+  dynamic toDartValue(
+    dynamic value, {
+    required Type dartType,
+    Set<BreezeBaseTypeConverter> converters = const {},
+  }) {
     final storageType = value.runtimeType;
     final effectiveConverters = {
       ...converters,
@@ -82,7 +86,11 @@ mixin BreezeStorageTypeConverters {
     return value;
   }
 
-  dynamic toStorageValue(dynamic value, {required Type dartType, Set<BreezeBaseTypeConverter> converters = const {}}) {
+  dynamic toStorageValue(
+    dynamic value, {
+    required Type dartType,
+    Set<BreezeBaseTypeConverter> converters = const {},
+  }) {
     final effectiveConverters = {
       ...converters,
       ...typeConverters,

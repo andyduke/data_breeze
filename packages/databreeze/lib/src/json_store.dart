@@ -128,6 +128,89 @@ class BreezeJsonStore extends BreezeStore with BreezeStoreFetch {
   }
 
   @override
+  Future<dynamic> fetchColumnWithRequest({
+    required String table,
+    required String column,
+    required BreezeAbstractFetchRequest request,
+    Set<BreezeBaseTypeConverter<dynamic, dynamic>> typeConverters = const {},
+  }) async {
+    if (simulateLatency) {
+      // Simulate latency
+      await Future.delayed(_latency);
+    }
+
+    if (!records.containsKey(table)) {
+      log?.finest('Fetch column $request: null');
+      return null;
+    }
+
+    Iterable<Map<String, dynamic>> allRecords = records[table]!.values;
+    dynamic columnValue;
+
+    switch (request) {
+      case BreezeFetchRequest(filter: final filter, sortBy: final sortBy):
+        if (sortBy.isNotEmpty) {
+          allRecords = allRecords.sorted((a, b) => applySort(a, b, sortBy));
+        }
+
+        columnValue = allRecords.firstWhereOrNull((entry) => applyFilter(entry, filter))?.values.first;
+        break;
+
+      case BreezeJsonFetchRequest(test: final test):
+        columnValue = allRecords.firstWhereOrNull((entry) => test(entry))?.values.first;
+        break;
+    }
+
+    log?.finest('Fetch column $request: $columnValue');
+
+    return columnValue;
+  }
+
+  @override
+  Future<List<dynamic>> fetchColumnAllWithRequest({
+    required String table,
+    required String column,
+    required BreezeAbstractFetchRequest request,
+    Set<BreezeBaseTypeConverter<dynamic, dynamic>> typeConverters = const {},
+  }) async {
+    if (simulateLatency) {
+      // Simulate latency
+      await Future.delayed(_latency);
+    }
+
+    if (!records.containsKey(table)) {
+      log?.finest('Fetch All column $request: []');
+      return [];
+    }
+
+    Iterable<Map<String, dynamic>> allRecords = records[table]!.values;
+    late Iterable<Map<String, dynamic>> rows;
+
+    switch (request) {
+      case BreezeFetchRequest(filter: final filter, sortBy: final sortBy):
+        if (sortBy.isNotEmpty) {
+          allRecords = allRecords.sorted((a, b) => applySort(a, b, sortBy));
+        }
+
+        rows = allRecords;
+        if (filter != null) {
+          rows = rows.where((entry) => applyFilter(entry, filter));
+        }
+        break;
+
+      case BreezeJsonFetchRequest(test: final test):
+        rows = allRecords.where((entry) => test(entry));
+        break;
+    }
+
+    final result = rows.map((r) => r.values.first);
+
+    log?.finest('Fetch All column $request: $result');
+
+    return result.toList(growable: false);
+  }
+
+  @override
   Future<dynamic> addRecord({
     required String name,
     required String key,

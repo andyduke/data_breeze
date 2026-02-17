@@ -732,4 +732,43 @@ CREATE TEMP TABLE task_progress(
       expect(prices, equals(25));
     });
   });
+
+  group('Fetch column', () {
+    test('Fetch one column', () async {
+      final store = TestStore(
+        log: log,
+        models: {
+          Task.blueprint,
+        },
+        migrationStrategy: BreezeSqliteMigrations(singleTaskMigration),
+      );
+
+      final name = await store.fetchColumn<String>(
+        table: Task.blueprint.name,
+        column: TaskColumns.name,
+        filter: BreezeField(TaskColumns.id).eq(1),
+      );
+
+      expect(name, isNotNull);
+      expect(name, equals('File 1'));
+    });
+
+    test('Fetch all columns', () async {
+      final store = TestStore(
+        log: log,
+        models: {
+          Task.blueprint,
+        },
+        migrationStrategy: BreezeSqliteMigrations(singleTaskMigration),
+      );
+
+      final names = await store.fetchColumnAll<String>(
+        table: Task.blueprint.name,
+        column: TaskColumns.name,
+      );
+
+      expect(names, hasLength(1));
+      expect(names, equals(['File 1']));
+    });
+  });
 }
