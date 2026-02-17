@@ -3,8 +3,9 @@ import 'package:databreeze_annotation/databreeze_annotation.dart';
 
 part 'paper.g.dart';
 
-/// Note model
+/// Paper model
 @BzModel(
+  primaryKey: 'uuid',
   name: 'papers',
   // primaryKey: 'note_id',
   // schemaVersionClass: BreezeSqliteModelSchemaVersion,
@@ -17,7 +18,9 @@ part 'paper.g.dart';
     ]),
   ],
 )
-class Paper extends BreezeModel<int> with PaperModel {
+class Paper extends BreezeModel<String> with PaperModel {
+  String uuid;
+
   String _title;
 
   String get title => _title;
@@ -44,6 +47,7 @@ class Paper extends BreezeModel<int> with PaperModel {
   bool flag = false;
 
   Paper({
+    required this.uuid,
     required String title,
     required this.text,
     required this.updatedAt,

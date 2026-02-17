@@ -239,7 +239,7 @@ The model is missing fields: ${missingFields.join(', ')}.''');
         // print('### Fields: $fieldNames');
         // print('### Schema: $schemaFieldNames');
 
-        final extraFields = fieldNames.where((e) => !schemaFieldNames.contains(e));
+        final extraFields = fieldNames.where((e) => (e != primaryKey) && !schemaFieldNames.contains(e));
         if (extraFields.isNotEmpty) {
           throw Exception('''The model "$className" fields do not match the schema.
 The schema does not specify the model fields: ${extraFields.join(', ')}.''');
