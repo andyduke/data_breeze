@@ -1,7 +1,8 @@
 abstract class BzSchemaChange {
   const BzSchemaChange();
 
-  const factory BzSchemaChange.column(String name, Type type, {bool isNullable}) = BzAppendField;
+  const factory BzSchemaChange.column(String name, Type type, {bool isNullable /* TODO: bool isUnique = false */}) =
+      BzAppendField;
 
   const factory BzSchemaChange.rename(String name, {required String to}) = BzRenameField;
 
@@ -17,6 +18,7 @@ class BzAppendField extends BzSchemaChange {
     this.name,
     this.type, {
     this.isNullable = false,
+    /* TODO: bool isUnique = false */
   }) /* : assert(
          // TODO: Allow any type, due to TypeConverter
          type == String || type == num || type == int || type == double || type == bool,

@@ -10,6 +10,8 @@ class BreezeModelColumn<T> {
   /// Is the column a primary key?
   final bool isPrimaryKey;
 
+  // TODO: Add bool unique
+
   /// Are the values ​​in this column automatically generated
   /// in the database (e.g., auto-increment)?
   ///

@@ -5,6 +5,7 @@ part 'paper.g.dart';
 
 /// Paper model
 @BzModel(
+  // TODO: primaryKey = id, uuid is unique
   primaryKey: 'uuid',
   name: 'papers',
   // primaryKey: 'note_id',
@@ -19,7 +20,11 @@ part 'paper.g.dart';
   ],
 )
 class Paper extends BreezeModel<String> with PaperModel {
-  String uuid;
+  @BzTransient()
+  String? get uuid => id;
+  set uuid(String? newValue) {
+    id = newValue;
+  }
 
   String _title;
 
@@ -47,7 +52,7 @@ class Paper extends BreezeModel<String> with PaperModel {
   bool flag = false;
 
   Paper({
-    required this.uuid,
+    // required this.uuid,
     required String title,
     required this.text,
     required this.updatedAt,

@@ -306,6 +306,7 @@ class BreezeSqliteStore extends BreezeStore with BreezeStoreFetch {
     required String name,
     required String key,
     required dynamic keyValue,
+    // TODO: Add uniqueKeys
     required Map<String, dynamic> record,
   }) async {
     final hasPrimaryKey = record.containsKey(key) && (record[key] != null);
