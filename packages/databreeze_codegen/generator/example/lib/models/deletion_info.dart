@@ -7,6 +7,7 @@ part 'deletion_info.g.dart';
 @BzModel(
   primaryKey: 'table',
   name: 'deletion_info',
+  constructor: '_',
   schemaHistory: [
     BzSchemaVersion(1, [
       BzSchemaChange.column('timestamp', DateTime),
@@ -14,12 +15,19 @@ part 'deletion_info.g.dart';
   ],
 )
 class DeletionInfo extends BreezeModel<String> with DeletionInfoModel {
-  String table;
+  String? get table => id;
+  // set table(String value) => id = value;
 
   DateTime timestamp;
 
   DeletionInfo({
-    required this.table,
+    required String table,
+    required this.timestamp,
+  }) {
+    id = table;
+  }
+
+  DeletionInfo._({
     required this.timestamp,
   });
 }

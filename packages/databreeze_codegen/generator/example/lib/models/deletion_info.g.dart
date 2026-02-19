@@ -21,13 +21,10 @@ mixin DeletionInfoModel {
     builder: DeletionInfoModel.fromRecord,
   );
 
-  static DeletionInfo fromRecord(Map<String, dynamic> map) => DeletionInfo(
-    table: map[DeletionInfoModel.table],
-    timestamp: map[DeletionInfoModel.timestamp],
-  );
+  static DeletionInfo fromRecord(Map<String, dynamic> map) =>
+      DeletionInfo._(timestamp: map[DeletionInfoModel.timestamp]);
 
   static const id = BreezeField('table');
-  static const table = BreezeField('table');
   static const timestamp = BreezeField('timestamp');
 
   // ---
@@ -37,7 +34,6 @@ mixin DeletionInfoModel {
   BreezeModelBlueprint get schema => DeletionInfoModel.blueprint;
 
   Map<String, dynamic> toRecord() => {
-    DeletionInfoModel.table: _self.table,
     DeletionInfoModel.timestamp: _self.timestamp,
   };
 }

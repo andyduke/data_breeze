@@ -5,12 +5,14 @@ import 'package:meta/meta_meta.dart';
 class BzModel {
   final String? name;
   final String? primaryKey;
+  final String? constructor;
   final Type? schemaVersionClass;
   final List<BzSchemaVersion> schemaHistory;
 
   const BzModel({
     this.name,
     this.primaryKey,
+    this.constructor,
     this.schemaVersionClass,
     this.schemaHistory = const [],
   });

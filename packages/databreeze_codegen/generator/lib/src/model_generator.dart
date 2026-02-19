@@ -26,6 +26,7 @@ class BreezeModelGenerator extends GeneratorForAnnotation<BzModel> {
     final tableName = modelName ?? camelToSnake(className);
     final primaryKey = annotation.peek('primaryKey')?.stringValue ?? 'id';
     final primaryKeyType = classElement.modelKeyType;
+    final constructor = annotation.peek('constructor')?.stringValue;
     final schemaVersionClass =
         annotation.peek('schemaVersionClass')?.typeValue.getDisplayString() ?? 'BreezeModelSchemaVersion';
 
@@ -64,12 +65,13 @@ class BreezeModelGenerator extends GeneratorForAnnotation<BzModel> {
     ).join('\n');
 
     // Generate code
+    final constructorName = (constructor != null && constructor.isNotEmpty) ? '.$constructor' : '';
     final output =
         '''
 mixin ${className}Model {
   $blueprint
 
-  static $className fromRecord(Map<String, dynamic> map) => $className(
+  static $className fromRecord(Map<String, dynamic> map) => $className$constructorName(
 ${fields.map((f) => "    ${f.constructorName}: map[${className}Model.${f.name}],").join('\n')}
   );
 
@@ -136,8 +138,12 @@ ${fields.map((f) => "    ${className}Model.${f.name}: _self.${f.accessorName},")
         continue;
       }
 
+      final annotationField = field.isOriginGetterSetter ? field.getter! : field;
+
       // Get @BzColumn annotation
-      final columnAnn = const TypeChecker.typeNamed(BzColumn).firstAnnotationOf(field, throwOnUnresolved: false);
+      final columnAnn = const TypeChecker.typeNamed(
+        BzColumn,
+      ).firstAnnotationOf(annotationField, throwOnUnresolved: false);
       final columnName = (columnAnn == null)
           ? camelToSnake(field.name!)
           : ConstantReader(columnAnn).read('name').literalValue as String;
@@ -146,7 +152,9 @@ ${fields.map((f) => "    ${className}Model.${f.name}: _self.${f.accessorName},")
       if (columnAnn == null && field.isPrivate) continue;
 
       // Skip transient fields from BreezeModel
-      final transientAnn = const TypeChecker.typeNamed(BzTransient).firstAnnotationOf(field, throwOnUnresolved: false);
+      final transientAnn = const TypeChecker.typeNamed(
+        BzTransient,
+      ).firstAnnotationOf(annotationField, throwOnUnresolved: false);
       if (transientAnn != null) continue;
 
       // print('[${element.displayName}] Prop: ${field.name}, type: ${field.type.element?.displayName}');
