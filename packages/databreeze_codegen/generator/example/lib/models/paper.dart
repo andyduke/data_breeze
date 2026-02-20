@@ -20,6 +20,11 @@ part 'paper.g.dart';
   ],
 )
 class Paper extends BreezeModel<String> with PaperModel {
+  // @override
+  // String? get id => super.id;
+  // @override
+  // set id(String? value) => super.id = value;
+
   @BzTransient()
   String? get uuid => id;
   set uuid(String? newValue) {

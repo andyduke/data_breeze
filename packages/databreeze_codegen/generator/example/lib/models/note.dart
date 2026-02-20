@@ -6,7 +6,7 @@ part 'note.g.dart';
 /// Note model
 @BzModel(
   name: 'my_notes',
-  primaryKey: 'note_id',
+  // primaryKey: 'note_id',
   // schemaVersionClass: BreezeSqliteModelSchemaVersion,
   schemaHistory: [
     BzSchemaVersion(1, [

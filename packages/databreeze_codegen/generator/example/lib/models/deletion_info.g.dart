@@ -24,7 +24,7 @@ mixin DeletionInfoModel {
   static DeletionInfo fromRecord(Map<String, dynamic> map) =>
       DeletionInfo._(timestamp: map[DeletionInfoModel.timestamp]);
 
-  static const id = BreezeField('table');
+  static const table = BreezeField('table');
   static const timestamp = BreezeField('timestamp');
 
   // ---

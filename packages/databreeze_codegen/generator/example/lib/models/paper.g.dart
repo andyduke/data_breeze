@@ -31,7 +31,7 @@ mixin PaperModel {
     versionTag: map[PaperModel.versionTag],
   );
 
-  static const id = BreezeField('uuid');
+  static const uuid = BreezeField('uuid');
   static const title = BreezeField('title');
   static const text = BreezeField('text');
   static const updatedAt = BreezeField('updated_at');

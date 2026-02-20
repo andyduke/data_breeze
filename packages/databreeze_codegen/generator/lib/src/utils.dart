@@ -22,3 +22,13 @@ String camelToSnake(String input) {
     (m) => '_${m.group(0)!.toLowerCase()}',
   );
 }
+
+String snakeToCamel(String input) {
+  if (!input.contains(RegExp(r'(_|-)+'))) {
+    return input;
+  }
+  return input.toLowerCase().replaceAllMapped(
+    RegExp(r'(_|-)+([a-z])'),
+    (Match m) => m[2]!.toUpperCase(),
+  );
+}

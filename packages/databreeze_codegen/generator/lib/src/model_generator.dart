@@ -66,6 +66,7 @@ class BreezeModelGenerator extends GeneratorForAnnotation<BzModel> {
 
     // Generate code
     final constructorName = (constructor != null && constructor.isNotEmpty) ? '.$constructor' : '';
+    final primaryKeyProp = snakeToCamel(primaryKey);
     final output =
         '''
 mixin ${className}Model {
@@ -75,7 +76,7 @@ mixin ${className}Model {
 ${fields.map((f) => "    ${f.constructorName}: map[${className}Model.${f.name}],").join('\n')}
   );
 
-  static const id = BreezeField('$primaryKey');
+  static const $primaryKeyProp = BreezeField('$primaryKey');
 ${fields.map((f) => "  static const ${f.name} = BreezeField('${f.columnName}');").join('\n')}
 
   // ---
@@ -137,6 +138,8 @@ ${fields.map((f) => "    ${className}Model.${f.name}: _self.${f.accessorName},")
           ) {
         continue;
       }
+
+      if (field.name == 'id') continue;
 
       final annotationField = field.isOriginGetterSetter ? field.getter! : field;
 
