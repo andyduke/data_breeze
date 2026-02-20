@@ -77,7 +77,7 @@ ${fields.map((f) => "    ${f.constructorName}: map[${className}Model.${f.name}],
   );
 
   static const $primaryKeyProp = BreezeField('$primaryKey');
-${fields.map((f) => "  static const ${f.name} = BreezeField('${f.columnName}');").join('\n')}
+${fields.where((f) => f.columnName != primaryKey).map((f) => "  static const ${f.name} = BreezeField('${f.columnName}');").join('\n')}
 
   // ---
 
