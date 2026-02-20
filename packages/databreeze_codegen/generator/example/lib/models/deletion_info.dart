@@ -10,6 +10,7 @@ part 'deletion_info.g.dart';
   constructor: '_',
   schemaHistory: [
     BzSchemaVersion(1, [
+      // BzSchemaChange.column('table', String),
       BzSchemaChange.column('timestamp', DateTime),
     ]),
   ],

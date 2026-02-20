@@ -241,6 +241,11 @@ ${fields.map((f) => "    ${className}Model.${f.name}: _self.${f.accessorName},")
         final schemaFieldNames = schema.fields.map((f) => f.name).toList(growable: false);
         final fieldNames = fields.map((f) => f.columnName).toList(growable: false);
 
+        final primaryKeyDetected = schemaFieldNames.contains(primaryKey);
+        if (primaryKeyDetected) {
+          throw Exception('''The model "$className" schema must not specify a primary key field "$primaryKey".''');
+        }
+
         final missingFields = schemaFieldNames.where((e) => !fieldNames.contains(e));
         if (missingFields.isNotEmpty) {
           throw Exception('''The model "$className" fields do not match the schema.
