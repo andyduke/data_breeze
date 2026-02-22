@@ -167,16 +167,28 @@ abstract mixin class BreezeModel<K> implements BreezeBaseModel {
     if (schema.key != null) schema.key!: id,
   };
 
+  /// Callback called before the model is saved (added or updated) to the store.
+  ///
+  /// See also:
+  /// - [afterSave]
+  Future<void> beforeSave() async {}
+
+  /// Callback called after the model is saved (added or updated) to the store.
+  ///
+  /// See also:
+  /// - [beforeSave]
+  Future<void> afterSave() async {}
+
   /// Callback called after a model has been added to the store.
   Future<void> afterAdd() async {}
 
-  /// Callback called before the model is saved to the store.
+  /// Callback called before the model is updated in the store.
   ///
   /// See also:
   /// - [afterUpdate]
   Future<void> beforeUpdate() async {}
 
-  /// Callback called after the model is saved to the store.
+  /// Callback called after the model is updated in the store.
   ///
   /// See also:
   /// - [beforeUpdate]

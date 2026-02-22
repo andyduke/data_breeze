@@ -154,10 +154,20 @@ abstract class BreezeStore with BreezeStorageTypeConverters {
   }
 
   Future<M> save<M extends BreezeModel>(M record) async {
-    if (record.isNew) {
-      return add(record);
-    } else {
-      return update(record);
+    if (!record.isFrozen) {
+      await record.beforeSave();
+    }
+
+    try {
+      if (record.isNew) {
+        return add(record);
+      } else {
+        return update(record);
+      }
+    } finally {
+      if (!record.isFrozen) {
+        await record.afterSave();
+      }
     }
   }
 
