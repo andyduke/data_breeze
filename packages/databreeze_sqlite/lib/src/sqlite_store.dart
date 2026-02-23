@@ -346,6 +346,27 @@ class BreezeSqliteStore extends BreezeStore with BreezeStoreFetch {
   }
 
   @override
+  Future<void> deleteWhereRecords({
+    required String name,
+    required BreezeFilterExpression filter,
+  }) async {
+    final (whereSql, whereParams) = _buildWhere(filter);
+    final whereClause = 'WHERE $whereSql';
+
+    // Skip and do not delete anything if the condition is empty.
+    if (whereSql.isEmpty) {
+      return;
+    }
+
+    await executeSql(
+      'DELETE FROM $name $whereClause',
+      whereParams,
+    );
+
+    log?.finest('Deleted from "$name" where $filter');
+  }
+
+  @override
   Future<T?> aggregate<T extends num>(
     String name,
     BreezeAggregationOp op,

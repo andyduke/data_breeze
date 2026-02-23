@@ -156,6 +156,29 @@ Future<void> main() async {
         ),
       );
     });
+
+    test('Delete where', () async {
+      final store = TestStore(
+        log: log,
+        models: {
+          Task.blueprint,
+        },
+        migrationStrategy: BreezeSqliteMigrations(tasksMigration),
+      );
+
+      await store.deleteWhere<Task>(filter: BreezeField(TaskColumns.status).inside([0, 1]));
+
+      // ---
+
+      final db = await store.database;
+
+      final res = await db.execute('SELECT * FROM tasks');
+      final rows = res.rows;
+
+      log.finest('$rows');
+
+      expect(rows, hasLength(0));
+    });
   });
 
   group('Sort Order', () {

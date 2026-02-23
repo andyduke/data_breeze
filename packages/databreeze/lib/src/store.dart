@@ -274,6 +274,32 @@ abstract class BreezeStore with BreezeStorageTypeConverters {
     return record;
   }
 
+  /// Deletes records from the store based on the [filter] condition.
+  ///
+  /// Note: The [beforeDelete] and [afterDelete] model hooks will not
+  /// be called when deleting.
+  Future<void> deleteWhere<M extends BreezeModel>({
+    required BreezeFilterExpression filter,
+  }) async {
+    if (M == dynamic) {
+      throw Exception('The generic parameter M is required.');
+    }
+
+    final modelBlueprint = blueprintOf(M) as BreezeModelBlueprint<M>;
+    final tableName = modelBlueprint.name;
+
+    await deleteWhereRecords(name: tableName, filter: filter);
+
+    _changesController.add(
+      BreezeStoreChange(
+        store: this,
+        type: BreezeStoreChangeType.delete,
+        entity: tableName,
+        id: null,
+      ),
+    );
+  }
+
   Future<T> count<T extends num>(
     String name,
     String column, {
@@ -382,6 +408,12 @@ abstract class BreezeStore with BreezeStorageTypeConverters {
     required String key,
     required dynamic keyValue,
     required Map<String, dynamic> record,
+  });
+
+  @protected
+  Future<void> deleteWhereRecords({
+    required String name,
+    required BreezeFilterExpression filter,
   });
 
   @protected

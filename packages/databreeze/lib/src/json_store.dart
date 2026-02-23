@@ -285,6 +285,23 @@ class BreezeJsonStore extends BreezeStore with BreezeStoreFetch {
   }
 
   @override
+  Future<void> deleteWhereRecords({
+    required String name,
+    required BreezeFilterExpression filter,
+  }) async {
+    if (!records.containsKey(name)) {
+      log?.finest('Delete from "$name" where $filter: "$name" is not exist.');
+      return;
+    }
+
+    Map<int, Map<String, dynamic>> allRecords = records[name]!;
+
+    allRecords.removeWhere((id, row) => applyFilter(row, filter));
+
+    log?.finest('Deleted from "$name" where $filter');
+  }
+
+  @override
   Future<T?> aggregate<T extends num>(
     String name,
     BreezeAggregationOp op,
