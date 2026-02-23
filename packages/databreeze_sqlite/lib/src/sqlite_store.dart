@@ -536,6 +536,19 @@ class BreezeSqliteStore extends BreezeStore with BreezeStoreFetch {
   }
 
   (String, List<dynamic>) _buildComparison(BreezeComparisonFilter f) {
+    // Convert comparison with NULL to IS NULL/IS NOT NULL expression.
+    if ((f.operator == '==' || f.operator == '!=') && (f.value == null)) {
+      final op = switch (f.operator) {
+        '==' => 'IS',
+        '!=' => 'IS NOT',
+        _ => throw UnsupportedError('Invalid operator: ${f.operator}'),
+      };
+      return (
+        '${f.field} $op NULL',
+        [],
+      );
+    }
+
     final op = switch (f.operator) {
       '==' => '=',
       '!=' => '!=',
