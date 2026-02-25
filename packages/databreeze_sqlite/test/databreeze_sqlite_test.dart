@@ -367,6 +367,48 @@ CREATE TEMP TABLE task_progress(
       expect(tasks[0].id, equals(3));
       expect(tasks[0].name, equals('File 3'));
     });
+
+    test('SELECT with None', () async {
+      final store = TestStore(
+        log: log,
+        models: {
+          Task.blueprint,
+        },
+        migrationStrategy: BreezeSqliteMigrations(
+          SqliteMigrations()..add(
+            SqliteMigration(
+              1,
+              (tx) async {
+                await tx.execute(createTaskTableSql);
+
+                await tx.execute('''
+  INSERT INTO tasks(id, name, note, created_at, file) VALUES(1, 'File 1', 'Test file', '2025-10-30 12:00:00+03:00', 'path/to')
+''');
+
+                await tx.execute('''
+  INSERT INTO tasks(id, name, note, created_at, file) VALUES(2, 'File 2', 'Test file', '2025-10-30 11:00:00+03:00', 'path/to')
+''');
+
+                await tx.execute('''
+  INSERT INTO tasks(id, name, note, created_at, file) VALUES(3, 'File 3', 'Test file', '2025-10-30 11:00:00+03:00', 'filename')
+''');
+              },
+            ),
+          ),
+        ),
+      );
+
+      final query = BreezeQueryAll<Task>(
+        filter: BreezeFilterExpression.none(),
+      );
+      final tasks = await query.fetch(store);
+
+      expect(tasks, hasLength(3));
+
+      expect(tasks[0].id, equals(1));
+      expect(tasks[1].id, equals(2));
+      expect(tasks[2].id, equals(3));
+    });
   });
 
   group('Upsert', () {

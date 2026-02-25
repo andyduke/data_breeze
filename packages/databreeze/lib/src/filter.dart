@@ -1,6 +1,17 @@
 /// Base class for all filter expressions used in queries.
 abstract class BreezeFilterExpression {
   const BreezeFilterExpression();
+
+  /// Shortcut for empty filter.
+  factory BreezeFilterExpression.none() = BreezeNoneFilter;
+}
+
+/// An empty filter.
+///
+/// This is necessary to be able to specify a filter
+/// conditionally (for example, with a ternary operator).
+class BreezeNoneFilter extends BreezeFilterExpression {
+  const BreezeNoneFilter();
 }
 
 /// A comparison filter (e.g., `field == value`, `field > value`).

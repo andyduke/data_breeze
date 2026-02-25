@@ -435,7 +435,7 @@ class BreezeJsonStore extends BreezeStore with BreezeStoreFetch {
       return applyFilter(entry, filter.left) || applyFilter(entry, filter.right);
     } else if (filter is BreezeNotFilter) {
       return !applyFilter(entry, filter.expression);
-    } else if (filter == null) {
+    } else if (filter == null || filter is BreezeNoneFilter) {
       // Do nothing
       return true;
     } else {

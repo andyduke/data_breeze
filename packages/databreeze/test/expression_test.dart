@@ -97,5 +97,23 @@ Future<void> main() async {
         expect(store.applyFilter({'name': 'Bill', 'age': 35}, expr), isTrue);
       });
     });
+
+    group('Special filters', () {
+      test('None', () {
+        final BreezeFilterExpression expr = BreezeFilterExpression.none();
+        expect(store.applyFilter({'anything': 1}, expr), isTrue);
+      });
+
+      test('Conditionally', () {
+        final value = 1;
+        final expr = (value > 0) ? BreezeField('anything').eq(1) : BreezeNoneFilter();
+        expect(store.applyFilter({'anything': 1}, expr), isTrue);
+      });
+
+      test('None AND logical', () {
+        final expr = (BreezeField('age') > 30) & BreezeNoneFilter();
+        expect(store.applyFilter({'age': 35, 'name': 'John'}, expr), isTrue);
+      });
+    });
   });
 }
