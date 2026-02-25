@@ -104,4 +104,15 @@ extension type const BreezeField(String name) implements String {
 
   /// Creates a filter for a value not inside a list of [values].
   BreezeFilterExpression notInside(List<dynamic> values) => BreezeInFilter(name, values, inverse: true);
+
+  BreezeExpressionValue get expr => BreezeExpressionValue(name);
+}
+
+class BreezeExpressionValue {
+  final dynamic expr;
+
+  const BreezeExpressionValue(this.expr);
+
+  @override
+  String toString() => 'expr($expr)';
 }

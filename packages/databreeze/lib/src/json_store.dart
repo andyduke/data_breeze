@@ -391,29 +391,30 @@ class BreezeJsonStore extends BreezeStore with BreezeStoreFetch {
   bool applyFilter(Map<String, dynamic> entry, BreezeFilterExpression? filter) {
     if (filter is BreezeComparisonFilter) {
       final value = entry[filter.field];
+      final filterValue = (filter.value is BreezeExpressionValue) ? entry[filter.value.expr] : filter.value;
       switch (filter.operator) {
         case '==':
-          return value == filter.value;
+          return value == filterValue;
         case '!=':
-          return value != filter.value;
+          return value != filterValue;
         case '<':
           return switch (value) {
-            Comparable comparableValue => comparableValue.compareTo(filter.value) < 0,
+            Comparable comparableValue => comparableValue.compareTo(filterValue) < 0,
             _ => false,
           };
         case '<=':
           return switch (value) {
-            Comparable comparableValue => comparableValue.compareTo(filter.value) <= 0,
+            Comparable comparableValue => comparableValue.compareTo(filterValue) <= 0,
             _ => false,
           };
         case '>':
           return switch (value) {
-            Comparable comparableValue => comparableValue.compareTo(filter.value) > 0,
+            Comparable comparableValue => comparableValue.compareTo(filterValue) > 0,
             _ => false,
           };
         case '>=':
           return switch (value) {
-            Comparable comparableValue => comparableValue.compareTo(filter.value) >= 0,
+            Comparable comparableValue => comparableValue.compareTo(filterValue) >= 0,
             _ => false,
           };
         default:

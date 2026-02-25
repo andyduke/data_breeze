@@ -410,6 +410,46 @@ CREATE TEMP TABLE task_progress(
       expect(tasks[2].id, equals(3));
     });
 
+    test('SELECT with String comparison', () async {
+      final store = TestStore(
+        log: log,
+        models: {
+          Task.blueprint,
+        },
+        migrationStrategy: BreezeSqliteMigrations(
+          SqliteMigrations()..add(
+            SqliteMigration(
+              1,
+              (tx) async {
+                await tx.execute(createTaskTableSql);
+
+                await tx.execute('''
+  INSERT INTO tasks(id, name, note, created_at, file) VALUES(1, 'File 1', 'Abc', '2025-10-30 12:00:00+03:00', 'Xyz')
+''');
+
+                await tx.execute('''
+  INSERT INTO tasks(id, name, note, created_at, file) VALUES(2, 'File 2', 'Bbb', '2025-10-30 11:00:00+03:00', 'Bbb')
+''');
+
+                await tx.execute('''
+  INSERT INTO tasks(id, name, note, created_at, file) VALUES(3, 'File 3', 'Ccc', '2025-10-30 11:00:00+03:00', 'Ccc')
+''');
+              },
+            ),
+          ),
+        ),
+      );
+
+      final query = BreezeQueryAll<Task>(
+        filter: BreezeField('note').eq('Bbb'),
+      );
+      final tasks = await query.fetch(store);
+
+      expect(tasks, hasLength(1));
+
+      expect(tasks[0].id, equals(2));
+    });
+
     test('SELECT with Expression AND None', () async {
       final store = TestStore(
         log: log,
@@ -490,6 +530,46 @@ CREATE TEMP TABLE task_progress(
       expect(tasks[0].id, equals(1));
       expect(tasks[1].id, equals(2));
       expect(tasks[2].id, equals(3));
+    });
+
+    test('SELECT with Expression < Expression', () async {
+      final store = TestStore(
+        log: log,
+        models: {
+          Task.blueprint,
+        },
+        migrationStrategy: BreezeSqliteMigrations(
+          SqliteMigrations()..add(
+            SqliteMigration(
+              1,
+              (tx) async {
+                await tx.execute(createTaskTableSql);
+
+                await tx.execute('''
+  INSERT INTO tasks(id, name, note, created_at, file) VALUES(1, 'File 1', 'Abc', '2025-10-30 12:00:00+03:00', 'Xyz')
+''');
+
+                await tx.execute('''
+  INSERT INTO tasks(id, name, note, created_at, file) VALUES(2, 'File 2', 'Bbb', '2025-10-30 11:00:00+03:00', 'Bbb')
+''');
+
+                await tx.execute('''
+  INSERT INTO tasks(id, name, note, created_at, file) VALUES(3, 'File 3', 'Ccc', '2025-10-30 11:00:00+03:00', 'Ccc')
+''');
+              },
+            ),
+          ),
+        ),
+      );
+
+      final query = BreezeQueryAll<Task>(
+        filter: BreezeField('note') < BreezeField('file').expr,
+      );
+      final tasks = await query.fetch(store);
+
+      expect(tasks, hasLength(1));
+
+      expect(tasks[0].id, equals(1));
     });
   });
 

@@ -558,10 +558,18 @@ class BreezeSqliteStore extends BreezeStore with BreezeStoreFetch {
       '>=' => '>=',
       _ => throw UnsupportedError('Invalid operator: ${f.operator}'),
     };
-    return (
-      '${f.field} $op ?',
-      [f.value],
-    );
+
+    if (f.value is BreezeExpressionValue) {
+      return (
+        '${f.field} $op ${f.value.expr}',
+        [],
+      );
+    } else {
+      return (
+        '${f.field} $op ?',
+        [f.value],
+      );
+    }
   }
 
   (String, List<dynamic>) _buildBetween(BreezeBetweenFilter f) {
