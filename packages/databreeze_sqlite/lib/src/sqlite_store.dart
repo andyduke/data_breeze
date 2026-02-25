@@ -584,10 +584,27 @@ class BreezeSqliteStore extends BreezeStore with BreezeStoreFetch {
   (String, List<dynamic>) _combineFilter(String op, BreezeFilterExpression left, BreezeFilterExpression right) {
     final (leftSql, leftArgs) = _buildWhere(left);
     final (rightSql, rightArgs) = _buildWhere(right);
-    return (
-      '($leftSql $op $rightSql)',
-      [...leftArgs, ...rightArgs],
-    );
+
+    if (left is BreezeNoneFilter && right is BreezeNoneFilter) {
+      return ('', []);
+    }
+    if (right is BreezeNoneFilter) {
+      return (
+        leftSql,
+        [...leftArgs],
+      );
+    }
+    if (left is BreezeNoneFilter) {
+      return (
+        rightSql,
+        [...rightArgs],
+      );
+    } else {
+      return (
+        '($leftSql $op $rightSql)',
+        [...leftArgs, ...rightArgs],
+      );
+    }
   }
 
   (String, List<dynamic>) _buildNot(BreezeFilterExpression expression) {
