@@ -38,8 +38,9 @@ String snakeToCamel(String input) {
 }
 
 String convertNameStyle(String value, BzModelNameStyle nameStyle) {
-  return switch (nameStyle) {
+  final result = switch (nameStyle) {
     BzModelNameStyle.camelCase => value,
     BzModelNameStyle.snakeCase => camelToSnake(value),
   };
+  return result;
 }

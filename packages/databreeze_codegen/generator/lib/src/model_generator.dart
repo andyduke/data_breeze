@@ -282,7 +282,8 @@ extension BzModelNameStyleUtils on BzModelNameStyle {
     BzModelNameStyle defaultValue = BzModelNameStyle.snakeCase,
   }) {
     if (value != null) {
-      final result = BzModelNameStyle.values.firstWhereOrNull((v) => v.name == value);
+      final valueName = value.split('.').last;
+      final result = BzModelNameStyle.values.firstWhereOrNull((v) => v.name == valueName);
       return result ?? defaultValue;
     } else {
       return defaultValue;
