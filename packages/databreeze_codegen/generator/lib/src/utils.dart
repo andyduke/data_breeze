@@ -1,3 +1,5 @@
+import 'package:databreeze_annotation/databreeze_annotation.dart';
+
 bool listEquals<T>(List<T>? a, List<T>? b) {
   if (a == null) {
     return b == null;
@@ -17,10 +19,12 @@ bool listEquals<T>(List<T>? a, List<T>? b) {
 }
 
 String camelToSnake(String input) {
-  return input.replaceAllMapped(
-    RegExp(r'(?<=[a-z])[A-Z]'),
-    (m) => '_${m.group(0)!.toLowerCase()}',
-  );
+  return input
+      .replaceAllMapped(
+        RegExp(r'(?<=[a-z])[A-Z]'),
+        (m) => '_${m.group(0)!.toLowerCase()}',
+      )
+      .toLowerCase();
 }
 
 String snakeToCamel(String input) {
@@ -31,4 +35,11 @@ String snakeToCamel(String input) {
     RegExp(r'(_|-)+([a-z])'),
     (Match m) => m[2]!.toUpperCase(),
   );
+}
+
+String convertNameStyle(String value, BzModelNameStyle nameStyle) {
+  return switch (nameStyle) {
+    BzModelNameStyle.camelCase => value,
+    BzModelNameStyle.snakeCase => camelToSnake(value),
+  };
 }

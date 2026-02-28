@@ -27,6 +27,7 @@ class BreezeModelGenerator extends GeneratorForAnnotation<BzModel> {
     final primaryKey = annotation.peek('primaryKey')?.stringValue ?? 'id';
     final primaryKeyType = classElement.modelKeyType;
     final constructor = annotation.peek('constructor')?.stringValue;
+    final nameStyle = BzModelNameStyleUtils.fromString(annotation.peek('nameStyle')?.revive().accessor);
     final schemaVersionClass =
         annotation.peek('schemaVersionClass')?.typeValue.getDisplayString() ?? 'BreezeModelSchemaVersion';
 
@@ -35,7 +36,7 @@ class BreezeModelGenerator extends GeneratorForAnnotation<BzModel> {
     }
 
     // Collect fields
-    final fields = _collectFields(element, primaryKey: primaryKey);
+    final fields = _collectFields(element, primaryKey: primaryKey, nameStyle: nameStyle);
 
     // Collect schema versions
     final schemaVersions = _collectSchemaVersions(element, annotation);
@@ -51,6 +52,7 @@ class BreezeModelGenerator extends GeneratorForAnnotation<BzModel> {
       primaryKey: primaryKey,
       primaryKeyType: primaryKeyType,
       schemaVersionClass: schemaVersionClass,
+      nameStyle: nameStyle,
     );
 
     // Generate blueprint code
@@ -62,6 +64,7 @@ class BreezeModelGenerator extends GeneratorForAnnotation<BzModel> {
       fields,
       schemaVersions,
       schemaVersionClass,
+      nameStyle,
     ).join('\n');
 
     // Generate code
@@ -96,7 +99,11 @@ ${fields.map((f) => "    ${className}Model.${f.name}: _self.${f.accessorName},")
     return output;
   }
 
-  List<FieldInfo> _collectFields(ClassElement element, {required String primaryKey}) {
+  List<FieldInfo> _collectFields(
+    ClassElement element, {
+    required String primaryKey,
+    required BzModelNameStyle nameStyle,
+  }) {
     final fields = <FieldInfo>[];
 
     /*
@@ -148,7 +155,7 @@ ${fields.map((f) => "    ${className}Model.${f.name}: _self.${f.accessorName},")
         BzColumn,
       ).firstAnnotationOf(annotationField, throwOnUnresolved: false);
       final columnName = (columnAnn == null)
-          ? camelToSnake(field.name!)
+          ? convertNameStyle(field.name!, nameStyle)
           : ConstantReader(columnAnn).read('name').literalValue as String;
 
       // Skip a private property that does not have a field name annotation
@@ -202,6 +209,7 @@ ${fields.map((f) => "    ${className}Model.${f.name}: _self.${f.accessorName},")
     List<FieldInfo> fields,
     List<SchemaVersionChanges> schemaVersions,
     String schemaVersionClass,
+    BzModelNameStyle nameStyle,
   ) {
     final g = BlueprintGenerator(
       className: className,
@@ -211,6 +219,7 @@ ${fields.map((f) => "    ${className}Model.${f.name}: _self.${f.accessorName},")
       fields: fields,
       schemaVersions: schemaVersions,
       schemaVersionClass: schemaVersionClass,
+      nameStyle: nameStyle,
     );
     return g.generate();
   }
@@ -223,6 +232,7 @@ ${fields.map((f) => "    ${className}Model.${f.name}: _self.${f.accessorName},")
     required String primaryKey,
     required String primaryKeyType,
     required String schemaVersionClass,
+    required BzModelNameStyle nameStyle,
   }) {
     if (schemaVersions.isNotEmpty) {
       final blueprintGenerator = BlueprintMultiVersionsGenerator(
@@ -233,6 +243,7 @@ ${fields.map((f) => "    ${className}Model.${f.name}: _self.${f.accessorName},")
         fields: fields,
         schemaVersions: schemaVersions,
         schemaVersionClass: schemaVersionClass,
+        nameStyle: nameStyle,
       );
 
       final schema = blueprintGenerator.generateVersionedColumns(fields, schemaVersions).lastOrNull;
@@ -261,6 +272,20 @@ The model is missing fields: ${missingFields.join(', ')}.''');
 The schema does not specify the model fields: ${extraFields.join(', ')}.''');
         }
       }
+    }
+  }
+}
+
+extension BzModelNameStyleUtils on BzModelNameStyle {
+  static BzModelNameStyle fromString(
+    String? value, {
+    BzModelNameStyle defaultValue = BzModelNameStyle.snakeCase,
+  }) {
+    if (value != null) {
+      final result = BzModelNameStyle.values.firstWhereOrNull((v) => v.name == value);
+      return result ?? defaultValue;
+    } else {
+      return defaultValue;
     }
   }
 }

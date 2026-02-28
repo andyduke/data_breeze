@@ -1,4 +1,4 @@
-import 'package:collection/collection.dart';
+import 'package:databreeze_annotation/databreeze_annotation.dart';
 import 'package:databreeze_generator/src/code_generator.dart';
 import 'package:databreeze_generator/src/types.dart';
 import 'package:databreeze_generator/src/utils.dart';
@@ -11,6 +11,7 @@ class BlueprintMultiVersionsGenerator extends CodeGenerator {
   final List<FieldInfo> fields;
   final List<SchemaVersionChanges> schemaVersions;
   final String schemaVersionClass;
+  final BzModelNameStyle nameStyle;
 
   BlueprintMultiVersionsGenerator({
     required this.className,
@@ -20,6 +21,7 @@ class BlueprintMultiVersionsGenerator extends CodeGenerator {
     required this.fields,
     required this.schemaVersions,
     required this.schemaVersionClass,
+    required this.nameStyle,
   });
 
   @override
@@ -69,7 +71,7 @@ ${v.fields.map((f) => "         BreezeModelColumn<${f.typeStr}>(${f.constructorP
     final List<ColumnInfo> columns = fields
         .map(
           (f) => ColumnInfo(
-            name: f.columnName ?? camelToSnake(f.name),
+            name: f.columnName ?? convertNameStyle(f.name, nameStyle),
             type: f.typeStr,
             isNullable: f.isNullable,
           ),

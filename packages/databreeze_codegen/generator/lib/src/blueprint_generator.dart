@@ -1,3 +1,4 @@
+import 'package:databreeze_annotation/databreeze_annotation.dart';
 import 'package:databreeze_generator/src/blueprint_multi_versions_generator.dart';
 import 'package:databreeze_generator/src/blueprint_single_version_generator.dart';
 import 'package:databreeze_generator/src/code_generator.dart';
@@ -11,6 +12,7 @@ class BlueprintGenerator extends CodeGenerator {
   final List<FieldInfo> fields;
   final List<SchemaVersionChanges> schemaVersions;
   final String schemaVersionClass;
+  final BzModelNameStyle nameStyle;
 
   BlueprintGenerator({
     required this.className,
@@ -20,6 +22,7 @@ class BlueprintGenerator extends CodeGenerator {
     required this.fields,
     required this.schemaVersions,
     required this.schemaVersionClass,
+    required this.nameStyle,
   });
 
   @override
@@ -42,6 +45,7 @@ class BlueprintGenerator extends CodeGenerator {
         fields: fields,
         schemaVersions: schemaVersions,
         schemaVersionClass: schemaVersionClass,
+        nameStyle: nameStyle,
       );
       yield* g.generate();
     }
