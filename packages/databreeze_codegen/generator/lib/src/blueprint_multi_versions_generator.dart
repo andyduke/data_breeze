@@ -72,7 +72,7 @@ ${v.fields.map((f) => "         BreezeModelColumn<${f.typeStr}>(${f.constructorP
         .map(
           (f) => ColumnInfo(
             name: f.columnName ?? convertNameStyle(f.name, nameStyle),
-            type: f.typeStr,
+            type: f.type,
             isNullable: f.isNullable,
           ),
         )

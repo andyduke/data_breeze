@@ -23,7 +23,11 @@ class BreezeModelGenerator extends GeneratorForAnnotation<BzModel> {
     final ClassElement classElement = element;
     final className = classElement.name!;
     final modelName = annotation.peek('name')?.stringValue;
-    final tableName = modelName ?? camelToSnake(className);
+    final tableName =
+        modelName ??
+        camelToSnake(
+          className,
+        ); // TODO: plural - https://github.com/ivofernandes/pluralize/blob/main/lib/src/pluralize.dart
     final primaryKey = annotation.peek('primaryKey')?.stringValue ?? 'id';
     final primaryKeyType = classElement.modelKeyType;
     final constructor = annotation.peek('constructor')?.stringValue;
@@ -167,7 +171,9 @@ ${fields.map((f) => "    ${className}Model.${f.name}: _self.${f.accessorName},")
       ).firstAnnotationOf(annotationField, throwOnUnresolved: false);
       if (transientAnn != null) continue;
 
-      // print('[${element.displayName}] Prop: ${field.name}, type: ${field.type.element?.displayName}');
+      // print(
+      //   '[${element.displayName}] Prop: ${field.name}, type: ${field.type.element?.displayName}, nullable: ${field.type.nullabilitySuffix}',
+      // );
 
       final publicName = field.isPrivate ? field.name!.substring(1) : field.name!;
 
@@ -177,7 +183,7 @@ ${fields.map((f) => "    ${className}Model.${f.name}: _self.${f.accessorName},")
           constructorName: publicName,
           name: publicName,
           accessorName: field.name!,
-          typeStr: field.type.element?.displayName ?? 'dynamic',
+          type: field.type.element?.displayName ?? 'dynamic',
           isNullable: field.type.nullabilitySuffix != NullabilitySuffix.none,
           columnName: columnName,
           isPrimaryKey: field.name == primaryKey,

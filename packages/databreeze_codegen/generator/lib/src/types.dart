@@ -19,16 +19,18 @@ class FieldInfo {
   /// this will be the property's private name.
   final String accessorName;
 
-  final String typeStr;
+  final String type;
   final bool isNullable;
   final String? columnName;
   final bool isPrimaryKey;
+
+  String get typeStr => type + (isNullable ? '?' : '');
 
   const FieldInfo({
     String? constructorName,
     String? accessorName,
     required this.name,
-    required this.typeStr,
+    required this.type,
     required this.isNullable,
     this.columnName,
     this.isPrimaryKey = false,

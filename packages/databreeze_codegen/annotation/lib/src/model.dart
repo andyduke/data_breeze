@@ -16,6 +16,7 @@ class BzModel {
   final String? constructor;
   final Type? schemaVersionClass;
   final List<BzSchemaVersion> schemaHistory;
+  // TODO: Rename [nameStyle] to [columnNameStyle]
   final BzModelNameStyle nameStyle;
 
   const BzModel({

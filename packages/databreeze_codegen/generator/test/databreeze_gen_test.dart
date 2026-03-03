@@ -23,9 +23,9 @@ void main() {
       ];
 
       final fields = <FieldInfo>[
-        FieldInfo(name: 'title', typeStr: 'String', isNullable: false),
-        FieldInfo(name: 'text', typeStr: 'String', isNullable: true),
-        FieldInfo(name: 'updated_at', typeStr: 'String', isNullable: false),
+        FieldInfo(name: 'title', type: 'String', isNullable: false),
+        FieldInfo(name: 'text', type: 'String', isNullable: true),
+        FieldInfo(name: 'updated_at', type: 'String', isNullable: false),
       ];
 
       final expectedVersions = <SchemaVersion>[
@@ -90,9 +90,9 @@ void main() {
       ];
 
       final fields = <FieldInfo>[
-        FieldInfo(name: 'title', typeStr: 'String', isNullable: false),
-        FieldInfo(name: 'text', typeStr: 'String', isNullable: true),
-        FieldInfo(name: 'createdAt', typeStr: 'String', isNullable: false),
+        FieldInfo(name: 'title', type: 'String', isNullable: false),
+        FieldInfo(name: 'text', type: 'String', isNullable: true),
+        FieldInfo(name: 'createdAt', type: 'String', isNullable: false),
       ];
 
       final expectedVersions = <SchemaVersion>[
