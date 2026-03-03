@@ -17,7 +17,7 @@ mixin ItemModel {
       BreezeModelColumn<String>('name'),
 
       // category
-      BreezeModelColumn<ItemCategory?>('category_id'),
+      BreezeModelColumn<ItemCategory>('category_id'),
     },
     builder: ItemModel.fromRecord,
   );

@@ -12,10 +12,10 @@ class Item extends BreezeModel<int> with ItemModel {
   String name;
 
   @BzColumn(name: 'category_id')
-  ItemCategory? category;
+  ItemCategory /* ? */ category;
 
   Item({
     required this.name,
-    this.category,
+    /* ? */ required this.category,
   });
 }

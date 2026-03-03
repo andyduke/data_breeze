@@ -360,7 +360,7 @@ class BreezeSqliteStore extends BreezeStore with BreezeStoreFetch {
     required String name,
     required BreezeFilterExpression filter,
   }) async {
-    final (whereSql, whereParams) = _buildWhere(filter);
+    final (whereSql, whereParams) = _buildWhere(name, filter);
     final whereClause = 'WHERE $whereSql';
 
     // Skip and do not delete anything if the condition is empty.
@@ -426,11 +426,12 @@ class BreezeSqliteStore extends BreezeStore with BreezeStoreFetch {
   }
 
   ({String sql, List<dynamic> params}) sqlWhereOf(
+    String table,
     BreezeFilterExpression? filter, {
     String prefix = 'WHERE',
     String suffix = '',
   }) {
-    final (whereSql, whereParams) = _buildWhere(filter);
+    final (whereSql, whereParams) = _buildWhere(table, filter);
     final whereClause = whereSql.isNotEmpty ? '$prefix ($whereSql) $suffix'.trim() : '';
 
     return (
@@ -530,7 +531,7 @@ class BreezeSqliteStore extends BreezeStore with BreezeStoreFetch {
                 ),
               )
               .toList(growable: false),
-          constraint: '${column.name} = ${columnBlueprint.name}.id',
+          constraint: '$table.${column.name} = ${columnBlueprint.name}.id',
         ),
       );
     }
@@ -550,16 +551,16 @@ class BreezeSqliteStore extends BreezeStore with BreezeStoreFetch {
   }) {
     final (joinsColumns, joinsTables) = _buildJoins(joins);
 
-    final (whereSql, whereParams) = _buildWhere(filter);
+    final (whereSql, whereParams) = _buildWhere(table, filter);
     final whereClause = whereSql.isNotEmpty ? ' WHERE $whereSql' : '';
 
-    final (orderSql, orderParams) = _buildOrderBy(sortBy);
+    final (orderSql, orderParams) = _buildOrderBy(table, sortBy);
     final orderClause = orderSql.isNotEmpty ? ' ORDER BY $orderSql' : '';
 
     final limitClause = _buildLimit(limit, offset);
 
     return (
-      sql: 'SELECT $columns$joinsColumns FROM $table$joinsTables$whereClause$orderClause$limitClause',
+      sql: 'SELECT $table.$columns$joinsColumns FROM $table$joinsTables$whereClause$orderClause$limitClause',
       params: [...whereParams, ...orderParams],
     );
   }
@@ -581,19 +582,19 @@ class BreezeSqliteStore extends BreezeStore with BreezeStoreFetch {
     );
   }
 
-  (String, List<dynamic>) _buildWhere(BreezeFilterExpression? filter) {
+  (String, List<dynamic>) _buildWhere(String table, BreezeFilterExpression? filter) {
     return switch (filter) {
-      BreezeComparisonFilter f => _buildComparison(f),
-      BreezeBetweenFilter f => _buildBetween(f),
-      BreezeInFilter f => _buildIn(f),
-      BreezeAndFilter f => _combineFilter('AND', f.left, f.right),
-      BreezeOrFilter f => _combineFilter('OR', f.left, f.right),
-      BreezeNotFilter f => _buildNot(f.expression),
+      BreezeComparisonFilter f => _buildComparison(table, f),
+      BreezeBetweenFilter f => _buildBetween(table, f),
+      BreezeInFilter f => _buildIn(table, f),
+      BreezeAndFilter f => _combineFilter(table, 'AND', f.left, f.right),
+      BreezeOrFilter f => _combineFilter(table, 'OR', f.left, f.right),
+      BreezeNotFilter f => _buildNot(table, f.expression),
       _ => ('', []),
     };
   }
 
-  (String, List<dynamic>) _buildComparison(BreezeComparisonFilter f) {
+  (String, List<dynamic>) _buildComparison(String table, BreezeComparisonFilter f) {
     // Convert comparison with NULL to IS NULL/IS NOT NULL expression.
     if ((f.operator == '==' || f.operator == '!=') && (f.value == null)) {
       final op = switch (f.operator) {
@@ -602,7 +603,7 @@ class BreezeSqliteStore extends BreezeStore with BreezeStoreFetch {
         _ => throw UnsupportedError('Invalid operator: ${f.operator}'),
       };
       return (
-        '${f.field} $op NULL',
+        '$table.${f.field} $op NULL',
         [],
       );
     }
@@ -619,37 +620,42 @@ class BreezeSqliteStore extends BreezeStore with BreezeStoreFetch {
 
     if (f.value is BreezeExpressionValue) {
       return (
-        '${f.field} $op ${f.value.expr}',
+        '$table.${f.field} $op ${f.value.expr}',
         [],
       );
     } else {
       return (
-        '${f.field} $op ?',
+        '$table.${f.field} $op ?',
         [f.value],
       );
     }
   }
 
-  (String, List<dynamic>) _buildBetween(BreezeBetweenFilter f) {
+  (String, List<dynamic>) _buildBetween(String table, BreezeBetweenFilter f) {
     return (
-      '${f.field} BETWEEN ? AND ?',
+      '$table.${f.field} BETWEEN ? AND ?',
       [f.min, f.max],
     );
   }
 
-  (String, List<dynamic>) _buildIn(BreezeInFilter f) {
+  (String, List<dynamic>) _buildIn(String table, BreezeInFilter f) {
     if (f.values.isEmpty) return ('0', []);
     final placeholders = List.filled(f.values.length, '?').join(', ');
     final op = !f.inverse ? 'IN' : 'NOT IN';
     return (
-      '${f.field} $op ($placeholders)',
+      '$table.${f.field} $op ($placeholders)',
       f.values,
     );
   }
 
-  (String, List<dynamic>) _combineFilter(String op, BreezeFilterExpression left, BreezeFilterExpression right) {
-    final (leftSql, leftArgs) = _buildWhere(left);
-    final (rightSql, rightArgs) = _buildWhere(right);
+  (String, List<dynamic>) _combineFilter(
+    String table,
+    String op,
+    BreezeFilterExpression left,
+    BreezeFilterExpression right,
+  ) {
+    final (leftSql, leftArgs) = _buildWhere(table, left);
+    final (rightSql, rightArgs) = _buildWhere(table, right);
 
     if (left is BreezeNoneFilter && right is BreezeNoneFilter) {
       return ('', []);
@@ -673,8 +679,8 @@ class BreezeSqliteStore extends BreezeStore with BreezeStoreFetch {
     }
   }
 
-  (String, List<dynamic>) _buildNot(BreezeFilterExpression expression) {
-    final (notSql, notArgs) = _buildWhere(expression);
+  (String, List<dynamic>) _buildNot(String table, BreezeFilterExpression expression) {
+    final (notSql, notArgs) = _buildWhere(table, expression);
     final sql = (notSql.startsWith('(') && notSql.endsWith(')')) ? notSql : '($notSql)';
     return (
       'NOT $sql',
@@ -682,9 +688,9 @@ class BreezeSqliteStore extends BreezeStore with BreezeStoreFetch {
     );
   }
 
-  (String, List<dynamic>) _buildOrderBy(List<BreezeSortBy> orderBy) {
+  (String, List<dynamic>) _buildOrderBy(String table, List<BreezeSortBy> orderBy) {
     final result = orderBy
-        .map((order) => '${order.column} ${_orderDirections[order.direction]}')
+        .map((order) => '$table.${order.column} ${_orderDirections[order.direction]}')
         .join(
           ', ',
         );
