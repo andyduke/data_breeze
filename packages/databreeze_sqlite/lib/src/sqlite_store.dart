@@ -161,8 +161,17 @@ class BreezeSqliteStore extends BreezeStore with BreezeStoreFetch {
 
     switch (request) {
       case BreezeFetchRequest(filter: final filter, sortBy: final sortBy):
-        final (:sql, :params) = buildSql(table, filter: filter, sortBy: sortBy, limit: 1);
+        // TODO: JOIN blueprint.nestedModelColumns
+        final joins = (blueprint != null) ? createJoins(table, blueprint.nestedModelColumns) : const <SqlJoin>[];
+        final (:sql, :params) = buildSql(
+          table,
+          filter: filter,
+          joins: joins,
+          sortBy: sortBy,
+          limit: 1,
+        );
         result = await executeSql(sql, params, typeConverters);
+        // TODO: convert joined to nested map
         break;
 
       case BreezeSqliteRequest(sql: final sql, params: final params):
@@ -193,6 +202,7 @@ class BreezeSqliteStore extends BreezeStore with BreezeStoreFetch {
       case BreezeFetchRequest(filter: final filter, sortBy: final sortBy):
         final (:sql, :params) = buildSql(table, filter: filter, sortBy: sortBy);
         result = await executeSql(sql, params, typeConverters);
+        // TODO: FetchAll blueprint.relatedModels -> append to result
         break;
 
       case BreezeSqliteRequest(sql: final sql, params: final params):
@@ -501,14 +511,45 @@ class BreezeSqliteStore extends BreezeStore with BreezeStoreFetch {
   }
 
   @protected
+  List<SqlJoin> createJoins(String table, List<BreezeModelColumn> columns) {
+    final result = <SqlJoin>[];
+
+    for (final column in columns) {
+      final columnBlueprint = blueprintOf(column.type /* ! */);
+      // TODO: Recursive buildJoins(columnBlueprint.nestedModelColumns)
+      result.add(
+        SqlJoin(
+          parentTable: table,
+          table: columnBlueprint.name,
+          columns: columnBlueprint.columns.values
+              .map(
+                (c) => SqlColumn(
+                  table: columnBlueprint.name,
+                  name: c.name,
+                  alias: '_${columnBlueprint.name}_${c.name}',
+                ),
+              )
+              .toList(growable: false),
+          constraint: '${column.name} = ${columnBlueprint.name}.id',
+        ),
+      );
+    }
+
+    return result;
+  }
+
+  @protected
   ({String sql, List<dynamic> params}) buildSql(
     String table, {
     String columns = '*',
     BreezeFilterExpression? filter,
+    List<SqlJoin> joins = const [],
     List<BreezeSortBy> sortBy = const [],
     int? limit,
     int? offset,
   }) {
+    final (joinsColumns, joinsTables) = _buildJoins(joins);
+
     final (whereSql, whereParams) = _buildWhere(filter);
     final whereClause = whereSql.isNotEmpty ? ' WHERE $whereSql' : '';
 
@@ -518,8 +559,25 @@ class BreezeSqliteStore extends BreezeStore with BreezeStoreFetch {
     final limitClause = _buildLimit(limit, offset);
 
     return (
-      sql: 'SELECT $columns FROM $table$whereClause$orderClause$limitClause',
+      sql: 'SELECT $columns$joinsColumns FROM $table$joinsTables$whereClause$orderClause$limitClause',
       params: [...whereParams, ...orderParams],
+    );
+  }
+
+  (String columns, String tables) _buildJoins(List<SqlJoin> joins) {
+    final columns = <String>[];
+    final tables = <String>[];
+
+    for (final join in joins) {
+      columns.addAll(join.columns.map((c) => c.fullName));
+      tables.add(
+        'LEFT JOIN ${join.table} ON ${join.constraint}',
+      );
+    }
+
+    return (
+      columns.isNotEmpty ? ', ${columns.join(', ')}' : '',
+      tables.isNotEmpty ? ' ${tables.join(', ')}' : '',
     );
   }
 
@@ -728,4 +786,46 @@ class SqliteFileOpenFactory extends DefaultSqliteOpenFactory {
     final db = super.open(options);
     return db;
   }
+}
+
+class SqlColumn {
+  final String? table;
+  final String name;
+  final String? alias;
+
+  String get fullName {
+    final result = StringBuffer();
+
+    if (table != null) {
+      result.write('$table.');
+    }
+
+    result.write(name);
+
+    if (alias != null) {
+      result.write(' AS $alias');
+    }
+
+    return result.toString();
+  }
+
+  const SqlColumn({
+    this.table,
+    required this.name,
+    this.alias,
+  });
+}
+
+class SqlJoin {
+  final String parentTable;
+  final String table;
+  final List<SqlColumn> columns;
+  final String constraint;
+
+  const SqlJoin({
+    required this.parentTable,
+    required this.table,
+    required this.columns,
+    required this.constraint,
+  });
 }

@@ -25,6 +25,12 @@ class BreezeModelColumn<T> {
   /// Dart type in the model for this column
   Type get type => T;
 
+  // bool isSubtype<S>() => <T>[] is List<S>;
+  bool isSubtype<S>() {
+    final result = (<T>[] is List<S>) /* || (<T>[] is List<S?>) */;
+    return result;
+  }
+
   /*
   /// The database data type for storing the column value
   ///
@@ -43,6 +49,10 @@ class BreezeModelColumn<T> {
   */
 
   /// Does this column accept NULL values?
+  // TODO: Pass this parameter explicitly in the constructor, otherwise it
+  //  will be impossible to obtain a non-nullable field type.
+  //  This, for example, means it's impossible to obtain a blueprint for
+  //  a BreezeModel field in a JOIN.
   bool get isNullable => null is T;
 
   const BreezeModelColumn(

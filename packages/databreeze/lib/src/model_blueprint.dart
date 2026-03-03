@@ -56,6 +56,12 @@ class BreezeModelBlueprint<M extends BreezeBaseModel> extends BreezeModelVersion
     );
   }
 
+  List<BreezeModelColumn> get nestedModelColumns => columns.values
+      .where(
+        (column) => column.isSubtype<BreezeModel>(),
+      )
+      .toList(growable: false);
+
   /// Create a model instance from a raw record
   M fromRecord(Map<String, dynamic> record, BreezeStorageTypeConverters converters) {
     final typedRecord = fromRaw(record, converters);
