@@ -208,11 +208,10 @@ class BreezeSqliteStore extends BreezeStore with BreezeStoreFetch {
       case BreezeFetchRequest(filter: final filter, sortBy: final sortBy):
         final (:sql, :params) = buildSql(table, filter: filter, sortBy: sortBy);
         result = await executeSql(sql, params, typeConverters);
-        // TODO: FetchAll blueprint.relatedModels -> append to result
 
-        // if (blueprint != null) {
-        //   result = loadNested(result, blueprint.nestedModelColumns);
-        // }
+        if (blueprint != null) {
+          result = await loadNested(result, blueprint.nestedModelColumns);
+        }
 
         break;
 
@@ -583,41 +582,47 @@ class BreezeSqliteStore extends BreezeStore with BreezeStoreFetch {
   }
 
   @protected
-  List<Map<String, dynamic>> loadNested(List<Map<String, dynamic>> rows, List<BreezeModelColumn> columns) {
-    final result = <Map<String, dynamic>>[];
-
-    // TODO: fetch nested rows
+  Future<List<Map<String, dynamic>>> loadNested(
+    List<Map<String, dynamic>> rows,
+    List<BreezeModelColumn> columns,
+  ) async {
+    final resultRows = rows
+        .map(
+          (row) => Map<String, dynamic>.from(row),
+        )
+        .toList();
 
     for (final column in columns) {
-      // final columnBlueprint = blueprintOf(column.type /* ! */);
-      // TODO: Recursive expandJoinsToNested('_${rows[column.name]}', columnBlueprint.nestedModelColumns)
+      final columnBlueprint = blueprintOf(column.type /* ! */);
+      if (columnBlueprint.key != null) {
+        final ids = {
+          for (final row in resultRows)
+            if (row.containsKey(column.name)) row[column.name],
+        }.toList(growable: false);
+        final nestedRows = Map.fromIterable(
+          await fetchAllRecords(
+            table: columnBlueprint.name,
+            request: BreezeFetchRequest(
+              filter: BreezeField(columnBlueprint.key!).inside(ids),
+            ),
+            blueprint: columnBlueprint,
+          ),
+          key: (row) => row[columnBlueprint.key!],
+        );
 
-      for (final row in rows) {
-        final nestedRow = {...row};
-
-        // TODO: expand ???
-
-        /*
-        final Map<String, dynamic> nestedRecord = {};
-
-        final nestedKeys = nestedRow.keys.where((k) => k.startsWith('__${column.name}__'));
-        for (final nestedKey in nestedKeys) {
-          final key = nestedKey.substring('__${column.name}__'.length);
-          nestedRecord[key] = nestedRow[nestedKey];
+        for (final row in resultRows) {
+          final rowFk = row[column.name];
+          if (rowFk != null) {
+            final nested = nestedRows[rowFk];
+            if (nested != null) {
+              row[column.name] = Map<String, dynamic>.from(nested);
+            }
+          }
         }
-
-        nestedRow.removeWhere((key, _) => nestedKeys.contains(key));
-
-        if (nestedRecord.isNotEmpty) {
-          nestedRow[column.name] = nestedRecord;
-        }
-        */
-
-        result.add(nestedRow);
       }
     }
 
-    return result;
+    return resultRows;
   }
 
   @protected
