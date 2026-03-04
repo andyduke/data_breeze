@@ -1,3 +1,5 @@
+import 'package:databreeze/src/model_blueprint.dart';
+
 typedef BreezeDataRecord = Map<String, dynamic>;
 
 class BreezeException implements Exception {
@@ -12,3 +14,5 @@ class BreezeException implements Exception {
     return "$runtimeType: $message";
   }
 }
+
+typedef BreezeBlueprintLookup = BreezeModelBlueprint Function(Type modelType);

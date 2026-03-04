@@ -156,13 +156,15 @@ class BreezeSqliteStore extends BreezeStore with BreezeStoreFetch {
     BreezeModelBlueprint? blueprint,
     Set<BreezeBaseTypeConverter> typeConverters = const {},
   }) async {
-    ResultSet? result;
+    List<Map<String, dynamic>>? result;
     Map<String, dynamic>? record;
 
     switch (request) {
       case BreezeFetchRequest(filter: final filter, sortBy: final sortBy):
-        // TODO: JOIN blueprint.nestedModelColumns
-        final joins = (blueprint != null) ? createJoins(table, blueprint.nestedModelColumns) : const <SqlJoin>[];
+        final joins = (blueprint != null)
+            ? createJoinsForNested(table, blueprint.nestedModelColumns)
+            : const <SqlJoin>[];
+
         final (:sql, :params) = buildSql(
           table,
           filter: filter,
@@ -171,7 +173,11 @@ class BreezeSqliteStore extends BreezeStore with BreezeStoreFetch {
           limit: 1,
         );
         result = await executeSql(sql, params, typeConverters);
-        // TODO: convert joined to nested map
+
+        if (blueprint != null) {
+          result = expandJoinsToNested(result, blueprint.nestedModelColumns);
+        }
+
         break;
 
       case BreezeSqliteRequest(sql: final sql, params: final params):
@@ -195,7 +201,7 @@ class BreezeSqliteStore extends BreezeStore with BreezeStoreFetch {
     BreezeModelBlueprint? blueprint,
     Set<BreezeBaseTypeConverter> typeConverters = const {},
   }) async {
-    ResultSet? result;
+    List<Map<String, dynamic>>? result;
     List<Map<String, dynamic>>? records;
 
     switch (request) {
@@ -203,6 +209,11 @@ class BreezeSqliteStore extends BreezeStore with BreezeStoreFetch {
         final (:sql, :params) = buildSql(table, filter: filter, sortBy: sortBy);
         result = await executeSql(sql, params, typeConverters);
         // TODO: FetchAll blueprint.relatedModels -> append to result
+
+        // if (blueprint != null) {
+        //   result = loadNested(result, blueprint.nestedModelColumns);
+        // }
+
         break;
 
       case BreezeSqliteRequest(sql: final sql, params: final params):
@@ -512,12 +523,13 @@ class BreezeSqliteStore extends BreezeStore with BreezeStoreFetch {
   }
 
   @protected
-  List<SqlJoin> createJoins(String table, List<BreezeModelColumn> columns) {
+  List<SqlJoin> createJoinsForNested(String table, List<BreezeModelColumn> columns) {
     final result = <SqlJoin>[];
 
     for (final column in columns) {
       final columnBlueprint = blueprintOf(column.type /* ! */);
       // TODO: Recursive buildJoins(columnBlueprint.nestedModelColumns)
+
       result.add(
         SqlJoin(
           parentTable: table,
@@ -527,13 +539,82 @@ class BreezeSqliteStore extends BreezeStore with BreezeStoreFetch {
                 (c) => SqlColumn(
                   table: columnBlueprint.name,
                   name: c.name,
-                  alias: '_${columnBlueprint.name}_${c.name}',
+                  alias: '__${column.name}__${c.name}',
                 ),
               )
               .toList(growable: false),
           constraint: '$table.${column.name} = ${columnBlueprint.name}.id',
         ),
       );
+    }
+
+    return result;
+  }
+
+  @protected
+  List<Map<String, dynamic>> expandJoinsToNested(List<Map<String, dynamic>> rows, List<BreezeModelColumn> columns) {
+    final result = <Map<String, dynamic>>[];
+
+    for (final column in columns) {
+      // final columnBlueprint = blueprintOf(column.type /* ! */);
+      // TODO: Recursive expandJoinsToNested('_${rows[column.name]}', columnBlueprint.nestedModelColumns)
+
+      for (final row in rows) {
+        final nestedRow = {...row};
+        final Map<String, dynamic> nestedRecord = {};
+
+        final nestedKeys = nestedRow.keys.where((k) => k.startsWith('__${column.name}__'));
+        for (final nestedKey in nestedKeys) {
+          final key = nestedKey.substring('__${column.name}__'.length);
+          nestedRecord[key] = nestedRow[nestedKey];
+        }
+
+        nestedRow.removeWhere((key, _) => nestedKeys.contains(key));
+
+        if (nestedRecord.isNotEmpty) {
+          nestedRow[column.name] = nestedRecord;
+        }
+
+        result.add(nestedRow);
+      }
+    }
+
+    return result;
+  }
+
+  @protected
+  List<Map<String, dynamic>> loadNested(List<Map<String, dynamic>> rows, List<BreezeModelColumn> columns) {
+    final result = <Map<String, dynamic>>[];
+
+    // TODO: fetch nested rows
+
+    for (final column in columns) {
+      // final columnBlueprint = blueprintOf(column.type /* ! */);
+      // TODO: Recursive expandJoinsToNested('_${rows[column.name]}', columnBlueprint.nestedModelColumns)
+
+      for (final row in rows) {
+        final nestedRow = {...row};
+
+        // TODO: expand ???
+
+        /*
+        final Map<String, dynamic> nestedRecord = {};
+
+        final nestedKeys = nestedRow.keys.where((k) => k.startsWith('__${column.name}__'));
+        for (final nestedKey in nestedKeys) {
+          final key = nestedKey.substring('__${column.name}__'.length);
+          nestedRecord[key] = nestedRow[nestedKey];
+        }
+
+        nestedRow.removeWhere((key, _) => nestedKeys.contains(key));
+
+        if (nestedRecord.isNotEmpty) {
+          nestedRow[column.name] = nestedRecord;
+        }
+        */
+
+        result.add(nestedRow);
+      }
     }
 
     return result;

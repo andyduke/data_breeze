@@ -77,6 +77,8 @@ Future<void> main() async {
       expect(item!.id, equals(1));
       expect(item.name, equals('Item 1'));
       expect(item.category, isNotNull);
+      expect(item.category, isA<ItemCategory>());
+      expect(item.category.name, equals('Category 1'));
     });
 
     test('Fetch All Records with Relation', () async {

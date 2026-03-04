@@ -62,9 +62,34 @@ class BreezeModelBlueprint<M extends BreezeBaseModel> extends BreezeModelVersion
       )
       .toList(growable: false);
 
+  Set<BreezeBaseTypeConverter> nestedModelsConverters(
+    BreezeStorageTypeConverters converters,
+    BreezeBlueprintLookup blueprintOf,
+  ) {
+    final Set<BreezeBaseTypeConverter> result = {};
+
+    for (final column in nestedModelColumns) {
+      final columnBlueprint = blueprintOf(column.type);
+      result.add(
+        _ModelTypeConverter(
+          column.type,
+          columnBlueprint,
+          converters,
+          blueprintOf,
+        ),
+      );
+    }
+
+    return result;
+  }
+
   /// Create a model instance from a raw record
-  M fromRecord(Map<String, dynamic> record, BreezeStorageTypeConverters converters) {
-    final typedRecord = fromRaw(record, converters);
+  M fromRecord(
+    Map<String, dynamic> record,
+    BreezeStorageTypeConverters converters,
+    BreezeBlueprintLookup blueprintOf,
+  ) {
+    final typedRecord = fromRaw(record, converters, blueprintOf);
     final result = builder(typedRecord);
 
     if ((result is BreezeModel) && (key != null)) {
@@ -75,14 +100,62 @@ class BreezeModelBlueprint<M extends BreezeBaseModel> extends BreezeModelVersion
   }
 
   /// Convert db's data types to schema column types
-  Map<String, dynamic> fromRaw(Map<String, dynamic> raw, BreezeStorageTypeConverters converters) =>
-      raw.map((k, v) => MapEntry(k, valueFromStorage(k, v, converters)));
+  Map<String, dynamic> fromRaw(
+    Map<String, dynamic> raw,
+    BreezeStorageTypeConverters converters,
+    BreezeBlueprintLookup blueprintOf,
+  ) {
+    final extendedTypeConverters = {
+      ...typeConverters,
+      ...nestedModelsConverters(converters, blueprintOf),
+    };
+
+    return raw.map(
+      (k, v) => MapEntry(
+        k,
+        valueFromStorage(
+          k,
+          v,
+          converters,
+          extendedTypeConverters,
+          blueprintOf,
+        ),
+      ),
+    );
+  }
 
   /// Convert schema column types into db's data types
-  Map<String, dynamic> toRaw(Map<String, dynamic> raw, BreezeStorageTypeConverters converters) =>
-      raw.map((k, v) => MapEntry(k, valueToStorage(k, v, converters)));
+  Map<String, dynamic> toRaw(
+    Map<String, dynamic> raw,
+    BreezeStorageTypeConverters converters,
+    BreezeBlueprintLookup blueprintOf,
+  ) {
+    final extendedTypeConverters = {
+      ...typeConverters,
+      ...nestedModelsConverters(converters, blueprintOf),
+    };
 
-  dynamic valueFromStorage(String name, dynamic value, BreezeStorageTypeConverters converters) {
+    return raw.map(
+      (k, v) => MapEntry(
+        k,
+        valueToStorage(
+          k,
+          v,
+          converters,
+          extendedTypeConverters,
+          blueprintOf,
+        ),
+      ),
+    );
+  }
+
+  dynamic valueFromStorage(
+    String name,
+    dynamic value,
+    BreezeStorageTypeConverters converters,
+    Set<BreezeBaseTypeConverter> typeConverters,
+    BreezeBlueprintLookup blueprintOf,
+  ) {
     final column = columns[name];
 
     if (column == null) {
@@ -109,7 +182,13 @@ class BreezeModelBlueprint<M extends BreezeBaseModel> extends BreezeModelVersion
     }
   }
 
-  dynamic valueToStorage(String name, dynamic value, BreezeStorageTypeConverters converters) {
+  dynamic valueToStorage(
+    String name,
+    dynamic value,
+    BreezeStorageTypeConverters converters,
+    Set<BreezeBaseTypeConverter> typeConverters,
+    BreezeBlueprintLookup blueprintOf,
+  ) {
     final column = columns[name]!;
 
     if (!column.isAutoGenerate && !column.isNullable && value == null) {
@@ -127,4 +206,49 @@ class BreezeModelBlueprint<M extends BreezeBaseModel> extends BreezeModelVersion
       return result ?? value;
     }
   }
+}
+
+class _ModelTypeConverter<M extends BreezeBaseModel> extends BreezeBaseTypeConverter<M, Map<String, dynamic>> {
+  final Type modelType;
+  final BreezeModelBlueprint<M> blueprint;
+  final BreezeStorageTypeConverters converters;
+  final BreezeBlueprintLookup blueprintOf;
+
+  const _ModelTypeConverter(this.modelType, this.blueprint, this.converters, this.blueprintOf);
+
+  @override
+  bool isDartType(Type type) {
+    final result = (modelType == type);
+    return result;
+  }
+
+  @override
+  bool isStorageType(Type type) {
+    final result = (type == <String, dynamic>{}.runtimeType);
+    return result;
+  }
+
+  @override
+  bool canConvertToStorage(Type dartType) {
+    /*
+    if (blueprint is BreezeModelBlueprint<BreezeModel>) {
+      return super.canConvertToStorage(dartType);
+    } else {
+      return false;
+    }
+    */
+    return false;
+  }
+
+  @override
+  M toDart(Map<String, dynamic> value) => blueprint.fromRecord(value, converters, blueprintOf);
+
+  /*
+  @override
+  Map<String, dynamic> toStorage(M value) =>
+      blueprint.toRaw((value as BreezeModel).toRawRecord(), converters, blueprintOf);
+  */
+
+  @override
+  Map<String, dynamic> toStorage(M value) => {};
 }

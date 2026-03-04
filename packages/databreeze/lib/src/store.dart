@@ -129,7 +129,7 @@ abstract class BreezeStore with BreezeStorageTypeConverters {
       },
     );
 
-    return ((record != null) ? modelBlueprint.fromRecord(record, this) : null);
+    return ((record != null) ? modelBlueprint.fromRecord(record, this, blueprintOf) : null);
   }
 
   Future<List<M>> fetchAllWithRequest<M extends BreezeBaseModel>(
@@ -149,7 +149,7 @@ abstract class BreezeStore with BreezeStorageTypeConverters {
     );
 
     return [
-      for (final record in records) modelBlueprint.fromRecord(record, this),
+      for (final record in records) modelBlueprint.fromRecord(record, this, blueprintOf),
     ];
   }
 
@@ -181,7 +181,7 @@ abstract class BreezeStore with BreezeStorageTypeConverters {
         throw Exception('The "$M" model does not have a primary key field.');
       }
 
-      final rawRecord = record.schema.toRaw(record.toRawRecord(), this);
+      final rawRecord = record.schema.toRaw(record.toRawRecord(), this, blueprintOf);
       final newId = await addRecord(name: tableName, key: keyName, record: rawRecord);
 
       // TODO: Check key type?
@@ -216,7 +216,7 @@ abstract class BreezeStore with BreezeStorageTypeConverters {
         throw Exception('The "$M" model does not have a primary key field.');
       }
 
-      final rawRecord = record.schema.toRaw(record.toRawRecord(), this);
+      final rawRecord = record.schema.toRaw(record.toRawRecord(), this, blueprintOf);
 
       if (keyValue != null) {
         record.beforeUpdate();
@@ -249,7 +249,7 @@ abstract class BreezeStore with BreezeStorageTypeConverters {
         throw Exception('The "$M" model does not have a primary key field.');
       }
 
-      final rawRecord = record.schema.toRaw(record.toRawRecord(), this);
+      final rawRecord = record.schema.toRaw(record.toRawRecord(), this, blueprintOf);
 
       if (keyValue != null) {
         record.beforeDelete();
