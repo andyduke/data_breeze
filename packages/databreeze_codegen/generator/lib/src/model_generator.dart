@@ -172,7 +172,7 @@ ${fields.map((f) => "    ${className}Model.${f.name}: _self.${f.accessorName},")
       if (transientAnn != null) continue;
 
       // print(
-      //   '[${element.displayName}] Prop: ${field.name}, type: ${field.type.element?.displayName}, nullable: ${field.type.nullabilitySuffix}',
+      //   '[${element.displayName}] Prop: ${field.name}, type: ${field.type.getDisplayString() /*element?.displayName*/}, nullable: ${field.type.nullabilitySuffix}',
       // );
 
       final publicName = field.isPrivate ? field.name!.substring(1) : field.name!;
@@ -183,7 +183,7 @@ ${fields.map((f) => "    ${className}Model.${f.name}: _self.${f.accessorName},")
           constructorName: publicName,
           name: publicName,
           accessorName: field.name!,
-          type: field.type.element?.displayName ?? 'dynamic',
+          type: field.type.getDisplayString() /*field.type.element?.displayName ?? 'dynamic'*/,
           isNullable: field.type.nullabilitySuffix != NullabilitySuffix.none,
           columnName: columnName,
           isPrimaryKey: field.name == primaryKey,
