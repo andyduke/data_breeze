@@ -5,6 +5,7 @@ export 'src/types.dart';
 export 'src/type_converters.dart';
 export 'src/model_column.dart';
 export 'src/model_schema.dart';
+export 'src/relations/model_relation.dart';
 export 'src/model_blueprint.dart';
 export 'src/model.dart';
 export 'src/filter.dart';

@@ -4,6 +4,8 @@ import 'package:logging/logging.dart';
 import 'package:sqlite_async/sqlite_async.dart';
 import 'package:test/test.dart';
 
+import 'lib/models/article.dart';
+import 'lib/models/article_tag.dart';
 import 'lib/models/item.dart';
 import 'lib/models/item_category.dart';
 import 'lib/test_store.dart';
@@ -45,6 +47,50 @@ CREATE TABLE items(
             [1, 'Item 1', 1],
             [2, 'Item 2', 1],
             [3, 'Item 3', 2],
+          ],
+        );
+      },
+    ),
+  );
+
+final articlesMigration = SqliteMigrations()
+  ..add(
+    SqliteMigration(
+      1,
+      (tx) async {
+        await tx.execute(r'''
+CREATE TABLE article_tags(
+    id INTEGER PRIMARY KEY,
+    name TEXT,
+    article_id INT NULL
+)
+''');
+        await tx.execute(r'''
+CREATE TABLE articles(
+    id INTEGER PRIMARY KEY,
+    title TEXT,
+    text TEXT
+)
+''');
+
+        await tx.executeBatch(
+          r'''
+          INSERT INTO articles(id, title, text) VALUES(?, ?, ?)
+          ''',
+          [
+            [1, 'Article 1', 'Body 1'],
+            [2, 'Article 2', 'Body 2'],
+          ],
+        );
+
+        await tx.executeBatch(
+          r'''
+          INSERT INTO article_tags(id, name, article_id) VALUES(?, ?, ?)
+          ''',
+          [
+            [1, 'tag1', 1],
+            [2, 'tag2', 1],
+            [3, 'tag3', 2],
           ],
         );
       },
@@ -114,5 +160,28 @@ Future<void> main() async {
       expect(items[2].category, isA<ItemCategory>());
       expect(items[2].category.name, equals('Category 2'));
     });
+
+    test('Fetch Record with List Relation (belongsTo)', () async {
+      final store = TestStore(
+        log: log,
+        models: {
+          ArticleModel.blueprint,
+          ArticleTagModel.blueprint,
+        },
+        migrationStrategy: BreezeSqliteMigrations(articlesMigration),
+      );
+
+      final query = BreezeQueryById<Article>(1);
+      final article = await query.fetch(store);
+
+      expect(article, isNotNull);
+      expect(article!.id, equals(1));
+      expect(article.title, equals('Article 1'));
+      expect(article.tags, hasLength(2));
+    });
+
+    // TODO: Test Multilevel nesting: item.category.icon
+
+    // TODO: Test List nesting: category.items
   });
 }

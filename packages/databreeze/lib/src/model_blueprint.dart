@@ -1,6 +1,7 @@
 import 'package:databreeze/src/model.dart';
 import 'package:databreeze/src/model_column.dart';
 import 'package:databreeze/src/model_schema.dart';
+import 'package:databreeze/src/relations/model_relation.dart';
 import 'package:databreeze/src/type_converters.dart';
 import 'package:databreeze/src/types.dart';
 
@@ -12,12 +13,15 @@ class BreezeModelBlueprint<M extends BreezeBaseModel> extends BreezeModelVersion
   @override
   final Set<BreezeBaseTypeConverter> typeConverters;
 
+  final Set<BreezeModelRelation> relations;
+
   BreezeModelBlueprint({
     required String name,
     required Set<BreezeModelColumn> columns,
     Set<Object?> tags = const {},
     required BreezeModelBlueprintBuilder<M> builder,
     Set<BreezeBaseTypeConverter> typeConverters = const {},
+    Set<BreezeModelRelation> relations = const {},
   }) : this.versioned(
          versions: {
            BreezeModelSchemaVersion(
@@ -28,13 +32,17 @@ class BreezeModelBlueprint<M extends BreezeBaseModel> extends BreezeModelVersion
          },
          builder: builder,
          typeConverters: typeConverters,
+         relations: relations,
        );
 
   BreezeModelBlueprint.versioned({
     required Set<BreezeModelSchemaVersion> versions,
     required this.builder,
     this.typeConverters = const {},
-  }) : super(versions);
+    this.relations = const {},
+  }) : super(versions) {
+    // TODO: Validate [columns] for the presence of columns for [relations].
+  }
 
   Type get type => M;
 
@@ -47,21 +55,30 @@ class BreezeModelBlueprint<M extends BreezeBaseModel> extends BreezeModelVersion
     Set<BreezeModelColumn>? columns,
     required T Function(Map<String, dynamic> raw) builder,
     Set<BreezeBaseTypeConverter>? typeConverters,
+    Set<BreezeModelRelation> relations = const {},
   }) {
     return BreezeModelBlueprint<T>(
       name: name ?? this.name,
       columns: columns ?? this.columns.values.toSet(),
       builder: builder,
       typeConverters: typeConverters ?? this.typeConverters,
+      relations: relations,
     );
   }
 
+  @Deprecated('Remove this')
   List<BreezeModelColumn> get nestedModelColumns => columns.values
       .where(
-        (column) => column.isSubtype<BreezeModel>(),
+        // (column) => column.isSubtype<BreezeBaseModel>() || column.isSubtype<List<BreezeBaseModel>>(),
+        // (column) => column is BreezeModelColumn<BreezeBaseModel> || column is BreezeModelColumn<List<BreezeBaseModel>>,
+        (column) {
+          print('{???} ${column.type} ${column.genericType} ${column.baseType}');
+          return column is BreezeModelColumn<BreezeBaseModel> || column is BreezeModelColumn<List<BreezeBaseModel>>;
+        },
       )
       .toList(growable: false);
 
+  @Deprecated('Remove this')
   Set<BreezeBaseTypeConverter> nestedModelsConverters(
     BreezeStorageTypeConverters converters,
     BreezeBlueprintLookup blueprintOf,
@@ -208,6 +225,7 @@ class BreezeModelBlueprint<M extends BreezeBaseModel> extends BreezeModelVersion
   }
 }
 
+@Deprecated('Remove this')
 class _ModelTypeConverter<M extends BreezeBaseModel> extends BreezeBaseTypeConverter<M, Map<String, dynamic>> {
   final Type modelType;
   final BreezeModelBlueprint<M> blueprint;

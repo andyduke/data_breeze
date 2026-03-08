@@ -25,11 +25,13 @@ class BreezeModelColumn<T> {
   /// Dart type in the model for this column
   Type get type => T;
 
+  /*
   // bool isSubtype<S>() => <T>[] is List<S>;
   bool isSubtype<S>() {
     final result = (<T>[] is List<S>) /* || (<T>[] is List<S?>) */;
     return result;
   }
+  */
 
   /*
   /// The database data type for storing the column value
@@ -55,6 +57,9 @@ class BreezeModelColumn<T> {
   //  a BreezeModel field in a JOIN.
   bool get isNullable => null is T;
 
+  @Deprecated('Remove this')
+  final Type baseType;
+
   const BreezeModelColumn(
     this.name, {
     this.prevName,
@@ -62,7 +67,8 @@ class BreezeModelColumn<T> {
     bool? isAutoGenerate,
     this.defaultValue,
     // @Deprecated('???') Type? storageType,
-  }) : isAutoGenerate = isAutoGenerate ?? (isPrimaryKey ? true : false)
+  }) : isAutoGenerate = isAutoGenerate ?? (isPrimaryKey ? true : false),
+       baseType = T
   /* , _storageType = storageType */;
 
   @override
@@ -70,4 +76,29 @@ class BreezeModelColumn<T> {
 
   @override
   int get hashCode => name.hashCode;
+}
+
+/*
+extension BreezeModelListColumn<T> on BreezeModelColumn<List<T>> {
+  Type get listType => T;
+}
+
+extension BreezeModelColumnTyping<T> on BreezeModelColumn<T> {
+  Type get genericType => switch (this) {
+    BreezeModelColumn<List> listColumn => listColumn.listType,
+    BreezeModelColumn<T> column => column.type,
+  };
+}
+*/
+
+@Deprecated('Remove this')
+extension BreezeModelListColumnTyping<T> on BreezeModelColumn<List<T>> {
+  Type get genericType => T;
+
+  Type get listType => T;
+}
+
+@Deprecated('Remove this')
+extension BreezeModelColumnTyping<T> on BreezeModelColumn<T> {
+  Type get genericType => T;
 }

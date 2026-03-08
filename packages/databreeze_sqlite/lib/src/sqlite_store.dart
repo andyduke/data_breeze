@@ -526,7 +526,34 @@ class BreezeSqliteStore extends BreezeStore with BreezeStoreFetch {
     final result = <SqlJoin>[];
 
     for (final column in columns) {
-      final columnBlueprint = blueprintOf(column.type /* ! */);
+      /*
+      final type = switch (column) {
+        BreezeModelColumn<List<BreezeBaseModel>> _ => column.listType,
+        BreezeModelColumn<BreezeBaseModel> _ => column.type,
+        _ => null,
+      };
+      */
+
+      print('{!} ${column.baseType}');
+
+      /*
+      final type = column.genericType
+      /*(column is BreezeModelColumn<List<BreezeBaseModel>>) //
+          ? column.listType
+          : column.type*/
+      ;
+      */
+
+      // final type = column.isSubtype<List<BreezeBaseModel>>() ? column.genericType : column.type;
+
+      // final type =
+      //     (column is BreezeModelColumn<List>) //
+      //     ? column.listType
+      //     : column.type;
+
+      final type = column.type;
+
+      final columnBlueprint = blueprintOf(type /* ! */);
       // TODO: Recursive buildJoins(columnBlueprint.nestedModelColumns)
 
       result.add(

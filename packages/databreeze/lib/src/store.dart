@@ -3,6 +3,8 @@ import 'package:databreeze/src/filter.dart';
 import 'package:databreeze/src/migration/migration_strategy.dart';
 import 'package:databreeze/src/model.dart';
 import 'package:databreeze/src/model_blueprint.dart';
+import 'package:databreeze/src/relations/model_relation.dart';
+import 'package:databreeze/src/relations/store_relations.dart';
 import 'package:databreeze/src/store_fetch_options.dart';
 import 'package:databreeze/src/store_change.dart';
 import 'package:databreeze/src/type_converters.dart';
@@ -111,7 +113,7 @@ abstract class BreezeStore with BreezeStorageTypeConverters {
     return blueprint;
   }
 
-  // --- API
+  // --- Fetching API
 
   Future<M?> fetchWithRequest<M extends BreezeBaseModel>(
     BreezeAbstractFetchRequest request, {
@@ -152,6 +154,8 @@ abstract class BreezeStore with BreezeStorageTypeConverters {
       for (final record in records) modelBlueprint.fromRecord(record, this, blueprintOf),
     ];
   }
+
+  // --- Change API
 
   Future<M> save<M extends BreezeModel>(M record) async {
     if (!record.isFrozen) {
@@ -353,6 +357,165 @@ abstract class BreezeStore with BreezeStorageTypeConverters {
     BreezeAggregationOp.max,
     column,
     BreezeFetchRequest(filter: filter),
+  );
+
+  // Relations
+
+  @protected
+  Future<BreezeFetchRelationsRequest> preFetchRelations(Set<BreezeModelRelation> relations) async {
+    final request = BreezeFetchRelationsRequest(relations: relations);
+    return request;
+  }
+
+  @protected
+  Future<List<Map<String, dynamic>>> fetchRelations<M extends BreezeBaseModel>(
+    BreezeModelBlueprint<M> blueprint,
+    BreezeFetchRelationsRequest request,
+    List<Map<String, dynamic>> records,
+  ) async {
+    /*
+    final List<Map<String, dynamic>> result = [
+      for (final record in records) {...record},
+    ];
+    */
+    final result = records;
+
+    for (final relation in request.relations) {
+      final relationInfo = relation.resolve(blueprint);
+      final relationBlueprint = blueprintOf(relation.type);
+
+      switch (relationInfo) {
+        case BreezeModelResolvedHasOneRelation hasOne:
+          await fetchHasOne(hasOne, result, relationBlueprint);
+          break;
+
+        case BreezeModelResolvedHasManyRelation hasMany:
+          final rows = await fetchHasMany(hasMany, result, relationBlueprint);
+          result[relation.name] = rows;
+          break;
+
+        case BreezeModelResolvedBelongsToRelation belongsTo:
+          final row = await fetchBelongsTo(belongsTo, result, relationBlueprint);
+          result[relation.name] = row;
+          break;
+
+        case BreezeModelResolvedHasManyThroughRelation hasManyThrough:
+          final rows = await fetchHasManyThrough(hasManyThrough, result, relationBlueprint);
+          result[relation.name] = rows;
+          break;
+      }
+    }
+
+    return result;
+  }
+
+  @protected
+  Future<void> fetchHasOne(
+    BreezeModelResolvedHasOneRelation relation,
+    List<Map<String, dynamic>> records,
+    BreezeModelBlueprint relationBlueprint,
+  ) async {
+    final ids = {
+      for (final record in records)
+        if (record.containsKey(relation.sourceKey)) record[relation.sourceKey],
+    }.toList(growable: false);
+
+    final rows = await fetchAllWithRequest(
+      BreezeFetchRequest(
+        filter: BreezeField(relation.foreignKey).inside(ids),
+        // sortBy: sortBy,
+      ),
+      blueprint: relationBlueprint,
+    );
+    final relatedRows = Map<dynamic, BreezeBaseModel>.fromIterable(
+      rows,
+      key: (row) => row.id,
+    );
+
+    for (final record in records) {
+      if (record.containsKey(relation.sourceKey)) {
+        record[relation.name] = relatedRows[record[relation.sourceKey]];
+      }
+    }
+  }
+
+  @protected
+  Future<void> fetchHasMany(
+    BreezeModelResolvedHasManyRelation relation,
+    List<Map<String, dynamic>> records,
+    BreezeModelBlueprint relationBlueprint,
+  ) async {
+    final ids = {
+      for (final record in records)
+        if (record.containsKey(relation.sourceKey)) record[relation.sourceKey],
+    }.toList(growable: false);
+
+    final rows = await fetchAllWithRequest(
+      BreezeFetchRequest(
+        filter: BreezeField(relation.foreignKey).inside(ids),
+        // sortBy: sortBy,
+      ),
+      blueprint: relationBlueprint,
+    );
+    final relatedRows = <dynamic, List<BreezeBaseModel>>{};
+    for (final row in rows) {
+      // TODO: For fetching relationships, raw data (maps) must be fetched
+      //  instead of models, so that the resulting data can be manipulated.
+      //  Transforming records into models must be done in the "blueprint."
+      (relatedRows[row.id] ??= []).add(row);
+    }
+
+    for (final record in records) {
+      if (record.containsKey(relation.sourceKey)) {
+        record[relation.name] = relatedRows[record[relation.sourceKey]];
+      }
+    }
+  }
+
+  @protected
+  Future<BreezeBaseModel?> fetchBelongsTo(
+    BreezeModelResolvedBelongsToRelation relation,
+    Map<String, dynamic> record,
+    BreezeModelBlueprint relationBlueprint,
+  ) async {
+    return await fetchWithRequest(
+      BreezeFetchRequest(
+        filter: BreezeField(relation.foreignKey).eq(record[relation.sourceKey]),
+        // sortBy: sortBy,
+      ),
+      blueprint: relationBlueprint,
+    );
+  }
+
+  @protected
+  Future<List<BreezeBaseModel>> fetchHasManyThrough(
+    BreezeModelResolvedHasManyThroughRelation relation,
+    Map<String, dynamic> record,
+    BreezeModelBlueprint relationBlueprint,
+  );
+
+  @protected
+  Future<Map<String, dynamic>> updateRelationsBeforeSave(
+    Map<String, dynamic> record,
+    Set<BreezeModelRelation> relations,
+  );
+
+  @protected
+  Future<Map<String, dynamic>> updateRelationsAfterSave(
+    Map<String, dynamic> record,
+    Set<BreezeModelRelation> relations,
+  );
+
+  @protected
+  Future<Map<String, dynamic>> deleteRelationsBeforeDelete(
+    Map<String, dynamic> record,
+    Set<BreezeModelRelation> relations,
+  );
+
+  @protected
+  Future<Map<String, dynamic>> deleteRelationsAfterDelete(
+    Map<String, dynamic> record,
+    Set<BreezeModelRelation> relations,
   );
 
   // --- To implement
