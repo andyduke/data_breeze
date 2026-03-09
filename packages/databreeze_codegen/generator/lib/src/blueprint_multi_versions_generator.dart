@@ -1,14 +1,15 @@
 import 'package:databreeze_annotation/databreeze_annotation.dart';
-import 'package:databreeze_generator/src/code_generator.dart';
+import 'package:databreeze_generator/src/blueprint_code_generator.dart';
 import 'package:databreeze_generator/src/types.dart';
 import 'package:databreeze_generator/src/utils.dart';
 
-class BlueprintMultiVersionsGenerator extends CodeGenerator {
+class BlueprintMultiVersionsGenerator extends BlueprintCodeGenerator {
   final String className;
   final String tableName;
   final String primaryKey;
   final String primaryKeyType;
   final List<FieldInfo> fields;
+  final List<RelationInfo> relations;
   final List<SchemaVersionChanges> schemaVersions;
   final String schemaVersionClass;
   final BzModelNameStyle nameStyle;
@@ -19,6 +20,7 @@ class BlueprintMultiVersionsGenerator extends CodeGenerator {
     required this.primaryKey,
     required this.primaryKeyType,
     required this.fields,
+    required this.relations,
     required this.schemaVersions,
     required this.schemaVersionClass,
     required this.nameStyle,
@@ -34,6 +36,7 @@ class BlueprintMultiVersionsGenerator extends CodeGenerator {
     versions: {
       $versions
     },
+    ${relations.isNotEmpty ? relations.map((r) => "\n  ${generateRelation(r)},").join('\n') : ''}
     builder: ${className}Model.fromRecord,
   );
 ''';

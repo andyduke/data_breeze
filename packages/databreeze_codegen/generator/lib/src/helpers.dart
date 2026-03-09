@@ -1,5 +1,15 @@
 import 'package:analyzer/dart/element/element.dart';
+import 'package:analyzer/dart/element/type.dart';
 import 'package:collection/collection.dart';
+
+extension DartTypeHelpers on DartType {
+  Iterable<DartType> get genericTypes {
+    return switch (this) {
+      ParameterizedType type => type.typeArguments,
+      _ => const [],
+    };
+  }
+}
 
 extension ClassElementHelpers on ClassElement {
   List<String> get genericTypes {

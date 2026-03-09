@@ -79,18 +79,18 @@ class BreezeModelBlueprint<M extends BreezeBaseModel> extends BreezeModelVersion
       .toList(growable: false);
 
   @Deprecated('Remove this')
-  Set<BreezeBaseTypeConverter> nestedModelsConverters(
+  Set<BreezeBaseTypeConverter> relationsConverters(
     BreezeStorageTypeConverters converters,
     BreezeBlueprintLookup blueprintOf,
   ) {
     final Set<BreezeBaseTypeConverter> result = {};
 
-    for (final column in nestedModelColumns) {
-      final columnBlueprint = blueprintOf(column.type);
+    for (final relation in relations) {
+      final relationBlueprint = blueprintOf(relation.type);
       result.add(
-        _ModelTypeConverter(
-          column.type,
-          columnBlueprint,
+        _RelationModelTypeConverter(
+          relation.type,
+          relationBlueprint,
           converters,
           blueprintOf,
         ),
@@ -124,8 +124,22 @@ class BreezeModelBlueprint<M extends BreezeBaseModel> extends BreezeModelVersion
   ) {
     final extendedTypeConverters = {
       ...typeConverters,
-      ...nestedModelsConverters(converters, blueprintOf),
+      // ...relationsConverters(converters, blueprintOf),
     };
+
+    // Convert relations
+    final relMaps = Map<String, BreezeModelRelation>.fromIterable(relations, key: (r) => r.name);
+    for (final MapEntry(key: relName, value: rel) in relMaps.entries) {
+      if (raw.containsKey(relName)) {
+        final relBlueprint = blueprintOf(rel.type);
+        final rawRelValue = raw[relName];
+        if (rawRelValue is Iterable) {
+          raw[relName] = rawRelValue.map((r) => relBlueprint.fromRecord(r, converters, blueprintOf)).toList();
+        } else {
+          raw[relName] = relBlueprint.fromRecord(raw[relName], converters, blueprintOf);
+        }
+      }
+    }
 
     return raw.map(
       (k, v) => MapEntry(
@@ -149,7 +163,7 @@ class BreezeModelBlueprint<M extends BreezeBaseModel> extends BreezeModelVersion
   ) {
     final extendedTypeConverters = {
       ...typeConverters,
-      ...nestedModelsConverters(converters, blueprintOf),
+      // ...relationsConverters(converters, blueprintOf),
     };
 
     return raw.map(
@@ -226,13 +240,13 @@ class BreezeModelBlueprint<M extends BreezeBaseModel> extends BreezeModelVersion
 }
 
 @Deprecated('Remove this')
-class _ModelTypeConverter<M extends BreezeBaseModel> extends BreezeBaseTypeConverter<M, Map<String, dynamic>> {
+class _RelationModelTypeConverter<M extends BreezeBaseModel> extends BreezeBaseTypeConverter<M, Map<String, dynamic>> {
   final Type modelType;
   final BreezeModelBlueprint<M> blueprint;
   final BreezeStorageTypeConverters converters;
   final BreezeBlueprintLookup blueprintOf;
 
-  const _ModelTypeConverter(this.modelType, this.blueprint, this.converters, this.blueprintOf);
+  const _RelationModelTypeConverter(this.modelType, this.blueprint, this.converters, this.blueprintOf);
 
   @override
   bool isDartType(Type type) {

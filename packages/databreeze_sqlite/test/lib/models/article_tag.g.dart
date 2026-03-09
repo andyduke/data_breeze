@@ -16,6 +16,7 @@ mixin ArticleTagModel {
       // name
       BreezeModelColumn<String>('name'),
     },
+
     builder: ArticleTagModel.fromRecord,
   );
 

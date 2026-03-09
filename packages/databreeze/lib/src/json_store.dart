@@ -2,7 +2,9 @@ import 'dart:math' as math;
 import 'package:collection/collection.dart';
 import 'package:databreeze/src/filter.dart';
 import 'package:databreeze/src/mixins/store_mixins.dart';
+import 'package:databreeze/src/model.dart';
 import 'package:databreeze/src/model_blueprint.dart';
+import 'package:databreeze/src/relations/model_relation.dart';
 import 'package:databreeze/src/store_fetch_options.dart';
 import 'package:databreeze/src/store.dart';
 import 'package:databreeze/src/type_converters.dart';
@@ -385,6 +387,17 @@ class BreezeJsonStore extends BreezeStore with BreezeStoreFetch {
 
     return result;
   }
+
+  @override
+  Future<void> fetchHasManyThrough(
+    BreezeModelResolvedHasManyThroughRelation<BreezeBaseModel> relation,
+    List<Map<String, dynamic>> records,
+    BreezeModelBlueprint<BreezeBaseModel> relationBlueprint,
+  ) async {
+    throw UnimplementedError();
+  }
+
+  // ---
 
   @protected
   @visibleForTesting

@@ -10,6 +10,7 @@ class BlueprintGenerator extends CodeGenerator {
   final String primaryKey;
   final String primaryKeyType;
   final List<FieldInfo> fields;
+  final List<RelationInfo> relations;
   final List<SchemaVersionChanges> schemaVersions;
   final String schemaVersionClass;
   final BzModelNameStyle nameStyle;
@@ -20,6 +21,7 @@ class BlueprintGenerator extends CodeGenerator {
     required this.primaryKey,
     required this.primaryKeyType,
     required this.fields,
+    required this.relations,
     required this.schemaVersions,
     required this.schemaVersionClass,
     required this.nameStyle,
@@ -34,6 +36,7 @@ class BlueprintGenerator extends CodeGenerator {
         primaryKey: primaryKey,
         primaryKeyType: primaryKeyType,
         fields: fields,
+        relations: relations,
       );
       yield* g.generate();
     } else {
@@ -43,6 +46,7 @@ class BlueprintGenerator extends CodeGenerator {
         primaryKey: primaryKey,
         primaryKeyType: primaryKeyType,
         fields: fields,
+        relations: relations,
         schemaVersions: schemaVersions,
         schemaVersionClass: schemaVersionClass,
         nameStyle: nameStyle,

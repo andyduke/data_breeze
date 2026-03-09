@@ -42,6 +42,9 @@ class BreezeModelGenerator extends GeneratorForAnnotation<BzModel> {
     // Collect fields
     final fields = _collectFields(element, primaryKey: primaryKey, nameStyle: nameStyle);
 
+    // Collect relations
+    final relations = _collectRelations(element, primaryKey: primaryKey, nameStyle: nameStyle);
+
     // Collect schema versions
     final schemaVersions = _collectSchemaVersions(element, annotation);
 
@@ -50,6 +53,7 @@ class BreezeModelGenerator extends GeneratorForAnnotation<BzModel> {
     // Validate the latest version against the list of fields
     _validateFieldsAgainstLatestSchema(
       fields,
+      relations,
       schemaVersions,
       className: className,
       tableName: tableName,
@@ -66,6 +70,7 @@ class BreezeModelGenerator extends GeneratorForAnnotation<BzModel> {
       primaryKey,
       primaryKeyType,
       fields,
+      relations,
       schemaVersions,
       schemaVersionClass,
       nameStyle,
@@ -81,6 +86,7 @@ mixin ${className}Model {
 
   static $className fromRecord(Map<String, dynamic> map) => $className$constructorName(
 ${fields.map((f) => "    ${f.constructorName}: map[${className}Model.${f.name}],").join('\n')}
+${relations.map((r) => "    ${r.name}: map['${r.name}'],").join('\n')}
   );
 
   static const $primaryKeyProp = BreezeField('$primaryKey');
@@ -94,6 +100,7 @@ ${fields.where((f) => f.columnName != primaryKey).map((f) => "  static const ${f
 
   Map<String, dynamic> toRecord() => {
 ${fields.map((f) => "    ${className}Model.${f.name}: _self.${f.accessorName},").join('\n')}
+${relations.map((r) => "    '${r.name}': _self.${r.name},").join('\n')}
   };
 }
 ''';
@@ -154,6 +161,12 @@ ${fields.map((f) => "    ${className}Model.${f.name}: _self.${f.accessorName},")
 
       final annotationField = field.isOriginGetterSetter ? field.getter! : field;
 
+      // Skip relationship fields from BreezeModel
+      final relationshipAnn = const TypeChecker.typeNamed(
+        BzRelationship,
+      ).firstAnnotationOf(annotationField, throwOnUnresolved: false);
+      if (relationshipAnn != null) continue;
+
       // Get @BzColumn annotation
       final columnAnn = const TypeChecker.typeNamed(
         BzColumn,
@@ -194,6 +207,66 @@ ${fields.map((f) => "    ${className}Model.${f.name}: _self.${f.accessorName},")
     return fields;
   }
 
+  List<RelationInfo> _collectRelations(
+    ClassElement element, {
+    required String primaryKey,
+    required BzModelNameStyle nameStyle,
+  }) {
+    final result = <RelationInfo>[];
+
+    for (final field in element.fields) {
+      if (field.isStatic || // Skip Static fields
+          field.isPrivate || // Skip Private fields
+          (field.setter == null) // Skip readonly fields
+          ) {
+        continue;
+      }
+
+      final annotationField = field.isOriginGetterSetter ? field.getter! : field;
+
+      // Get @BzRelationship annotation
+      final relationAnn = const TypeChecker.typeNamed(
+        BzRelationship,
+      ).firstAnnotationOf(annotationField, throwOnUnresolved: false);
+
+      if (relationAnn == null) continue;
+
+      final relationAnnReader = ConstantReader(relationAnn);
+      final relationType = RelationType.fromString(relationAnn.constructorInvocation!.constructor.name!);
+      final relationName = relationAnnReader.read('name').literalValue as String;
+      final relationModelType = switch (relationType) {
+        RelationType.hasOne => field.type.getDisplayString(),
+        RelationType.hasMany => field.type.genericTypes.first.getDisplayString(),
+        RelationType.belongsTo => field.type.getDisplayString(),
+        RelationType.hasManyThrough => field.type.genericTypes.first.getDisplayString(),
+      }.replaceFirst('?', '');
+      final relationForeignKey = relationAnnReader.read('foreignKey').literalValue as String?;
+      final relationSourceKey = relationAnnReader.read('sourceKey').literalValue as String?;
+      final relationThrough = relationAnnReader.peek('through')?.literalValue as String?;
+
+      print(
+        '[!] $relationType (${field.type.isDartCoreList ? field.type.genericTypes : '--'}): $relationName<$relationModelType> (foreignKey: $relationForeignKey, sourceKey: $relationSourceKey)',
+      );
+
+      // print(
+      //   '[${element.displayName}] Prop: ${field.name}, type: ${field.type.getDisplayString() /*element?.displayName*/}, nullable: ${field.type.nullabilitySuffix}',
+      // );
+
+      result.add(
+        RelationInfo(
+          name: relationName,
+          relationType: relationType,
+          type: relationModelType,
+          foreignKey: relationForeignKey,
+          sourceKey: relationSourceKey,
+          through: relationThrough,
+        ),
+      );
+    }
+
+    return result;
+  }
+
   List<SchemaVersionChanges> _collectSchemaVersions(ClassElement element, ConstantReader annotation) {
     final versions = annotation.peek('schemaHistory')?.listValue ?? [];
 
@@ -213,6 +286,7 @@ ${fields.map((f) => "    ${className}Model.${f.name}: _self.${f.accessorName},")
     String primaryKey,
     String primaryKeyType,
     List<FieldInfo> fields,
+    List<RelationInfo> relations,
     List<SchemaVersionChanges> schemaVersions,
     String schemaVersionClass,
     BzModelNameStyle nameStyle,
@@ -223,6 +297,7 @@ ${fields.map((f) => "    ${className}Model.${f.name}: _self.${f.accessorName},")
       primaryKey: primaryKey,
       primaryKeyType: primaryKeyType,
       fields: fields,
+      relations: relations,
       schemaVersions: schemaVersions,
       schemaVersionClass: schemaVersionClass,
       nameStyle: nameStyle,
@@ -232,6 +307,7 @@ ${fields.map((f) => "    ${className}Model.${f.name}: _self.${f.accessorName},")
 
   void _validateFieldsAgainstLatestSchema(
     List<FieldInfo> fields,
+    List<RelationInfo> relations,
     List<SchemaVersionChanges> schemaVersions, {
     required String className,
     required String tableName,
@@ -247,6 +323,7 @@ ${fields.map((f) => "    ${className}Model.${f.name}: _self.${f.accessorName},")
         primaryKey: primaryKey,
         primaryKeyType: primaryKeyType,
         fields: fields,
+        relations: relations,
         schemaVersions: schemaVersions,
         schemaVersionClass: schemaVersionClass,
         nameStyle: nameStyle,

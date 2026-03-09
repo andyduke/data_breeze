@@ -15,19 +15,22 @@ mixin ItemModel {
 
       // name
       BreezeModelColumn<String>('name'),
+    },
 
-      // category
-      BreezeModelColumn<ItemCategory>('category_id'),
+    relations: {
+      BreezeModelRelation<ItemCategory>.belongsTo(
+        name: 'category',
+        sourceKey: 'category_id',
+      ),
     },
     builder: ItemModel.fromRecord,
   );
 
   static Item fromRecord(Map<String, dynamic> map) =>
-      Item(name: map[ItemModel.name], category: map[ItemModel.category]);
+      Item(name: map[ItemModel.name], category: map['category']);
 
   static const id = BreezeField('id');
   static const name = BreezeField('name');
-  static const category = BreezeField('category_id');
 
   // ---
 
@@ -37,6 +40,6 @@ mixin ItemModel {
 
   Map<String, dynamic> toRecord() => {
     ItemModel.name: _self.name,
-    ItemModel.category: _self.category,
+    'category': _self.category,
   };
 }

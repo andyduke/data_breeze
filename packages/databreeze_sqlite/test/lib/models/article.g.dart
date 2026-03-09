@@ -18,9 +18,13 @@ mixin ArticleModel {
 
       // text
       BreezeModelColumn<String>('text'),
+    },
 
-      // tags
-      BreezeModelColumn<List<ArticleTag>>('tags'),
+    relations: {
+      BreezeModelRelation<ArticleTag>.hasMany(
+        name: 'tags',
+        foreignKey: 'article_id',
+      ),
     },
     builder: ArticleModel.fromRecord,
   );
@@ -28,13 +32,12 @@ mixin ArticleModel {
   static Article fromRecord(Map<String, dynamic> map) => Article(
     title: map[ArticleModel.title],
     text: map[ArticleModel.text],
-    tags: map[ArticleModel.tags],
+    tags: map['tags'],
   );
 
   static const id = BreezeField('id');
   static const title = BreezeField('title');
   static const text = BreezeField('text');
-  static const tags = BreezeField('tags');
 
   // ---
 
@@ -45,6 +48,6 @@ mixin ArticleModel {
   Map<String, dynamic> toRecord() => {
     ArticleModel.title: _self.title,
     ArticleModel.text: _self.text,
-    ArticleModel.tags: _self.tags,
+    'tags': _self.tags,
   };
 }

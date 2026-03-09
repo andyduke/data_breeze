@@ -38,6 +38,45 @@ class FieldInfo {
        accessorName = accessorName ?? name;
 }
 
+enum RelationType {
+  hasOne,
+  hasMany,
+  belongsTo,
+  hasManyThrough;
+
+  factory RelationType.fromString(String value) => values.firstWhere((v) => v.name == value);
+}
+
+class RelationInfo {
+  /// The public name of the property
+  ///
+  /// If the property is encapsulated by a getter and setter,
+  /// this will be the name of the getter.
+  final String name;
+
+  final RelationType relationType;
+
+  final String type;
+
+  final String? foreignKey;
+
+  final String? sourceKey;
+
+  final String? through;
+
+  const RelationInfo({
+    required this.name,
+    required this.relationType,
+    required this.type,
+    this.foreignKey,
+    this.sourceKey,
+    this.through,
+  }) : assert(
+         relationType != RelationType.hasManyThrough || through != null,
+         'For a hasManyThrough relationship, the linking table must be specified in through.',
+       );
+}
+
 extension type const CopyValue(String str) implements String {
   const CopyValue.reset() : str = '~~~';
 }

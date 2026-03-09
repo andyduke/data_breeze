@@ -41,6 +41,7 @@ class Article extends BreezeModel<int> with ArticleModel {
 
   // TODO: Belongs to
   // @BzColumn(name: 'category_id')
+  @BzRelationship.hasMany(name: 'tags', foreignKey: 'article_id')
   List<ArticleTag> tags;
 
   Article({

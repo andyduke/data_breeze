@@ -161,22 +161,26 @@ class BreezeSqliteStore extends BreezeStore with BreezeStoreFetch {
 
     switch (request) {
       case BreezeFetchRequest(filter: final filter, sortBy: final sortBy):
+        /*
         final joins = (blueprint != null)
             ? createJoinsForNested(table, blueprint.nestedModelColumns)
             : const <SqlJoin>[];
+        */
 
         final (:sql, :params) = buildSql(
           table,
           filter: filter,
-          joins: joins,
+          // joins: joins,
           sortBy: sortBy,
           limit: 1,
         );
         result = await executeSql(sql, params, typeConverters);
 
+        /*
         if (blueprint != null) {
           result = expandJoinsToNested(result, blueprint.nestedModelColumns);
         }
+        */
 
         break;
 
@@ -209,9 +213,11 @@ class BreezeSqliteStore extends BreezeStore with BreezeStoreFetch {
         final (:sql, :params) = buildSql(table, filter: filter, sortBy: sortBy);
         result = await executeSql(sql, params, typeConverters);
 
+        /*
         if (blueprint != null) {
           result = await loadNested(result, blueprint.nestedModelColumns);
         }
+        */
 
         break;
 
@@ -435,6 +441,17 @@ class BreezeSqliteStore extends BreezeStore with BreezeStoreFetch {
     return value as T?;
   }
 
+  @override
+  Future<void> fetchHasManyThrough(
+    BreezeModelResolvedHasManyThroughRelation<BreezeBaseModel> relation,
+    List<Map<String, dynamic>> records,
+    BreezeModelBlueprint<BreezeBaseModel> relationBlueprint,
+  ) async {
+    throw UnimplementedError();
+  }
+
+  // ---
+
   ({String sql, List<dynamic> params}) sqlWhereOf(
     String table,
     BreezeFilterExpression? filter, {
@@ -521,6 +538,7 @@ class BreezeSqliteStore extends BreezeStore with BreezeStoreFetch {
     }
   }
 
+  @Deprecated('Remove this')
   @protected
   List<SqlJoin> createJoinsForNested(String table, List<BreezeModelColumn> columns) {
     final result = <SqlJoin>[];
@@ -577,6 +595,7 @@ class BreezeSqliteStore extends BreezeStore with BreezeStoreFetch {
     return result;
   }
 
+  @Deprecated('Remove this')
   @protected
   List<Map<String, dynamic>> expandJoinsToNested(List<Map<String, dynamic>> rows, List<BreezeModelColumn> columns) {
     final result = <Map<String, dynamic>>[];
@@ -608,6 +627,7 @@ class BreezeSqliteStore extends BreezeStore with BreezeStoreFetch {
     return result;
   }
 
+  @Deprecated('Remove this')
   @protected
   Future<List<Map<String, dynamic>>> loadNested(
     List<Map<String, dynamic>> rows,

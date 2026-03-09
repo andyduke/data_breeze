@@ -1,12 +1,13 @@
-import 'package:databreeze_generator/src/code_generator.dart';
+import 'package:databreeze_generator/src/blueprint_code_generator.dart';
 import 'package:databreeze_generator/src/types.dart';
 
-class BlueprintSingleVersionGenerator extends CodeGenerator {
+class BlueprintSingleVersionGenerator extends BlueprintCodeGenerator {
   final String className;
   final String tableName;
   final String primaryKey;
   final String primaryKeyType;
   final List<FieldInfo> fields;
+  final List<RelationInfo> relations;
 
   BlueprintSingleVersionGenerator({
     required this.className,
@@ -14,6 +15,7 @@ class BlueprintSingleVersionGenerator extends CodeGenerator {
     required this.primaryKey,
     required this.primaryKeyType,
     required this.fields,
+    required this.relations,
   });
 
   @override
@@ -27,6 +29,7 @@ class BlueprintSingleVersionGenerator extends CodeGenerator {
       BreezeModelColumn<$primaryKeyType>('$primaryKey', isPrimaryKey: true),
 ${fields.map((f) => "\n// ${f.name}\n      BreezeModelColumn<${f.typeStr}>('${f.columnName}'),").join('\n')}
     },
+    ${relations.isNotEmpty ? relations.map((r) => "\n  ${generateRelation(r)},").join('\n') : ''}
     builder: ${className}Model.fromRecord,
   );
 ''';

@@ -124,7 +124,7 @@ Future<void> main() async {
       expect(item.name, equals('Item 1'));
       expect(item.category, isNotNull);
       expect(item.category, isA<ItemCategory>());
-      expect(item.category.name, equals('Category 1'));
+      expect(item.category!.name, equals('Category 1'));
     });
 
     test('Fetch All Records with Relation', () async {
@@ -146,19 +146,19 @@ Future<void> main() async {
       expect(items[0].name, equals('Item 1'));
       expect(items[0].category, isNotNull);
       expect(items[0].category, isA<ItemCategory>());
-      expect(items[0].category.name, equals('Category 1'));
+      expect(items[0].category!.name, equals('Category 1'));
 
       expect(items[1].id, equals(2));
       expect(items[1].name, equals('Item 2'));
       expect(items[1].category, isNotNull);
       expect(items[1].category, isA<ItemCategory>());
-      expect(items[1].category.name, equals('Category 1'));
+      expect(items[1].category!.name, equals('Category 1'));
 
       expect(items[2].id, equals(3));
       expect(items[2].name, equals('Item 3'));
       expect(items[2].category, isNotNull);
       expect(items[2].category, isA<ItemCategory>());
-      expect(items[2].category.name, equals('Category 2'));
+      expect(items[2].category!.name, equals('Category 2'));
     });
 
     test('Fetch Record with List Relation (belongsTo)', () async {

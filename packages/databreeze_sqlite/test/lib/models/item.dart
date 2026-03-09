@@ -11,11 +11,12 @@ part 'item.g.dart';
 class Item extends BreezeModel<int> with ItemModel {
   String name;
 
-  @BzColumn(name: 'category_id')
-  ItemCategory /* ? */ category;
+  // @BzColumn(name: 'category_id')
+  @BzRelationship.belongsTo(name: 'category', sourceKey: 'category_id')
+  ItemCategory? category;
 
   Item({
     required this.name,
-    /* ? */ required this.category,
+    this.category,
   });
 }

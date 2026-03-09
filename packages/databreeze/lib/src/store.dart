@@ -121,7 +121,9 @@ abstract class BreezeStore with BreezeStorageTypeConverters {
   }) async {
     final modelBlueprint = blueprint ?? (blueprintOf(M) as BreezeModelBlueprint<M>);
 
-    final record = await fetchRecord(
+    final relationsRequest = await preFetchRelations(modelBlueprint.relations);
+
+    Map<String, dynamic>? record = await fetchRecord(
       table: modelBlueprint.name,
       request: request,
       blueprint: modelBlueprint,
@@ -130,6 +132,15 @@ abstract class BreezeStore with BreezeStorageTypeConverters {
         ...typeConverters,
       },
     );
+
+    if (record != null) {
+      final records = await fetchRelations(
+        modelBlueprint,
+        relationsRequest,
+        [record],
+      );
+      record = records.firstOrNull;
+    }
 
     return ((record != null) ? modelBlueprint.fromRecord(record, this, blueprintOf) : null);
   }
@@ -140,7 +151,9 @@ abstract class BreezeStore with BreezeStorageTypeConverters {
   }) async {
     final modelBlueprint = blueprint ?? (blueprintOf(M) as BreezeModelBlueprint<M>);
 
-    final records = await fetchAllRecords(
+    final relationsRequest = await preFetchRelations(modelBlueprint.relations);
+
+    List<Map<String, dynamic>> records = await fetchAllRecords(
       table: modelBlueprint.name,
       request: request,
       blueprint: modelBlueprint,
@@ -149,6 +162,14 @@ abstract class BreezeStore with BreezeStorageTypeConverters {
         ...typeConverters,
       },
     );
+
+    if (records.isNotEmpty) {
+      records = await fetchRelations(
+        modelBlueprint,
+        relationsRequest,
+        records,
+      );
+    }
 
     return [
       for (final record in records) modelBlueprint.fromRecord(record, this, blueprintOf),
@@ -390,18 +411,15 @@ abstract class BreezeStore with BreezeStorageTypeConverters {
           break;
 
         case BreezeModelResolvedHasManyRelation hasMany:
-          final rows = await fetchHasMany(hasMany, result, relationBlueprint);
-          result[relation.name] = rows;
+          await fetchHasMany(hasMany, result, relationBlueprint);
           break;
 
         case BreezeModelResolvedBelongsToRelation belongsTo:
-          final row = await fetchBelongsTo(belongsTo, result, relationBlueprint);
-          result[relation.name] = row;
+          await fetchBelongsTo(belongsTo, result, relationBlueprint);
           break;
 
         case BreezeModelResolvedHasManyThroughRelation hasManyThrough:
-          final rows = await fetchHasManyThrough(hasManyThrough, result, relationBlueprint);
-          result[relation.name] = rows;
+          await fetchHasManyThrough(hasManyThrough, result, relationBlueprint);
           break;
       }
     }
@@ -420,14 +438,15 @@ abstract class BreezeStore with BreezeStorageTypeConverters {
         if (record.containsKey(relation.sourceKey)) record[relation.sourceKey],
     }.toList(growable: false);
 
-    final rows = await fetchAllWithRequest(
-      BreezeFetchRequest(
+    final rows = await fetchAllRecords(
+      table: relationBlueprint.name,
+      request: BreezeFetchRequest(
         filter: BreezeField(relation.foreignKey).inside(ids),
         // sortBy: sortBy,
       ),
       blueprint: relationBlueprint,
     );
-    final relatedRows = Map<dynamic, BreezeBaseModel>.fromIterable(
+    final relatedRows = Map<dynamic, Map<String, dynamic>>.fromIterable(
       rows,
       key: (row) => row.id,
     );
@@ -450,19 +469,17 @@ abstract class BreezeStore with BreezeStorageTypeConverters {
         if (record.containsKey(relation.sourceKey)) record[relation.sourceKey],
     }.toList(growable: false);
 
-    final rows = await fetchAllWithRequest(
-      BreezeFetchRequest(
+    final rows = await fetchAllRecords(
+      table: relationBlueprint.name,
+      request: BreezeFetchRequest(
         filter: BreezeField(relation.foreignKey).inside(ids),
         // sortBy: sortBy,
       ),
       blueprint: relationBlueprint,
     );
-    final relatedRows = <dynamic, List<BreezeBaseModel>>{};
+    final relatedRows = <dynamic, List<Map<String, dynamic>>>{};
     for (final row in rows) {
-      // TODO: For fetching relationships, raw data (maps) must be fetched
-      //  instead of models, so that the resulting data can be manipulated.
-      //  Transforming records into models must be done in the "blueprint."
-      (relatedRows[row.id] ??= []).add(row);
+      (relatedRows[row[relationBlueprint.key]] ??= []).add(row);
     }
 
     for (final record in records) {
@@ -473,24 +490,40 @@ abstract class BreezeStore with BreezeStorageTypeConverters {
   }
 
   @protected
-  Future<BreezeBaseModel?> fetchBelongsTo(
+  Future<void> fetchBelongsTo(
     BreezeModelResolvedBelongsToRelation relation,
-    Map<String, dynamic> record,
+    List<Map<String, dynamic>> records,
     BreezeModelBlueprint relationBlueprint,
   ) async {
-    return await fetchWithRequest(
-      BreezeFetchRequest(
-        filter: BreezeField(relation.foreignKey).eq(record[relation.sourceKey]),
+    final ids = {
+      for (final record in records)
+        if (record.containsKey(relation.sourceKey)) record[relation.sourceKey],
+    }.toList(growable: false);
+
+    final rows = await fetchAllRecords(
+      table: relationBlueprint.name,
+      request: BreezeFetchRequest(
+        filter: BreezeField(relation.foreignKey).inside(ids),
         // sortBy: sortBy,
       ),
       blueprint: relationBlueprint,
     );
+    final relatedRows = Map<dynamic, Map<String, dynamic>>.fromIterable(
+      rows,
+      key: (row) => row[relationBlueprint.key],
+    );
+
+    for (final record in records) {
+      if (record.containsKey(relation.sourceKey)) {
+        record[relation.name] = relatedRows[record[relation.sourceKey]];
+      }
+    }
   }
 
   @protected
-  Future<List<BreezeBaseModel>> fetchHasManyThrough(
+  Future<void> fetchHasManyThrough(
     BreezeModelResolvedHasManyThroughRelation relation,
-    Map<String, dynamic> record,
+    List<Map<String, dynamic>> records,
     BreezeModelBlueprint relationBlueprint,
   );
 
@@ -498,25 +531,37 @@ abstract class BreezeStore with BreezeStorageTypeConverters {
   Future<Map<String, dynamic>> updateRelationsBeforeSave(
     Map<String, dynamic> record,
     Set<BreezeModelRelation> relations,
-  );
+  ) async {
+    // TODO: Implement this
+    return record;
+  }
 
   @protected
   Future<Map<String, dynamic>> updateRelationsAfterSave(
     Map<String, dynamic> record,
     Set<BreezeModelRelation> relations,
-  );
+  ) async {
+    // TODO: Implement this
+    return record;
+  }
 
   @protected
   Future<Map<String, dynamic>> deleteRelationsBeforeDelete(
     Map<String, dynamic> record,
     Set<BreezeModelRelation> relations,
-  );
+  ) async {
+    // TODO: Implement this
+    return record;
+  }
 
   @protected
   Future<Map<String, dynamic>> deleteRelationsAfterDelete(
     Map<String, dynamic> record,
     Set<BreezeModelRelation> relations,
-  );
+  ) async {
+    // TODO: Implement this
+    return record;
+  }
 
   // --- To implement
 
