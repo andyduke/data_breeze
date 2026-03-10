@@ -479,7 +479,7 @@ abstract class BreezeStore with BreezeStorageTypeConverters {
     );
     final relatedRows = <dynamic, List<Map<String, dynamic>>>{};
     for (final row in rows) {
-      (relatedRows[row[relationBlueprint.key]] ??= []).add(row);
+      (relatedRows[row[relation.foreignKey]] ??= []).add(row);
     }
 
     for (final record in records) {

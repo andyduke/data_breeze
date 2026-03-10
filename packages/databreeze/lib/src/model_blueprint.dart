@@ -116,6 +116,16 @@ class BreezeModelBlueprint<M extends BreezeBaseModel> extends BreezeModelVersion
     return result;
   }
 
+  List<M> fromRecordsList(
+    Iterable<Map<String, dynamic>> records,
+    BreezeStorageTypeConverters converters,
+    BreezeBlueprintLookup blueprintOf,
+  ) {
+    final blueprint = blueprintOf(M) as BreezeModelBlueprint<M>;
+    final result = records.map((r) => blueprint.fromRecord(r, converters, blueprintOf)).toList();
+    return result;
+  }
+
   /// Convert db's data types to schema column types
   Map<String, dynamic> fromRaw(
     Map<String, dynamic> raw,
@@ -133,10 +143,10 @@ class BreezeModelBlueprint<M extends BreezeBaseModel> extends BreezeModelVersion
       if (raw.containsKey(relName)) {
         final relBlueprint = blueprintOf(rel.type);
         final rawRelValue = raw[relName];
-        if (rawRelValue is Iterable) {
-          raw[relName] = rawRelValue.map((r) => relBlueprint.fromRecord(r, converters, blueprintOf)).toList();
+        if (rawRelValue is Iterable<Map<String, dynamic>>) {
+          raw[relName] = relBlueprint.fromRecordsList(rawRelValue, converters, blueprintOf);
         } else {
-          raw[relName] = relBlueprint.fromRecord(raw[relName], converters, blueprintOf);
+          raw[relName] = relBlueprint.fromRecord(rawRelValue, converters, blueprintOf);
         }
       }
     }
