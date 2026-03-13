@@ -30,7 +30,8 @@ class BreezeSqliteRequest extends BreezeAbstractFetchRequest {
 
 typedef BreezeSqliteDatabaseLocation = Future<String> Function();
 
-class BreezeSqliteStore extends BreezeStore with BreezeStoreFetch {
+class BreezeSqliteStore extends BreezeStore
+    with BreezeStoreFetch, BreezeStoreRelations, BreezeStoreHasManyThoughRelations {
   final Logger? log;
 
   /// The database file name, or `null` for an in-memory database.
@@ -411,7 +412,13 @@ class BreezeSqliteStore extends BreezeStore with BreezeStoreFetch {
 
     switch (request) {
       case BreezeFetchRequest(filter: final filter, sortBy: final sortBy):
-        final (:sql, :params) = buildSql(name, columns: operator, filter: filter, sortBy: sortBy);
+        final (:sql, :params) = buildSql(
+          name,
+          addPrefixToSelect: false,
+          columns: operator,
+          filter: filter,
+          sortBy: sortBy,
+        );
         result = await executeSql(sql, params, typeConverters);
         break;
 
@@ -441,14 +448,14 @@ class BreezeSqliteStore extends BreezeStore with BreezeStoreFetch {
     return value as T?;
   }
 
-  @override
-  Future<void> fetchHasManyThrough(
-    BreezeModelResolvedHasManyThroughRelation<BreezeBaseModel> relation,
-    List<Map<String, dynamic>> records,
-    BreezeModelBlueprint<BreezeBaseModel> relationBlueprint,
-  ) async {
-    throw UnimplementedError();
-  }
+  // @override
+  // Future<void> fetchHasManyThrough(
+  //   BreezeModelResolvedHasManyThroughRelation<BreezeBaseModel> relation,
+  //   List<Map<String, dynamic>> records,
+  //   BreezeModelBlueprint<BreezeBaseModel> relationBlueprint,
+  // ) async {
+  //   throw UnimplementedError();
+  // }
 
   // ---
 
@@ -681,6 +688,7 @@ class BreezeSqliteStore extends BreezeStore with BreezeStoreFetch {
     List<BreezeSortBy> sortBy = const [],
     int? limit,
     int? offset,
+    bool addPrefixToSelect = true,
   }) {
     final (joinsColumns, joinsTables) = _buildJoins(joins);
 
@@ -692,8 +700,10 @@ class BreezeSqliteStore extends BreezeStore with BreezeStoreFetch {
 
     final limitClause = _buildLimit(limit, offset);
 
+    final selectColumns = addPrefixToSelect ? '$table.$columns' : columns;
+
     return (
-      sql: 'SELECT $table.$columns$joinsColumns FROM $table$joinsTables$whereClause$orderClause$limitClause',
+      sql: 'SELECT $selectColumns$joinsColumns FROM $table$joinsTables$whereClause$orderClause$limitClause',
       params: [...whereParams, ...orderParams],
     );
   }

@@ -2,7 +2,7 @@ import 'package:databreeze/databreeze.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:databreeze_flutter/databreeze_flutter.dart';
 
-class MockStore extends BreezeStore {
+class MockStore extends BreezeStore with BreezeStoreRelations {
   @override
   Future addRecord({required String name, required String key, required Map<String, dynamic> record}) {
     // TODO: implement addRecord
@@ -83,6 +83,15 @@ class MockStore extends BreezeStore {
     required Map<String, dynamic> record,
   }) {
     // TODO: implement updateRecord
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> deleteWhereRecords({
+    required String name,
+    required BreezeFilterExpression filter,
+  }) async {
+    // TODO: implement deleteWhereRecords
     throw UnimplementedError();
   }
 }

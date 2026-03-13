@@ -106,7 +106,7 @@ Future<void> main() async {
   final log = Logger('Breeze Sqlite');
 
   group('[Relations]', () {
-    test('Fetch Record with Relation', () async {
+    test('Fetch Record with Relation (belongsTo)', () async {
       final store = TestStore(
         log: log,
         models: {
@@ -127,7 +127,7 @@ Future<void> main() async {
       expect(item.category!.name, equals('Category 1'));
     });
 
-    test('Fetch All Records with Relation', () async {
+    test('Fetch All Records with Relation (belongsTo)', () async {
       final store = TestStore(
         log: log,
         models: {
@@ -161,7 +161,7 @@ Future<void> main() async {
       expect(items[2].category!.name, equals('Category 2'));
     });
 
-    test('Fetch Record with List Relation (belongsTo)', () async {
+    test('Fetch Record with List Relation (hasMany)', () async {
       final store = TestStore(
         log: log,
         models: {

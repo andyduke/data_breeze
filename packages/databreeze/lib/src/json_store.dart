@@ -1,10 +1,10 @@
 import 'dart:math' as math;
 import 'package:collection/collection.dart';
 import 'package:databreeze/src/filter.dart';
-import 'package:databreeze/src/mixins/store_mixins.dart';
-import 'package:databreeze/src/model.dart';
+import 'package:databreeze/src/mixins/store_fetch_mixin.dart';
+import 'package:databreeze/src/mixins/store_has_many_throught_relations_mixin.dart';
+import 'package:databreeze/src/mixins/store_relations_mixin.dart';
 import 'package:databreeze/src/model_blueprint.dart';
-import 'package:databreeze/src/relations/model_relation.dart';
 import 'package:databreeze/src/store_fetch_options.dart';
 import 'package:databreeze/src/store.dart';
 import 'package:databreeze/src/type_converters.dart';
@@ -23,7 +23,8 @@ class BreezeJsonFetchRequest extends BreezeAbstractFetchRequest {
   String toString() => '''BreezeJsonFetchRequest([test callback])''';
 }
 
-class BreezeJsonStore extends BreezeStore with BreezeStoreFetch {
+class BreezeJsonStore extends BreezeStore
+    with BreezeStoreFetch, BreezeStoreRelations, BreezeStoreHasManyThoughRelations {
   static const _latency = Duration(milliseconds: 500);
 
   final Logger? log;
@@ -388,14 +389,14 @@ class BreezeJsonStore extends BreezeStore with BreezeStoreFetch {
     return result;
   }
 
-  @override
-  Future<void> fetchHasManyThrough(
-    BreezeModelResolvedHasManyThroughRelation<BreezeBaseModel> relation,
-    List<Map<String, dynamic>> records,
-    BreezeModelBlueprint<BreezeBaseModel> relationBlueprint,
-  ) async {
-    throw UnimplementedError();
-  }
+  // @override
+  // Future<void> fetchHasManyThrough(
+  //   BreezeModelResolvedHasManyThroughRelation<BreezeBaseModel> relation,
+  //   List<Map<String, dynamic>> records,
+  //   BreezeModelBlueprint<BreezeBaseModel> relationBlueprint,
+  // ) async {
+  //   throw UnimplementedError();
+  // }
 
   // ---
 

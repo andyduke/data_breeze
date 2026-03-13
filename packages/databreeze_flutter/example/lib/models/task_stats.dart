@@ -33,6 +33,14 @@ class TaskStatsQuery extends BreezeQueryWhere<TaskStats> {
 
   @override
   Future<TaskStats?> exec(covariant BreezeSqliteStore store) async {
-    return store.count('tasks', 'id').then((value) => TaskStatsModel.blueprint.fromRecord({'count': value}, store));
+    return store
+        .count('tasks', 'id')
+        .then(
+          (value) => TaskStatsModel.blueprint.fromRecord(
+            {'count': value},
+            store,
+            store.blueprintOf,
+          ),
+        );
   }
 }

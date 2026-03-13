@@ -12,7 +12,9 @@ export 'src/filter.dart';
 export 'src/query.dart';
 export 'src/store_fetch_options.dart';
 export 'src/store_change.dart';
-export 'src/mixins/store_mixins.dart';
+export 'src/mixins/store_fetch_mixin.dart';
+export 'src/mixins/store_relations_mixin.dart';
+export 'src/mixins/store_has_many_throught_relations_mixin.dart';
 export 'src/store.dart';
 export 'src/json_store.dart';
 

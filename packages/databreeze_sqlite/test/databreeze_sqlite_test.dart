@@ -786,8 +786,8 @@ CREATE TEMP TABLE task_progress(
         expect(error, isA<SqliteException>());
         expect(
           error.toString(),
-          r'''SqliteException(1): while preparing statement, no such column: not_exist, SQL logic error (code 1)
-  Causing statement (at position 26): SELECT * FROM tasks WHERE not_exist = ? LIMIT 1''',
+          r'''SqliteException(1): while preparing statement, no such column: tasks.not_exist, SQL logic error (code 1)
+  Causing statement (at position 32): SELECT tasks.* FROM tasks WHERE tasks.not_exist = ? LIMIT 1''',
         );
       }
 
@@ -822,8 +822,8 @@ CREATE TEMP TABLE task_progress(
         expect(error, isA<SqliteException>());
         expect(
           error.toString(),
-          r'''SqliteException(1): while preparing statement, no such column: not_exist, SQL logic error (code 1)
-  Causing statement (at position 26): SELECT * FROM tasks WHERE not_exist = ? LIMIT 1''',
+          r'''SqliteException(1): while preparing statement, no such column: tasks.not_exist, SQL logic error (code 1)
+  Causing statement (at position 32): SELECT tasks.* FROM tasks WHERE tasks.not_exist = ? LIMIT 1''',
         );
 
         expect(actualError, isA<SqliteException>());
