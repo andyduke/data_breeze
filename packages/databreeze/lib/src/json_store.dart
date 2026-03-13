@@ -24,7 +24,7 @@ class BreezeJsonFetchRequest extends BreezeAbstractFetchRequest {
 }
 
 class BreezeJsonStore extends BreezeStore
-    with BreezeStoreFetch, BreezeStoreRelations, BreezeStoreHasManyThoughRelations {
+    with BreezeStoreFetch, BreezeStoreRelations /*, BreezeStoreHasManyThoughRelations*/ {
   static const _latency = Duration(milliseconds: 500);
 
   final Logger? log;

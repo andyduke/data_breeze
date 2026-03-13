@@ -20,6 +20,7 @@ class BlueprintSingleVersionGenerator extends BlueprintCodeGenerator {
 
   @override
   Iterable<String> generate() sync* {
+    // TODO: add relation columns generation
     final String output =
         '''
   static final blueprint = BreezeModelBlueprint<$className>(

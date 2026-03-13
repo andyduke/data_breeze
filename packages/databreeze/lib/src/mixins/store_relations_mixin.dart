@@ -152,7 +152,65 @@ mixin BreezeStoreRelations on BreezeStore {
     List<Map<String, dynamic>> records,
     BreezeModelBlueprint relationBlueprint,
   ) async {
-    // Do nothing
+    // Default implementation.
+    // SQL stores and others may have their own, more optimal implementation.
+
+    final leftPk = relation.leftPk;
+    final rightPk = relationBlueprint.key!;
+
+    // Collect key values ​​from main records
+    final ids = {
+      for (final record in records)
+        if (record.containsKey(leftPk)) record[leftPk],
+    }.toList(growable: false);
+
+    // Get the junction list of the main model and the child model
+    final junctionRows = await fetchAllRecords(
+      table: relation.through,
+      request: BreezeFetchRequest(
+        filter: BreezeField(relation.foreignKey).inside(ids),
+        // sortBy: sortBy,
+      ),
+    );
+    final junctionIds = junctionRows.map((row) => row[relation.sourceKey]).toSet();
+
+    // Get a list of child model records for all main models
+    final rowsList = await fetchAllRecords(
+      table: relationBlueprint.name,
+      request: BreezeFetchRequest(
+        filter: BreezeField(rightPk).inside(junctionIds),
+        // sortBy: sortBy,
+      ),
+      blueprint: relationBlueprint,
+    );
+    final rows = Map<dynamic, Map<String, dynamic>>.fromIterable(
+      rowsList,
+      key: (row) => row[rightPk],
+    );
+
+    // Collect lists of child model keys for the corresponding master models:
+    // { main_id: [ child_id, child_id ] }
+    final relatedIds = <dynamic, List<dynamic>>{};
+    for (final junctionRow in junctionRows) {
+      (relatedIds[junctionRow[relation.foreignKey]] ??= []).add(junctionRow[relation.sourceKey]);
+    }
+
+    // Collect lists of child model records for the corresponding master models
+    // { main_id: [ child_record, child_record ] }
+    final relatedRows = <dynamic, List<Map<String, dynamic>>>{};
+    for (final MapEntry(key: leftId, value: rightIds) in relatedIds.entries) {
+      relatedRows[leftId] = rightIds
+          .map((id) => rows[id]) //
+          .where((row) => (row != null))
+          .cast<Map<String, dynamic>>()
+          .toList(growable: false);
+    }
+
+    for (final record in records) {
+      if (record.containsKey(leftPk)) {
+        record[relation.name] = relatedRows[record[leftPk]];
+      }
+    }
   }
 
   @override

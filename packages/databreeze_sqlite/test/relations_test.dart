@@ -4,10 +4,12 @@ import 'package:logging/logging.dart';
 import 'package:sqlite_async/sqlite_async.dart';
 import 'package:test/test.dart';
 
+import 'lib/models/actor.dart';
 import 'lib/models/article.dart';
 import 'lib/models/article_tag.dart';
 import 'lib/models/item.dart';
 import 'lib/models/item_category.dart';
+import 'lib/models/movie.dart';
 import 'lib/test_store.dart';
 
 final itemsMigration = SqliteMigrations()
@@ -97,6 +99,66 @@ CREATE TABLE articles(
     ),
   );
 
+final manyToManyMigration = SqliteMigrations()
+  ..add(
+    SqliteMigration(
+      1,
+      (tx) async {
+        await tx.execute(r'''
+CREATE TABLE actors(
+    id INTEGER PRIMARY KEY,
+    name TEXT
+)
+''');
+        await tx.execute(r'''
+CREATE TABLE movies(
+    id INTEGER PRIMARY KEY,
+    title TEXT
+)
+''');
+        await tx.execute(r'''
+CREATE TABLE movie_actors(
+    movie_id INTEGER,
+    actor_id INTEGER
+)
+''');
+
+        await tx.executeBatch(
+          r'''
+          INSERT INTO actors(id, name) VALUES(?, ?)
+          ''',
+          [
+            [1, 'Actor 1'],
+            [2, 'Actor 2'],
+            [3, 'Actor 3'],
+          ],
+        );
+
+        await tx.executeBatch(
+          r'''
+          INSERT INTO movies(id, title) VALUES(?, ?)
+          ''',
+          [
+            [10, 'Movie 1'],
+            [20, 'Movie 2'],
+          ],
+        );
+
+        await tx.executeBatch(
+          r'''
+          INSERT INTO movie_actors(movie_id, actor_id) VALUES(?, ?)
+          ''',
+          [
+            [10, 1],
+            [10, 2],
+            [20, 1],
+            [20, 3],
+          ],
+        );
+      },
+    ),
+  );
+
 Future<void> main() async {
   Logger.root.level = Level.ALL;
   Logger.root.onRecord.listen((record) {
@@ -178,6 +240,40 @@ Future<void> main() async {
       expect(article!.id, equals(1));
       expect(article.title, equals('Article 1'));
       expect(article.tags, hasLength(2));
+    });
+
+    test('Fetch All Records with Relation (hasManyThrough)', () async {
+      final store = TestStore(
+        log: log,
+        models: {
+          ActorModel.blueprint,
+          MovieModel.blueprint,
+        },
+        migrationStrategy: BreezeSqliteMigrations(manyToManyMigration),
+      );
+
+      final query = BreezeQueryAll<Movie>();
+      final movies = await query.fetch(store);
+
+      expect(movies, hasLength(2));
+
+      expect(movies[0].id, equals(10));
+      expect(movies[0].title, equals('Movie 1'));
+      expect(movies[0].actors, isNotNull);
+      expect(movies[0].actors, hasLength(2));
+      expect(movies[0].actors[0], isA<Actor>());
+      expect(movies[0].actors[0].name, equals('Actor 1'));
+      expect(movies[0].actors[1], isA<Actor>());
+      expect(movies[0].actors[1].name, equals('Actor 2'));
+
+      expect(movies[1].id, equals(20));
+      expect(movies[1].title, equals('Movie 2'));
+      expect(movies[1].actors, isNotNull);
+      expect(movies[1].actors, hasLength(2));
+      expect(movies[1].actors[0], isA<Actor>());
+      expect(movies[1].actors[0].name, equals('Actor 1'));
+      expect(movies[1].actors[1], isA<Actor>());
+      expect(movies[1].actors[1].name, equals('Actor 3'));
     });
 
     // TODO: Test Multilevel nesting: item.category.icon

@@ -35,7 +35,7 @@ class BreezeBetweenFilter extends BreezeFilterExpression {
 /// A filter that checks if a field is in a list of values.
 class BreezeInFilter extends BreezeFilterExpression {
   final String field;
-  final List<dynamic> values;
+  final Iterable<dynamic> values;
   final bool inverse;
 
   const BreezeInFilter(this.field, this.values, {this.inverse = false});
@@ -100,10 +100,10 @@ extension type const BreezeField(String name) implements String {
   BreezeFilterExpression between(dynamic min, dynamic max) => BreezeBetweenFilter(name, min, max);
 
   /// Creates a filter for a value inside a list of [values].
-  BreezeFilterExpression inside(List<dynamic> values) => BreezeInFilter(name, values);
+  BreezeFilterExpression inside(Iterable<dynamic> values) => BreezeInFilter(name, values);
 
   /// Creates a filter for a value not inside a list of [values].
-  BreezeFilterExpression notInside(List<dynamic> values) => BreezeInFilter(name, values, inverse: true);
+  BreezeFilterExpression notInside(Iterable<dynamic> values) => BreezeInFilter(name, values, inverse: true);
 
   BreezeExpressionValue get expr => BreezeExpressionValue(name);
 }

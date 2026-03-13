@@ -4,6 +4,7 @@ import 'package:databreeze/src/model_blueprint.dart';
 import 'package:databreeze/src/relations/model_relation.dart';
 import 'package:databreeze/src/store.dart';
 
+@Deprecated('Remove this')
 mixin BreezeStoreHasManyThoughRelations on BreezeStore, BreezeStoreRelations {
   @override
   Future<void> fetchHasManyThrough(
@@ -11,7 +12,7 @@ mixin BreezeStoreHasManyThoughRelations on BreezeStore, BreezeStoreRelations {
     List<Map<String, dynamic>> records,
     BreezeModelBlueprint relationBlueprint,
   ) {
-    // TODO: Implement this
+    // TODO: Default implementation. SQL stores have their own, more optimal implementation.
     throw UnimplementedError('Not implemented yet.');
   }
 
@@ -20,7 +21,7 @@ mixin BreezeStoreHasManyThoughRelations on BreezeStore, BreezeStoreRelations {
     BreezeModelResolvedHasManyThroughRelation relation,
     Map<String, dynamic> record,
   ) {
-    // TODO: Implement this
+    // TODO: Default implementation. SQL stores have their own, more optimal implementation.
     throw UnimplementedError('Not implemented yet.');
   }
 }

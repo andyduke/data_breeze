@@ -111,6 +111,7 @@ final class BreezeModelBelongsToRelation<M extends BreezeBaseModel> extends Bree
 }
 
 final class BreezeModelHasManyThroughRelation<M extends BreezeBaseModel> extends BreezeModelRelation<M> {
+  // TODO: Rename to junction
   final String through;
 
   BreezeModelHasManyThroughRelation({
@@ -129,13 +130,14 @@ final class BreezeModelHasManyThroughRelation<M extends BreezeBaseModel> extends
   @override
   BreezeModelResolvedRelation<M> resolve<P extends BreezeBaseModel>(BreezeModelBlueprint<P> blueprint) {
     final table = blueprint.name;
-    final pk = blueprint.key;
+    final pk = blueprint.key!;
 
     return BreezeModelResolvedHasManyThroughRelation(
       name: name,
       through: through,
-      foreignKey: foreignKey ?? '${table}_$pk',
-      sourceKey: sourceKey ?? '${name}_id',
+      leftPk: pk,
+      leftKey: foreignKey ?? '${table}_$pk', // TODO: singular table name
+      rightKey: sourceKey ?? '${name}_id', // TODO: singular name
     );
   }
 
@@ -203,12 +205,14 @@ final class BreezeModelResolvedBelongsToRelation<M extends BreezeBaseModel> exte
 
 final class BreezeModelResolvedHasManyThroughRelation<M extends BreezeBaseModel>
     extends BreezeModelResolvedRelation<M> {
+  final String leftPk;
   final String through;
 
   const BreezeModelResolvedHasManyThroughRelation({
     required super.name,
     required this.through,
-    required super.foreignKey,
-    required super.sourceKey,
-  });
+    required this.leftPk,
+    required String leftKey,
+    required String rightKey,
+  }) : super(foreignKey: leftKey, sourceKey: rightKey);
 }

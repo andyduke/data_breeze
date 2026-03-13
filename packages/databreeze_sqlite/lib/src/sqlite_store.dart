@@ -31,7 +31,7 @@ class BreezeSqliteRequest extends BreezeAbstractFetchRequest {
 typedef BreezeSqliteDatabaseLocation = Future<String> Function();
 
 class BreezeSqliteStore extends BreezeStore
-    with BreezeStoreFetch, BreezeStoreRelations, BreezeStoreHasManyThoughRelations {
+    with BreezeStoreFetch, BreezeStoreRelations /*, BreezeStoreHasManyThoughRelations*/ {
   final Logger? log;
 
   /// The database file name, or `null` for an in-memory database.
@@ -787,7 +787,7 @@ class BreezeSqliteStore extends BreezeStore
     final op = !f.inverse ? 'IN' : 'NOT IN';
     return (
       '$table.${f.field} $op ($placeholders)',
-      f.values,
+      f.values.toList(growable: false),
     );
   }
 
