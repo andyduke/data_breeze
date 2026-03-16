@@ -11,6 +11,7 @@ import 'lib/models/item.dart';
 import 'lib/models/item_category.dart';
 import 'lib/models/movie.dart';
 import 'lib/test_store.dart';
+import 'lib/tests/relations_tests.dart';
 
 final itemsMigration = SqliteMigrations()
   ..add(
@@ -280,4 +281,23 @@ Future<void> main() async {
 
     // TODO: Test List nesting: category.items
   });
+
+  relationsGroup(
+    '[Sqlite Relations]',
+    store: (type, models) async => switch (type) {
+      RelationTests.hasOne => TestStore(
+        log: log,
+        models: models,
+        migrationStrategy: BreezeSqliteMigrations(itemsMigration),
+      ),
+      _ => TestStore(),
+    },
+  );
+
+  /*
+  // TestCaseGroup()('Class-based group');
+  group('Class-based tests', () {
+    Test1('source data')();
+  });
+  */
 }
