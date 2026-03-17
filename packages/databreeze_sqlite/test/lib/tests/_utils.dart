@@ -7,9 +7,9 @@ enum RelationTests {
   hasManyThrough,
 }
 
-typedef BreezeTestStoreGetter = Future<BreezeStore> Function(RelationTests type, Set<BreezeModelBlueprint> models);
+typedef BreezeTestStoreGetter = Future<BreezeTestStore> Function(RelationTests type, Set<BreezeModelBlueprint> models);
 
-typedef RelationTestFunction = Future<void> Function({required BreezeStore store});
+typedef RelationTestFunction = Future<void> Function({required BreezeTestStore store});
 
 void defineRelationGroup(
   String description, {

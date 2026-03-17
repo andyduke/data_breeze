@@ -284,14 +284,17 @@ Future<void> main() async {
 
   relationsGroup(
     '[Sqlite Relations]',
+    /*
     store: (type, models) async => switch (type) {
       RelationTests.hasOne => TestStore(
         log: log,
         models: models,
-        migrationStrategy: BreezeSqliteMigrations(itemsMigration),
+        // migrationStrategy: BreezeSqliteMigrations(itemsMigration),
       ),
       _ => TestStore(),
     },
+    */
+    store: (type, models) async => TestStore(log: log, models: models),
   );
 
   /*

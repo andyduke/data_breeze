@@ -6,11 +6,41 @@ import '../models/item.dart';
 import '../models/item_category.dart';
 
 part '_utils.dart';
+part '_test_store.dart';
 
 // @isTest
 Future<void> testFetchHasOneRelation({
-  required BreezeStore store,
+  required BreezeTestStore store,
 }) async {
+  await store.initCollection(
+    'item_categories',
+    {
+      'id': BreezeTestStoreField(type: int, isPrimaryKey: true),
+      'name': BreezeTestStoreField(type: String),
+    },
+    [
+      {
+        'id': 1,
+        'name': 'Category 1',
+      },
+    ],
+  );
+  await store.initCollection(
+    'items',
+    {
+      'id': BreezeTestStoreField(type: int, isPrimaryKey: true),
+      'name': BreezeTestStoreField(type: String),
+      'category_id': BreezeTestStoreField(type: int),
+    },
+    [
+      {
+        'id': 1,
+        'name': 'Item 1',
+        'category_id': 1,
+      },
+    ],
+  );
+
   final query = BreezeQueryById<Item>(1);
   final item = await query.fetch(store);
 
