@@ -515,7 +515,7 @@ abstract class BreezeStore with BreezeStorageTypeConverters {
   @protected
   Future<dynamic> addRecord({
     required String name,
-    required String key,
+    String? key,
     required Map<String, dynamic> record,
   });
 

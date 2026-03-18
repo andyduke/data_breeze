@@ -4,7 +4,11 @@ import 'package:databreeze_flutter/databreeze_flutter.dart';
 
 class MockStore extends BreezeStore with BreezeStoreRelations {
   @override
-  Future addRecord({required String name, required String key, required Map<String, dynamic> record}) {
+  Future addRecord({
+    required String name,
+    String? key,
+    required Map<String, dynamic> record,
+  }) {
     // TODO: implement addRecord
     throw UnimplementedError();
   }

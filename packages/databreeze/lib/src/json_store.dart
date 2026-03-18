@@ -2,7 +2,6 @@ import 'dart:math' as math;
 import 'package:collection/collection.dart';
 import 'package:databreeze/src/filter.dart';
 import 'package:databreeze/src/mixins/store_fetch_mixin.dart';
-import 'package:databreeze/src/mixins/store_has_many_throught_relations_mixin.dart';
 import 'package:databreeze/src/mixins/store_relations_mixin.dart';
 import 'package:databreeze/src/model_blueprint.dart';
 import 'package:databreeze/src/store_fetch_options.dart';
@@ -216,7 +215,7 @@ class BreezeJsonStore extends BreezeStore
   @override
   Future<dynamic> addRecord({
     required String name,
-    required String key,
+    String? key,
     required Map<String, dynamic> record,
   }) async {
     if (simulateLatency) {
@@ -227,7 +226,7 @@ class BreezeJsonStore extends BreezeStore
     final newId = lastId++;
     final newRecord = {
       ...record,
-      key: newId,
+      ?key: newId,
     };
 
     if (!records.containsKey(name)) {

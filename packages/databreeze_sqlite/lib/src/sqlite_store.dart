@@ -307,10 +307,10 @@ class BreezeSqliteStore extends BreezeStore
   @override
   Future<dynamic> addRecord({
     required String name,
-    required String key,
+    String? key,
     required Map<String, dynamic> record,
   }) async {
-    final hasPrimaryKey = record.containsKey(key) && (record[key] != null);
+    final hasPrimaryKey = (key != null) && record.containsKey(key) && (record[key] != null);
     final rawRecord = hasPrimaryKey ? record : ({...record}..remove(key));
     final columns = rawRecord.keys;
     final columnsPlaceholders = List.filled(columns.length, '?').join(', ');
@@ -323,7 +323,11 @@ class BreezeSqliteStore extends BreezeStore
 
     final lastInsertId = result.isNotEmpty ? result.first.values.first : null;
 
-    log?.finest('Added #$lastInsertId: $record');
+    if (lastInsertId != null) {
+      log?.finest('Added #$lastInsertId: $record');
+    } else {
+      log?.finest('Added: $record');
+    }
 
     return lastInsertId;
   }

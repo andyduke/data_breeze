@@ -17,7 +17,7 @@ abstract mixin class BreezeTestStore implements BreezeStore {
   @visibleForTesting
   Future<dynamic> addRecord({
     required String name,
-    required String key,
+    String? key,
     required Map<String, dynamic> record,
   });
 
@@ -25,7 +25,7 @@ abstract mixin class BreezeTestStore implements BreezeStore {
   @visibleForTesting
   Future<void> addRecords({
     required String name,
-    required String key,
+    String? key,
     required List<Map<String, dynamic>> records,
   }) async {
     await Future.wait(
@@ -65,7 +65,7 @@ abstract mixin class BreezeTestStore implements BreezeStore {
     Map<String, BreezeTestStoreField> fields,
     List<Map<String, dynamic>> records,
   ) async {
-    final key = fields.entries.firstWhere((e) => e.value.isPrimaryKey).key;
+    final key = fields.entries.firstWhereOrNull((e) => e.value.isPrimaryKey)?.key;
     await createCollection(name, fields);
     if (records.isNotEmpty) {
       await addRecords(name: name, key: key, records: records);

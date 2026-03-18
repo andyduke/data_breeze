@@ -1,82 +1,31 @@
+import 'package:collection/collection.dart';
 import 'package:databreeze/databreeze.dart';
 import 'package:meta/meta.dart';
 import 'package:test/test.dart';
 
+import '../models/actor.dart';
+import '../models/article.dart';
+import '../models/article_tag.dart';
 import '../models/item.dart';
 import '../models/item_category.dart';
+import '../models/movie.dart';
 
 part '_utils.dart';
 part '_test_store.dart';
+part '_test_belongsto_fetch.dart';
+part '_test_hasmany_fetch.dart';
+part '_test_hasmanythrough_fetch.dart';
 
 // @isTest
 Future<void> testFetchHasOneRelation({
   required BreezeTestStore store,
-}) async {
-  await store.initCollection(
-    'item_categories',
-    {
-      'id': BreezeTestStoreField(type: int, isPrimaryKey: true),
-      'name': BreezeTestStoreField(type: String),
-    },
-    [
-      {
-        'id': 1,
-        'name': 'Category 1',
-      },
-    ],
-  );
-  await store.initCollection(
-    'items',
-    {
-      'id': BreezeTestStoreField(type: int, isPrimaryKey: true),
-      'name': BreezeTestStoreField(type: String),
-      'category_id': BreezeTestStoreField(type: int),
-    },
-    [
-      {
-        'id': 1,
-        'name': 'Item 1',
-        'category_id': 1,
-      },
-    ],
-  );
-
-  final query = BreezeQueryById<Item>(1);
-  final item = await query.fetch(store);
-
-  expect(item, isNotNull);
-  expect(item!.id, equals(1));
-  expect(item.name, equals('Item 1'));
-  expect(item.category, isNotNull);
-  expect(item.category, isA<ItemCategory>());
-  expect(item.category!.name, equals('Category 1'));
-}
-
-// @isTest
-Future<void> testFetchHasManyRelation({
-  required BreezeStore store,
-}) async {
-  // TODO:
-  expect(store, isNotNull);
-}
-
-// @isTest
-Future<void> testFetchBelongsToRelation({
-  required BreezeStore store,
-}) async {
-  // TODO:
-}
-
-// @isTest
-Future<void> testFetchHasManyThroughRelation({
-  required BreezeStore store,
 }) async {
   // TODO:
 }
 
 // @isTest
 Future<void> testUpdateHasOneRelation({
-  required BreezeStore store,
+  required BreezeTestStore store,
 }) async {
   // TODO:
   expect(store, isNotNull);
@@ -93,13 +42,39 @@ void relationsGroup(
     relations: relations,
     store: store,
     tests: {
-      RelationTests.hasOne: (
-        models: {ItemModel.blueprint, ItemCategoryModel.blueprint},
-        test: testFetchHasOneRelation,
-      ),
-      RelationTests.hasMany: (models: {}, test: testFetchHasManyRelation),
-      RelationTests.belongsTo: (models: {}, test: testFetchBelongsToRelation),
-      RelationTests.hasManyThrough: (models: {}, test: testFetchHasManyThroughRelation),
+      RelationTests.hasOne: [
+        // (
+        //   label: 'fetch',
+        //   models: {ItemModel.blueprint, ItemCategoryModel.blueprint},
+        //   test: testFetchHasOneRelation,
+        // ),
+      ],
+      RelationTests.hasMany: [
+        (
+          label: 'fetchOne',
+          models: {ArticleModel.blueprint, ArticleTagModel.blueprint},
+          test: testFetchOneHasManyRelation,
+        ),
+      ],
+      RelationTests.belongsTo: [
+        (
+          label: 'fetchOne',
+          models: {ItemModel.blueprint, ItemCategoryModel.blueprint},
+          test: testFetchOneBelongsToRelation,
+        ),
+        (
+          label: 'fetchAll',
+          models: {ItemModel.blueprint, ItemCategoryModel.blueprint},
+          test: testFetchAllBelongsToRelation,
+        ),
+      ],
+      RelationTests.hasManyThrough: [
+        (
+          label: 'fetchAll',
+          models: {ActorModel.blueprint, MovieModel.blueprint},
+          test: testFetchAllHasManyThroughRelation,
+        ),
+      ],
     },
   );
 
