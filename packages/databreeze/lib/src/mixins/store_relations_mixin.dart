@@ -74,7 +74,7 @@ mixin BreezeStoreRelations on BreezeStore {
     );
     final relatedRows = Map<dynamic, Map<String, dynamic>>.fromIterable(
       rows,
-      key: (row) => row.id,
+      key: (row) => row[relation.sourceKey],
     );
 
     for (final record in records) {

@@ -4,24 +4,20 @@ import 'package:meta/meta.dart';
 import 'package:test/test.dart';
 
 import '../models/actor.dart';
+import '../models/company_address.dart';
 import '../models/article.dart';
 import '../models/article_tag.dart';
+import '../models/company.dart';
 import '../models/item.dart';
 import '../models/item_category.dart';
 import '../models/movie.dart';
 
 part '_utils.dart';
 part '_test_store.dart';
+part '_test_hasone_fetch.dart';
 part '_test_belongsto_fetch.dart';
 part '_test_hasmany_fetch.dart';
 part '_test_hasmanythrough_fetch.dart';
-
-// @isTest
-Future<void> testFetchHasOneRelation({
-  required BreezeTestStore store,
-}) async {
-  // TODO:
-}
 
 // @isTest
 Future<void> testUpdateHasOneRelation({
@@ -43,11 +39,16 @@ void relationsGroup(
     store: store,
     tests: {
       RelationTests.hasOne: [
-        // (
-        //   label: 'fetch',
-        //   models: {ItemModel.blueprint, ItemCategoryModel.blueprint},
-        //   test: testFetchHasOneRelation,
-        // ),
+        (
+          label: 'fetchOne',
+          models: {CompanyModel.blueprint, CompanyAddressModel.blueprint},
+          test: testFetchOneHasOneRelation,
+        ),
+        (
+          label: 'fetchAll',
+          models: {CompanyModel.blueprint, CompanyAddressModel.blueprint},
+          test: testFetchAllHasOneRelation,
+        ),
       ],
       RelationTests.hasMany: [
         (
