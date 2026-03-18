@@ -316,8 +316,9 @@ class BreezeSqliteStore extends BreezeStore
     final columnsPlaceholders = List.filled(columns.length, '?').join(', ');
     final values = rawRecord.values;
 
+    final returning = (key != null) ? ' RETURNING $key' : '';
     final result = await executeSql(
-      'INSERT INTO $name (${columns.join(', ')}) VALUES ($columnsPlaceholders) RETURNING $key',
+      'INSERT INTO $name (${columns.join(', ')}) VALUES ($columnsPlaceholders)$returning',
       values.toList(growable: false),
     );
 

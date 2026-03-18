@@ -1,5 +1,75 @@
 part of 'relations_tests.dart';
 
+Future<void> testFetchOneHasManyThroughRelation({
+  required BreezeTestStore store,
+}) async {
+  await store.initCollection(
+    'actors',
+    {
+      'id': BreezeTestStoreField(type: int, isPrimaryKey: true),
+      'name': BreezeTestStoreField(type: String),
+    },
+    [
+      {
+        'id': 1,
+        'name': 'Actor 1',
+      },
+      {
+        'id': 2,
+        'name': 'Actor 2',
+      },
+      {
+        'id': 3,
+        'name': 'Actor 3',
+      },
+    ],
+  );
+  await store.initCollection(
+    'movies',
+    {
+      'id': BreezeTestStoreField(type: int, isPrimaryKey: true),
+      'title': BreezeTestStoreField(type: String),
+    },
+    [
+      {
+        'id': 10,
+        'title': 'Movie 1',
+      },
+      {
+        'id': 20,
+        'title': 'Movie 2',
+      },
+    ],
+  );
+  await store.initCollection(
+    'movie_actors',
+    {
+      'movie_id': BreezeTestStoreField(type: int),
+      'actor_id': BreezeTestStoreField(type: int),
+    },
+    [
+      {'movie_id': 10, 'actor_id': 1},
+      {'movie_id': 10, 'actor_id': 2},
+      {'movie_id': 20, 'actor_id': 1},
+      {'movie_id': 20, 'actor_id': 3},
+    ],
+  );
+
+  final query = BreezeQueryById<Movie>(10);
+  final movie = await query.fetch(store);
+
+  expect(movie, isNotNull);
+
+  expect(movie!.id, equals(10));
+  expect(movie.title, equals('Movie 1'));
+  expect(movie.actors, isNotNull);
+  expect(movie.actors, hasLength(2));
+  expect(movie.actors[0], isA<Actor>());
+  expect(movie.actors[0].name, equals('Actor 1'));
+  expect(movie.actors[1], isA<Actor>());
+  expect(movie.actors[1].name, equals('Actor 2'));
+}
+
 Future<void> testFetchAllHasManyThroughRelation({
   required BreezeTestStore store,
 }) async {

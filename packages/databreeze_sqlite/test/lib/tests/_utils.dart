@@ -22,7 +22,7 @@ void defineRelationGroup(
     RelationTests.hasOne: 'HasOne',
     RelationTests.hasMany: 'HasMany',
     RelationTests.belongsTo: 'BelongsTo',
-    RelationTests.hasManyThrough: 'HasManyThrough',
+    RelationTests.hasManyThrough: 'HasMany through',
   };
 
   group(

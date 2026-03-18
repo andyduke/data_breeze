@@ -55,6 +55,11 @@ void relationsGroup(
           models: {ArticleModel.blueprint, ArticleTagModel.blueprint},
           test: testFetchOneHasManyRelation,
         ),
+        (
+          label: 'fetchAll',
+          models: {ArticleModel.blueprint, ArticleTagModel.blueprint},
+          test: testFetchAllHasManyRelation,
+        ),
       ],
       RelationTests.belongsTo: [
         (
@@ -69,6 +74,11 @@ void relationsGroup(
         ),
       ],
       RelationTests.hasManyThrough: [
+        (
+          label: 'fetchOne',
+          models: {ActorModel.blueprint, MovieModel.blueprint},
+          test: testFetchOneHasManyThroughRelation,
+        ),
         (
           label: 'fetchAll',
           models: {ActorModel.blueprint, MovieModel.blueprint},
