@@ -18,14 +18,7 @@ part '_test_hasone_fetch.dart';
 part '_test_belongsto_fetch.dart';
 part '_test_hasmany_fetch.dart';
 part '_test_hasmanythrough_fetch.dart';
-
-// @isTest
-Future<void> testUpdateHasOneRelation({
-  required BreezeTestStore store,
-}) async {
-  // TODO:
-  expect(store, isNotNull);
-}
+part '_test_hasone_update.dart';
 
 @isTestGroup
 void relationsGroup(
@@ -84,6 +77,22 @@ void relationsGroup(
           label: 'fetchAll',
           models: {ActorModel.blueprint, MovieModel.blueprint},
           test: testFetchAllHasManyThroughRelation,
+        ),
+      ],
+    },
+  );
+
+  // TODO: Add/Update/Delete records with relations
+  defineRelationGroup(
+    '$description Update',
+    relations: relations,
+    store: store,
+    tests: {
+      RelationTests.hasOne: [
+        (
+          label: null,
+          models: {CompanyModel.blueprint, CompanyAddressModel.blueprint},
+          test: testUpdateHasOneRelation,
         ),
       ],
     },

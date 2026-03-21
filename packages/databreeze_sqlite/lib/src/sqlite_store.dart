@@ -225,13 +225,21 @@ class BreezeSqliteStore extends BreezeStore
       case BreezeSqliteRequest(sql: final sql, params: final params):
         result = await executeSql(sql, params, typeConverters);
         break;
+
+      case Null _:
+        final (:sql, :params) = buildSql(table);
+        result = await executeSql(sql, params, typeConverters);
+        break;
+
+      default:
+        throw Exception('Request type "${request.runtimeType}" is not supported in store "$runtimeType".');
     }
 
-    if (result != null) {
-      records = result.map((r) => Map.from(r).cast<String, dynamic>()).toList(growable: false);
-    } else {
-      records = [];
-    }
+    // if (result != null) {
+    records = result.map((r) => Map.from(r).cast<String, dynamic>()).toList(growable: false);
+    // } else {
+    //   records = [];
+    // }
 
     // --
 

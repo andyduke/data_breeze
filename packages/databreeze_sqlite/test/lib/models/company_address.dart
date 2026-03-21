@@ -8,8 +8,10 @@ part 'company_address.g.dart';
 )
 class CompanyAddress extends BreezeModel<int> with CompanyAddressModel {
   String location;
+  // int? companyId;
 
   CompanyAddress({
     required this.location,
+    // this.companyId,
   });
 }

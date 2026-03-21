@@ -178,18 +178,22 @@ abstract class BreezeStore with BreezeStorageTypeConverters {
 
   // --- Change API
 
-  Future<M> save<M extends BreezeModel>(M record) async {
-    // TODO: Check if the recording needs to be saved.
+  Future<M> save<M extends BreezeModel>(M record) => saveWithOptions(record);
 
+  @internal
+  Future<M> saveWithOptions<M extends BreezeModel>(
+    M record, {
+    Map<String, dynamic>? extraData,
+  }) async {
     if (!record.isFrozen) {
       await record.beforeSave();
     }
 
     try {
       if (record.isNew) {
-        return add(record);
+        return add(record, extraData: extraData);
       } else {
-        return update(record);
+        return update(record, extraData: extraData);
       }
     } finally {
       if (!record.isFrozen) {
@@ -199,7 +203,10 @@ abstract class BreezeStore with BreezeStorageTypeConverters {
   }
 
   @protected
-  Future<M> add<M extends BreezeModel>(M record) async {
+  Future<M> add<M extends BreezeModel>(
+    M record, {
+    Map<String, dynamic>? extraData,
+  }) async {
     if (!record.isFrozen) {
       final tableName = record.schema.name;
       final keyName = record.schema.key;
@@ -208,15 +215,18 @@ abstract class BreezeStore with BreezeStorageTypeConverters {
         throw Exception('The "$M" model does not have a primary key field.');
       }
 
-      final rawRecord = record.schema.toRaw(record.toRawRecord(), this, blueprintOf);
+      final rawRecord = {
+        ...record.schema.toRaw(record.toRawRecord(), this, blueprintOf),
+        ...?extraData,
+      };
 
-      await updateRelationsBeforeSave<M>(
+      final recordWithoutRelations = await updateRelationsBeforeSave<M>(
         record.schema as BreezeModelBlueprint<M>,
         rawRecord,
         record.schema.relations,
       );
 
-      final newId = await addRecord(name: tableName, key: keyName, record: rawRecord);
+      final newId = await addRecord(name: tableName, key: keyName, record: recordWithoutRelations);
 
       // TODO: Check key type?
       // if (newId.runtimeType != record.keyType) {
@@ -224,9 +234,13 @@ abstract class BreezeStore with BreezeStorageTypeConverters {
       // }
 
       record.id = newId;
+      if (record.schema.key != null) {
+        rawRecord[record.schema.key!] = newId;
+      }
 
       await updateRelationsAfterSave(
-        record,
+        record.schema as BreezeModelBlueprint<M>,
+        rawRecord,
         record.schema.relations,
       );
 
@@ -245,7 +259,14 @@ abstract class BreezeStore with BreezeStorageTypeConverters {
   }
 
   @protected
-  Future<M> update<M extends BreezeModel>(M record) async {
+  Future<M> update<M extends BreezeModel>(
+    M record, {
+    Map<String, dynamic>? extraData,
+  }) async {
+    // TODO: Check if the recording needs to be saved.
+    //  Calculate the hash of record fields (excluding relationships)?
+    //  Compare it to the hash stored in the model after a fetch or previous save?
+
     if (!record.isFrozen) {
       final tableName = record.schema.name;
       final keyName = record.schema.key;
@@ -255,21 +276,25 @@ abstract class BreezeStore with BreezeStorageTypeConverters {
         throw Exception('The "$M" model does not have a primary key field.');
       }
 
-      final rawRecord = record.schema.toRaw(record.toRawRecord(), this, blueprintOf);
+      final rawRecord = {
+        ...record.schema.toRaw(record.toRawRecord(), this, blueprintOf),
+        ...?extraData,
+      };
 
       if (keyValue != null) {
         record.beforeUpdate();
 
-        await updateRelationsBeforeSave<M>(
+        final recordWithoutRelations = await updateRelationsBeforeSave<M>(
           record.schema as BreezeModelBlueprint<M>,
           rawRecord,
           record.schema.relations,
         );
 
-        await updateRecord(name: tableName, key: keyName, keyValue: keyValue, record: rawRecord);
+        await updateRecord(name: tableName, key: keyName, keyValue: keyValue, record: recordWithoutRelations);
 
         await updateRelationsAfterSave(
-          record,
+          record.schema as BreezeModelBlueprint<M>,
+          rawRecord,
           record.schema.relations,
         );
 
@@ -456,7 +481,7 @@ abstract class BreezeStore with BreezeStorageTypeConverters {
   );
 
   @protected
-  Future<void> updateRelationsBeforeSave<M extends BreezeBaseModel>(
+  Future<Map<String, dynamic>> updateRelationsBeforeSave<M extends BreezeBaseModel>(
     BreezeModelBlueprint<M> blueprint,
     Map<String, dynamic> record,
     Set<BreezeModelRelation> relations,
@@ -464,7 +489,8 @@ abstract class BreezeStore with BreezeStorageTypeConverters {
 
   @protected
   Future<void> updateRelationsAfterSave<M extends BreezeBaseModel>(
-    M record,
+    BreezeModelBlueprint<M> blueprint,
+    Map<String, dynamic> record,
     Set<BreezeModelRelation> relations,
   );
 

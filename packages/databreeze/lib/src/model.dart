@@ -164,7 +164,7 @@ abstract mixin class BreezeModel<K> implements BreezeBaseModel {
   @internal
   Map<String, dynamic> toRawRecord() => {
     ...toRecord(),
-    if (schema.key != null) schema.key!: id,
+    if (schema.key != null && id != null) schema.key!: id,
   };
 
   /// Callback called before the model is saved (added or updated) to the store.

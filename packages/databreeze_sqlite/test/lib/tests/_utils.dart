@@ -15,7 +15,7 @@ void defineRelationGroup(
   String description, {
   required BreezeTestStoreGetter store,
   Set<RelationTests> relations = const {...RelationTests.values},
-  required Map<RelationTests, Iterable<({String label, Set<BreezeModelBlueprint> models, RelationTestFunction test})>>
+  required Map<RelationTests, Iterable<({String? label, Set<BreezeModelBlueprint> models, RelationTestFunction test})>>
   tests,
 }) {
   final typeTestNames = {
@@ -32,7 +32,11 @@ void defineRelationGroup(
         if (relations.contains(type) && tests.containsKey(type)) {
           final typeTests = tests[type]!;
           for (final typeTest in typeTests) {
-            test('${typeTestNames[type]}: ${typeTest.label}', () async {
+            final testLabel = (typeTest.label != null)
+                ? '${typeTestNames[type]}: ${typeTest.label}'
+                : '${typeTestNames[type]}';
+
+            test(testLabel, () async {
               final testStore = await store(type, typeTest.models);
               return typeTest.test(store: testStore);
             });

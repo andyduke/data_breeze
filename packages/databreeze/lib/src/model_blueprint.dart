@@ -176,6 +176,18 @@ class BreezeModelBlueprint<M extends BreezeBaseModel> extends BreezeModelVersion
       // ...relationsConverters(converters, blueprintOf),
     };
 
+    /*
+    for (final relation in relations) {
+      final relationInfo = relation.resolve(this);
+
+      if (raw.containsKey(relationInfo.name)) {
+        raw[relationInfo.foreignKey] = raw[relationInfo.name];
+        raw.remove(relationInfo.name);
+      }
+    }
+    */
+
+    /*
     return raw.map(
       (k, v) => MapEntry(
         k,
@@ -188,6 +200,22 @@ class BreezeModelBlueprint<M extends BreezeBaseModel> extends BreezeModelVersion
         ),
       ),
     );
+    */
+
+    final relationNames = relations.map((rel) => rel.name);
+    final result = {
+      for (final MapEntry(key: key, value: value) in raw.entries)
+        key: (relationNames.contains(key))
+            ? value
+            : valueToStorage(
+                key,
+                value,
+                converters,
+                extendedTypeConverters,
+                blueprintOf,
+              ),
+    };
+    return result;
   }
 
   dynamic valueFromStorage(
