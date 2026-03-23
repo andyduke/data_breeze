@@ -48,6 +48,7 @@ sealed class BreezeModelRelation<M extends BreezeBaseModel> {
     String? sourceKey,
   }) = BreezeModelHasManyThroughRelation;
 
+  @Deprecated('Use BreezeStoreRelations.resolveRelation instead.')
   BreezeModelResolvedRelation<M> resolve<P extends BreezeBaseModel>(BreezeModelBlueprint<P> blueprint);
 }
 

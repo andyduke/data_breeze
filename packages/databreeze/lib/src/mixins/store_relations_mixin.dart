@@ -8,6 +8,41 @@ import 'package:databreeze/src/store_fetch_options.dart';
 import 'package:meta/meta.dart';
 
 mixin BreezeStoreRelations on BreezeStore {
+  @protected
+  BreezeModelResolvedRelation resolveRelation(
+    BreezeModelRelation relation,
+    BreezeModelBlueprint blueprint,
+  ) {
+    final table = blueprint.name;
+    final pk = blueprint.key;
+
+    final BreezeModelResolvedRelation resolved = switch (relation) {
+      BreezeModelHasOneRelation oneToOne => BreezeModelResolvedHasOneRelation(
+        name: oneToOne.name,
+        foreignKey: oneToOne.foreignKey ?? '${table}_$pk',
+        sourceKey: oneToOne.sourceKey ?? 'id',
+      ),
+      BreezeModelHasManyRelation oneToMany => BreezeModelResolvedHasManyRelation(
+        name: oneToMany.name,
+        foreignKey: oneToMany.foreignKey ?? '${table}_$pk',
+        sourceKey: oneToMany.sourceKey ?? 'id',
+      ),
+      BreezeModelBelongsToRelation manyToOne => BreezeModelResolvedBelongsToRelation(
+        name: manyToOne.name,
+        foreignKey: manyToOne.foreignKey ?? '$pk',
+        sourceKey: manyToOne.sourceKey ?? '${manyToOne.name}_id',
+      ),
+      BreezeModelHasManyThroughRelation manyToMany => BreezeModelResolvedHasManyThroughRelation(
+        name: manyToMany.name,
+        through: manyToMany.through,
+        leftPk: pk!,
+        leftKey: manyToMany.foreignKey ?? '${table}_$pk', // TODO: singular table name
+        rightKey: manyToMany.sourceKey ?? '${manyToMany.name}_id', // TODO: singular name
+      ),
+    };
+    return resolved;
+  }
+
   @override
   Future<BreezeFetchRelationsRequest> preFetchRelations(Set<BreezeModelRelation> relations) async {
     final request = BreezeFetchRelationsRequest(relations: relations);
@@ -28,7 +63,8 @@ mixin BreezeStoreRelations on BreezeStore {
     final result = records;
 
     for (final relation in request.relations) {
-      final relationInfo = relation.resolve(blueprint);
+      // final relationInfo = relation.resolve(blueprint);
+      final relationInfo = resolveRelation(relation, blueprint);
       final relationBlueprint = blueprintOf(relation.type);
 
       switch (relationInfo) {
@@ -222,7 +258,8 @@ mixin BreezeStoreRelations on BreezeStore {
     final result = {...record};
 
     for (final relation in relations) {
-      final relationInfo = relation.resolve(blueprint);
+      // final relationInfo = relation.resolve(blueprint);
+      final relationInfo = resolveRelation(relation, blueprint);
 
       switch (relationInfo) {
         case BreezeModelResolvedHasOneRelation hasOne:
@@ -264,7 +301,8 @@ mixin BreezeStoreRelations on BreezeStore {
     Set<BreezeModelRelation> relations,
   ) async {
     for (final relation in relations) {
-      final relationInfo = relation.resolve(blueprint);
+      // final relationInfo = relation.resolve(blueprint);
+      final relationInfo = resolveRelation(relation, blueprint);
 
       switch (relationInfo) {
         case BreezeModelResolvedHasOneRelation hasOne:
@@ -336,7 +374,7 @@ mixin BreezeStoreRelations on BreezeStore {
     BreezeModelResolvedHasManyThroughRelation relation,
     Map<String, dynamic> record,
   ) async {
-    // Do nothing
+    // TODO: Implement this
   }
 
   @override
