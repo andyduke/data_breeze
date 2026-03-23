@@ -33,19 +33,19 @@ mixin BreezeStoreRelations on BreezeStore {
 
       switch (relationInfo) {
         case BreezeModelResolvedHasOneRelation hasOne:
-          await fetchHasOne(hasOne, result, relationBlueprint);
+          await fetchOneToOne(hasOne, result, relationBlueprint);
           break;
 
         case BreezeModelResolvedHasManyRelation hasMany:
-          await fetchHasMany(hasMany, result, relationBlueprint);
+          await fetchOneToMany(hasMany, result, relationBlueprint);
           break;
 
         case BreezeModelResolvedBelongsToRelation belongsTo:
-          await fetchBelongsTo(belongsTo, result, relationBlueprint);
+          await fetchManyToOne(belongsTo, result, relationBlueprint);
           break;
 
         case BreezeModelResolvedHasManyThroughRelation hasManyThrough:
-          await fetchHasManyThrough(hasManyThrough, result, relationBlueprint);
+          await fetchManyToMany(hasManyThrough, result, relationBlueprint);
           break;
       }
     }
@@ -53,8 +53,8 @@ mixin BreezeStoreRelations on BreezeStore {
     return result;
   }
 
-  @override
-  Future<void> fetchHasOne(
+  @protected
+  Future<void> fetchOneToOne(
     BreezeModelResolvedHasOneRelation relation,
     List<Map<String, dynamic>> records,
     BreezeModelBlueprint relationBlueprint,
@@ -84,8 +84,8 @@ mixin BreezeStoreRelations on BreezeStore {
     }
   }
 
-  @override
-  Future<void> fetchHasMany(
+  @protected
+  Future<void> fetchOneToMany(
     BreezeModelResolvedHasManyRelation relation,
     List<Map<String, dynamic>> records,
     BreezeModelBlueprint relationBlueprint,
@@ -115,8 +115,8 @@ mixin BreezeStoreRelations on BreezeStore {
     }
   }
 
-  @override
-  Future<void> fetchBelongsTo(
+  @protected
+  Future<void> fetchManyToOne(
     BreezeModelResolvedBelongsToRelation relation,
     List<Map<String, dynamic>> records,
     BreezeModelBlueprint relationBlueprint,
@@ -146,8 +146,8 @@ mixin BreezeStoreRelations on BreezeStore {
     }
   }
 
-  @override
-  Future<void> fetchHasManyThrough(
+  @protected
+  Future<void> fetchManyToMany(
     BreezeModelResolvedHasManyThroughRelation relation,
     List<Map<String, dynamic>> records,
     BreezeModelBlueprint relationBlueprint,

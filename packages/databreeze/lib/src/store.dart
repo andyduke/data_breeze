@@ -453,34 +453,6 @@ abstract class BreezeStore with BreezeStorageTypeConverters {
   );
 
   @protected
-  Future<void> fetchHasOne(
-    BreezeModelResolvedHasOneRelation relation,
-    List<Map<String, dynamic>> records,
-    BreezeModelBlueprint relationBlueprint,
-  );
-
-  @protected
-  Future<void> fetchHasMany(
-    BreezeModelResolvedHasManyRelation relation,
-    List<Map<String, dynamic>> records,
-    BreezeModelBlueprint relationBlueprint,
-  );
-
-  @protected
-  Future<void> fetchBelongsTo(
-    BreezeModelResolvedBelongsToRelation relation,
-    List<Map<String, dynamic>> records,
-    BreezeModelBlueprint relationBlueprint,
-  );
-
-  @protected
-  Future<void> fetchHasManyThrough(
-    BreezeModelResolvedHasManyThroughRelation relation,
-    List<Map<String, dynamic>> records,
-    BreezeModelBlueprint relationBlueprint,
-  );
-
-  @protected
   Future<Map<String, dynamic>> updateRelationsBeforeSave<M extends BreezeBaseModel>(
     BreezeModelBlueprint<M> blueprint,
     Map<String, dynamic> record,

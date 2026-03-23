@@ -7,7 +7,7 @@ import 'package:databreeze/src/store.dart';
 @Deprecated('Remove this')
 mixin BreezeStoreHasManyThoughRelations on BreezeStore, BreezeStoreRelations {
   @override
-  Future<void> fetchHasManyThrough(
+  Future<void> fetchManyToMany(
     BreezeModelResolvedHasManyThroughRelation relation,
     List<Map<String, dynamic>> records,
     BreezeModelBlueprint relationBlueprint,
