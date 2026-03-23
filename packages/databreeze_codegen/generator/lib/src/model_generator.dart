@@ -262,6 +262,8 @@ ${relations.map((r) => "    '${r.name}': _self.${r.name},").join('\n')}
           through: relationThrough,
         ),
       );
+
+      // TODO: Add relation foreign key fields to fields list!
     }
 
     return result;

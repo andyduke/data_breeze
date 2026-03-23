@@ -262,31 +262,32 @@ mixin BreezeStoreRelations on BreezeStore {
       final relationInfo = resolveRelation(relation, blueprint);
 
       switch (relationInfo) {
-        case BreezeModelResolvedHasOneRelation hasOne:
-          if (result.containsKey(hasOne.name) && result[hasOne.name] is BreezeModel) {
+        case BreezeModelResolvedHasOneRelation oneToOne:
+          if (result.containsKey(oneToOne.name) && result[oneToOne.name] is BreezeModel) {
             // Remove from the result, since this value will be
             // processed later in updateRelationsAfterSave.
-            result.remove(hasOne.name);
+            result.remove(oneToOne.name);
           }
           break;
 
-        case BreezeModelResolvedHasManyRelation hasMany:
-          if (result.containsKey(hasMany.name) && result[hasMany.name] is Iterable<BreezeModel>) {
+        case BreezeModelResolvedHasManyRelation oneToMany:
+          if (result.containsKey(oneToMany.name) && result[oneToMany.name] is Iterable<BreezeModel>) {
             // Remove from the result, since this value will be
             // processed later in updateRelationsAfterSave.
-            result.remove(hasMany.name);
+            result.remove(oneToMany.name);
           }
           break;
 
-        case BreezeModelResolvedBelongsToRelation belongsTo:
-          if (result.containsKey(belongsTo.name) && result[belongsTo.name] is BreezeModel) {
-            await updateManyToOneRelation(record[relation.name], result, belongsTo);
-            result.remove(belongsTo.name);
+        case BreezeModelResolvedBelongsToRelation manyToOne:
+          if (result.containsKey(manyToOne.name) && result[manyToOne.name] is BreezeModel) {
+            await updateManyToOneRelation(result[relation.name], result, manyToOne);
+            result.remove(manyToOne.name);
           }
           break;
 
-        case BreezeModelResolvedHasManyThroughRelation hasManyThrough:
-          await updateManyToManyRelation(hasManyThrough, result);
+        case BreezeModelResolvedHasManyThroughRelation manyToMany:
+          // TODO: if (result.containsKey(manyToMany.name) && result[manyToMany.name] is Iterable<BreezeModel>) {
+          await updateManyToManyRelation(manyToMany, result);
           break;
       }
     }
