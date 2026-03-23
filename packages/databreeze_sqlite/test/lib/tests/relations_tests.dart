@@ -19,6 +19,7 @@ part '_test_belongsto_fetch.dart';
 part '_test_hasmany_fetch.dart';
 part '_test_hasmanythrough_fetch.dart';
 part '_test_hasone_update.dart';
+part '_test_hasmany_update.dart';
 
 @isTestGroup
 void relationsGroup(
@@ -84,15 +85,32 @@ void relationsGroup(
 
   // TODO: Add/Update/Delete records with relations
   defineRelationGroup(
-    '$description Update',
+    '$description Change',
     relations: relations,
     store: store,
     tests: {
       RelationTests.hasOne: [
         (
-          label: null,
+          label: 'Add',
+          models: {CompanyModel.blueprint, CompanyAddressModel.blueprint},
+          test: testAddHasOneRelation,
+        ),
+        (
+          label: 'Update',
           models: {CompanyModel.blueprint, CompanyAddressModel.blueprint},
           test: testUpdateHasOneRelation,
+        ),
+      ],
+      RelationTests.hasMany: [
+        (
+          label: 'Add',
+          models: {ArticleModel.blueprint, ArticleTagModel.blueprint},
+          test: testAddHasManyRelation,
+        ),
+        (
+          label: 'Update',
+          models: {ArticleModel.blueprint, ArticleTagModel.blueprint},
+          test: testUpdateHasManyRelation,
         ),
       ],
     },

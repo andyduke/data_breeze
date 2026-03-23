@@ -235,16 +235,9 @@ mixin BreezeStoreRelations on BreezeStore {
 
         case BreezeModelResolvedHasManyRelation hasMany:
           if (result.containsKey(hasMany.name) && result[hasMany.name] is Iterable<BreezeModel>) {
-            final relItems = result[hasMany.name];
+            // Remove from the result, since this value will be
+            // processed later in updateRelationsAfterSave.
             result.remove(hasMany.name);
-
-            final relKeys = [];
-            for (final relItem in relItems) {
-              final savedItem = await save(relItem);
-              relKeys.add(savedItem.id);
-            }
-
-            result[relationInfo.foreignKey] = relKeys;
           }
           break;
 
@@ -292,6 +285,22 @@ mixin BreezeStoreRelations on BreezeStore {
               },
             );
             record.remove(hasOne.name);
+          }
+          break;
+
+        case BreezeModelResolvedHasManyRelation hasMany:
+          if (record.containsKey(hasMany.name) && record[hasMany.name] is Iterable<BreezeModel>) {
+            final items = record[hasMany.name];
+            final futures = [
+              for (final item in items)
+                saveWithOptions(
+                  item,
+                  extraData: {
+                    relationInfo.foreignKey: record[blueprint.key],
+                  },
+                ),
+            ];
+            await Future.wait(futures);
           }
           break;
 
