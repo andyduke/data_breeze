@@ -17,7 +17,7 @@ mixin BreezeStoreHasManyThoughRelations on BreezeStore, BreezeStoreRelations {
   }
 
   @override
-  Future<void> updateHasManyThroughRelationBeforeSave<M extends BreezeBaseModel>(
+  Future<void> updateManyToManyRelation<M extends BreezeBaseModel>(
     BreezeModelResolvedHasManyThroughRelation relation,
     Map<String, dynamic> record,
   ) {

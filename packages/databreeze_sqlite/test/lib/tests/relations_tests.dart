@@ -20,6 +20,7 @@ part '_test_hasmany_fetch.dart';
 part '_test_hasmanythrough_fetch.dart';
 part '_test_hasone_update.dart';
 part '_test_hasmany_update.dart';
+part '_test_belongsto_update.dart';
 
 @isTestGroup
 void relationsGroup(
@@ -111,6 +112,18 @@ void relationsGroup(
           label: 'Update',
           models: {ArticleModel.blueprint, ArticleTagModel.blueprint},
           test: testUpdateHasManyRelation,
+        ),
+      ],
+      RelationTests.belongsTo: [
+        (
+          label: 'Add',
+          models: {ItemModel.blueprint, ItemCategoryModel.blueprint},
+          test: testAddBelongsToRelation,
+        ),
+        (
+          label: 'Update',
+          models: {ItemModel.blueprint, ItemCategoryModel.blueprint},
+          test: testUpdateBelongsToRelation,
         ),
       ],
     },

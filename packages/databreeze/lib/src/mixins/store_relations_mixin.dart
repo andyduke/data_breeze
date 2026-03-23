@@ -243,26 +243,18 @@ mixin BreezeStoreRelations on BreezeStore {
 
         case BreezeModelResolvedBelongsToRelation belongsTo:
           if (result.containsKey(belongsTo.name) && result[belongsTo.name] is BreezeModel) {
-            await save(result[belongsTo.name]);
+            await updateManyToOneRelation(record[relation.name], result, belongsTo);
             result.remove(belongsTo.name);
           }
           break;
 
         case BreezeModelResolvedHasManyThroughRelation hasManyThrough:
-          await updateHasManyThroughRelationBeforeSave(hasManyThrough, result);
+          await updateManyToManyRelation(hasManyThrough, result);
           break;
       }
     }
 
     return result;
-  }
-
-  @protected
-  Future<void> updateHasManyThroughRelationBeforeSave<M extends BreezeBaseModel>(
-    BreezeModelResolvedHasManyThroughRelation relation,
-    Map<String, dynamic> record,
-  ) async {
-    // Do nothing
   }
 
   @override
@@ -278,29 +270,14 @@ mixin BreezeStoreRelations on BreezeStore {
         case BreezeModelResolvedHasOneRelation hasOne:
           if (record.containsKey(hasOne.name) && record[hasOne.name] is BreezeModel) {
             final BreezeModel item = record[hasOne.name];
-            await saveWithOptions(
-              item,
-              extraData: {
-                relationInfo.foreignKey: record[blueprint.key],
-              },
-            );
-            record.remove(hasOne.name);
+            await updateOneToOneRelation(item, relationInfo, record, blueprint);
           }
           break;
 
         case BreezeModelResolvedHasManyRelation hasMany:
           if (record.containsKey(hasMany.name) && record[hasMany.name] is Iterable<BreezeModel>) {
-            final items = record[hasMany.name];
-            final futures = [
-              for (final item in items)
-                saveWithOptions(
-                  item,
-                  extraData: {
-                    relationInfo.foreignKey: record[blueprint.key],
-                  },
-                ),
-            ];
-            await Future.wait(futures);
+            final Iterable<BreezeModel> items = record[hasMany.name];
+            await updateOneToManyRelation(items, relationInfo, record, blueprint);
           }
           break;
 
@@ -308,6 +285,58 @@ mixin BreezeStoreRelations on BreezeStore {
         // Do nothing
       }
     }
+  }
+
+  @protected
+  Future<void> updateOneToOneRelation(
+    BreezeModel item,
+    BreezeModelResolvedHasOneRelation relation,
+    Map<String, dynamic> record,
+    BreezeModelBlueprint blueprint,
+  ) async {
+    await saveWithOptions(
+      item,
+      extraData: {
+        relation.foreignKey: record[blueprint.key],
+      },
+    );
+  }
+
+  @protected
+  Future<void> updateOneToManyRelation(
+    Iterable<BreezeModel> items,
+    BreezeModelResolvedHasManyRelation<BreezeBaseModel> relation,
+    Map<String, dynamic> record,
+    BreezeModelBlueprint blueprint,
+  ) async {
+    final futures = [
+      for (final item in items)
+        saveWithOptions(
+          item,
+          extraData: {
+            relation.foreignKey: record[blueprint.key],
+          },
+        ),
+    ];
+    await Future.wait(futures);
+  }
+
+  @protected
+  Future<void> updateManyToOneRelation(
+    BreezeModel item,
+    Map<String, dynamic> record,
+    BreezeModelResolvedBelongsToRelation<BreezeBaseModel> relation,
+  ) async {
+    final relatedItem = await save(item);
+    record[relation.sourceKey] = relatedItem.id;
+  }
+
+  @protected
+  Future<void> updateManyToManyRelation<M extends BreezeBaseModel>(
+    BreezeModelResolvedHasManyThroughRelation relation,
+    Map<String, dynamic> record,
+  ) async {
+    // Do nothing
   }
 
   @override
