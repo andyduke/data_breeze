@@ -286,8 +286,11 @@ mixin BreezeStoreRelations on BreezeStore {
           break;
 
         case BreezeModelResolvedHasManyThroughRelation manyToMany:
-          // TODO: if (result.containsKey(manyToMany.name) && result[manyToMany.name] is Iterable<BreezeModel>) {
-          await updateManyToManyRelation(manyToMany, result);
+          if (result.containsKey(manyToMany.name) && result[manyToMany.name] is Iterable<BreezeModel>) {
+            // Remove from the result, since this value will be
+            // processed later in updateRelationsAfterSave.
+            result.remove(manyToMany.name);
+          }
           break;
       }
     }
@@ -306,17 +309,25 @@ mixin BreezeStoreRelations on BreezeStore {
       final relationInfo = resolveRelation(relation, blueprint);
 
       switch (relationInfo) {
-        case BreezeModelResolvedHasOneRelation hasOne:
-          if (record.containsKey(hasOne.name) && record[hasOne.name] is BreezeModel) {
-            final BreezeModel item = record[hasOne.name];
+        case BreezeModelResolvedHasOneRelation oneToOne:
+          if (record.containsKey(oneToOne.name) && record[oneToOne.name] is BreezeModel) {
+            final BreezeModel item = record[oneToOne.name];
             await updateOneToOneRelation(item, relationInfo, record, blueprint);
           }
           break;
 
-        case BreezeModelResolvedHasManyRelation hasMany:
-          if (record.containsKey(hasMany.name) && record[hasMany.name] is Iterable<BreezeModel>) {
-            final Iterable<BreezeModel> items = record[hasMany.name];
+        case BreezeModelResolvedHasManyRelation oneToMany:
+          if (record.containsKey(oneToMany.name) && record[oneToMany.name] is Iterable<BreezeModel>) {
+            final Iterable<BreezeModel> items = record[oneToMany.name];
             await updateOneToManyRelation(items, relationInfo, record, blueprint);
+          }
+          break;
+
+        case BreezeModelResolvedHasManyThroughRelation manyToMany:
+          if (record.containsKey(manyToMany.name) && record[manyToMany.name] is Iterable<BreezeModel>) {
+            final Iterable<BreezeModel> items = record[manyToMany.name];
+            final relatedBlueprint = blueprintOf(relation.type);
+            await updateManyToManyRelation(items, relationInfo, record, blueprint, relatedBlueprint);
           }
           break;
 
@@ -371,11 +382,64 @@ mixin BreezeStoreRelations on BreezeStore {
   }
 
   @protected
-  Future<void> updateManyToManyRelation<M extends BreezeBaseModel>(
-    BreezeModelResolvedHasManyThroughRelation relation,
+  Future<void> updateManyToManyRelation(
+    Iterable<BreezeModel> items,
+    BreezeModelResolvedHasManyThroughRelation<BreezeBaseModel> relation,
     Map<String, dynamic> record,
+    BreezeModelBlueprint blueprint,
+    BreezeModelBlueprint relatedBlueprint,
   ) async {
-    // TODO: Implement this
+    // Save related records
+    final futures = [
+      for (final item in items) save(item),
+    ];
+    final relatedItems = await Future.wait(futures);
+
+    // Updating a junction collection with the keys of the main
+    // collection and the saved related collections.
+    //
+    // Synchronizing a junction collection:
+
+    // 1. Get a list of key pairs from the junction collection.
+    final junctionItems = await fetchAllRecords(table: relation.through);
+
+    // 2. Add new key pairs to it.
+    final newJunctions = [
+      for (final relatedItem in relatedItems)
+        if (junctionItems.indexWhere((ji) => ji[relation.sourceKey] == relatedItem.id) == -1)
+          {
+            relation.foreignKey: record[blueprint.key],
+            relation.sourceKey: relatedItem.id,
+          },
+    ];
+    if (newJunctions.isNotEmpty) {
+      await addRecords(name: relation.through, records: newJunctions);
+    }
+
+    // 3. Remove keys missing from the relatedItems collection.
+    final obsoleteJunctions = [
+      for (final junction in junctionItems)
+        if (relatedItems.indexWhere((ri) => ri.id == junction[relation.sourceKey]) == -1) //
+          junction[relation.sourceKey],
+    ];
+    if (obsoleteJunctions.isNotEmpty) {
+      await deleteWhereRecords(
+        name: relation.through,
+        filter:
+            BreezeField(relation.foreignKey).eq(record[blueprint.key]) &
+            BreezeField(relation.sourceKey).inside(obsoleteJunctions),
+      );
+    }
+
+    /* TODO: Cascade delete
+    // 4. Remove records from the related collection whose keys are missing from junctionItems.
+    if (obsoleteJunctions.isNotEmpty && relatedBlueprint.key != null) {
+      await deleteWhereRecords(
+        name: relatedBlueprint.name,
+        filter: BreezeField(relatedBlueprint.key!).inside(obsoleteJunctions),
+      );
+    }
+    */
   }
 
   @override

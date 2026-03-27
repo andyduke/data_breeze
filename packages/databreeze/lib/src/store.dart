@@ -518,6 +518,17 @@ abstract class BreezeStore with BreezeStorageTypeConverters {
   });
 
   @protected
+  Future<void> addRecords({
+    required String name,
+    String? key,
+    required List<Map<String, dynamic>> records,
+  }) async {
+    await Future.wait(
+      records.map((record) => addRecord(name: name, key: key, record: record)),
+    );
+  }
+
+  @protected
   Future<void> updateRecord({
     required String name,
     required String key,

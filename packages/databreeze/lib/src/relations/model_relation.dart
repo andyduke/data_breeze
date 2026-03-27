@@ -207,6 +207,7 @@ final class BreezeModelResolvedBelongsToRelation<M extends BreezeBaseModel> exte
 final class BreezeModelResolvedHasManyThroughRelation<M extends BreezeBaseModel>
     extends BreezeModelResolvedRelation<M> {
   final String leftPk;
+  // TODO: rename to junction
   final String through;
 
   const BreezeModelResolvedHasManyThroughRelation({

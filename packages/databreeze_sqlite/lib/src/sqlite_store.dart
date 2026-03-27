@@ -341,6 +341,8 @@ class BreezeSqliteStore extends BreezeStore
     return lastInsertId;
   }
 
+  // TODO: addRecords
+
   @override
   Future<void> updateRecord({
     required String name,

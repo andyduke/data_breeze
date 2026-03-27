@@ -18,6 +18,7 @@ part '_test_hasone_fetch.dart';
 part '_test_belongsto_fetch.dart';
 part '_test_hasmany_fetch.dart';
 part '_test_hasmanythrough_fetch.dart';
+part '_test_hasmanythrough_update.dart';
 part '_test_hasone_update.dart';
 part '_test_hasmany_update.dart';
 part '_test_belongsto_update.dart';
@@ -33,9 +34,9 @@ void relationsGroup(
     relations: relations,
     store: store,
     tests: {
-      RelationTests.hasOne: [
+      RelationTests.oneToOne: [
         (
-          label: 'fetchOne',
+          label: 'fetchSingle',
           models: {CompanyModel.blueprint, CompanyAddressModel.blueprint},
           test: testFetchOneHasOneRelation,
         ),
@@ -45,9 +46,9 @@ void relationsGroup(
           test: testFetchAllHasOneRelation,
         ),
       ],
-      RelationTests.hasMany: [
+      RelationTests.oneToMany: [
         (
-          label: 'fetchOne',
+          label: 'fetchSingle',
           models: {ArticleModel.blueprint, ArticleTagModel.blueprint},
           test: testFetchOneHasManyRelation,
         ),
@@ -57,9 +58,9 @@ void relationsGroup(
           test: testFetchAllHasManyRelation,
         ),
       ],
-      RelationTests.belongsTo: [
+      RelationTests.manyToOne: [
         (
-          label: 'fetchOne',
+          label: 'fetchSingle',
           models: {ItemModel.blueprint, ItemCategoryModel.blueprint},
           test: testFetchOneBelongsToRelation,
         ),
@@ -69,9 +70,9 @@ void relationsGroup(
           test: testFetchAllBelongsToRelation,
         ),
       ],
-      RelationTests.hasManyThrough: [
+      RelationTests.manyToMany: [
         (
-          label: 'fetchOne',
+          label: 'fetchSingle',
           models: {ActorModel.blueprint, MovieModel.blueprint},
           test: testFetchOneHasManyThroughRelation,
         ),
@@ -90,7 +91,7 @@ void relationsGroup(
     relations: relations,
     store: store,
     tests: {
-      RelationTests.hasOne: [
+      RelationTests.oneToOne: [
         (
           label: 'Add',
           models: {CompanyModel.blueprint, CompanyAddressModel.blueprint},
@@ -102,7 +103,7 @@ void relationsGroup(
           test: testUpdateHasOneRelation,
         ),
       ],
-      RelationTests.hasMany: [
+      RelationTests.oneToMany: [
         (
           label: 'Add',
           models: {ArticleModel.blueprint, ArticleTagModel.blueprint},
@@ -114,7 +115,7 @@ void relationsGroup(
           test: testUpdateHasManyRelation,
         ),
       ],
-      RelationTests.belongsTo: [
+      RelationTests.manyToOne: [
         (
           label: 'Add',
           models: {ItemModel.blueprint, ItemCategoryModel.blueprint},
@@ -124,6 +125,18 @@ void relationsGroup(
           label: 'Update',
           models: {ItemModel.blueprint, ItemCategoryModel.blueprint},
           test: testUpdateBelongsToRelation,
+        ),
+      ],
+      RelationTests.manyToMany: [
+        (
+          label: 'Add',
+          models: {ActorModel.blueprint, MovieModel.blueprint},
+          test: testAddHasManyThroughRelation,
+        ),
+        (
+          label: 'Update',
+          models: {ActorModel.blueprint, MovieModel.blueprint},
+          test: testUpdateHasManyThroughRelation,
         ),
       ],
     },

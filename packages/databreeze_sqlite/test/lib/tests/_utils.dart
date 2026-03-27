@@ -1,10 +1,10 @@
 part of 'relations_tests.dart';
 
 enum RelationTests {
-  hasOne,
-  hasMany,
-  belongsTo,
-  hasManyThrough,
+  oneToOne,
+  oneToMany,
+  manyToOne,
+  manyToMany,
 }
 
 typedef BreezeTestStoreGetter = Future<BreezeTestStore> Function(RelationTests type, Set<BreezeModelBlueprint> models);
@@ -19,10 +19,10 @@ void defineRelationGroup(
   tests,
 }) {
   final typeTestNames = {
-    RelationTests.hasOne: 'HasOne',
-    RelationTests.hasMany: 'HasMany',
-    RelationTests.belongsTo: 'BelongsTo',
-    RelationTests.hasManyThrough: 'HasMany through',
+    RelationTests.oneToOne: 'HasOne',
+    RelationTests.oneToMany: 'HasMany',
+    RelationTests.manyToOne: 'BelongsTo',
+    RelationTests.manyToMany: 'HasMany through',
   };
 
   group(

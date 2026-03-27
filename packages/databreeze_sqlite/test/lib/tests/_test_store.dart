@@ -21,17 +21,13 @@ abstract mixin class BreezeTestStore implements BreezeStore {
     required Map<String, dynamic> record,
   });
 
-  @protected
+  @override
   @visibleForTesting
   Future<void> addRecords({
     required String name,
     String? key,
     required List<Map<String, dynamic>> records,
-  }) async {
-    await Future.wait(
-      records.map((record) => addRecord(name: name, key: key, record: record)),
-    );
-  }
+  });
 
   @override
   @visibleForTesting
