@@ -1,3 +1,4 @@
+import 'package:databreeze/databreeze.dart';
 import 'package:databreeze_annotation/src/schema_version.dart';
 import 'package:meta/meta_meta.dart';
 
@@ -41,8 +42,8 @@ class BzColumn {
 @Target({TargetKind.field})
 class BzRelationship {
   final String name;
-  final String? foreignKey;
-  final String? sourceKey;
+  final BreezeRelationTypedKey? foreignKey;
+  final BreezeRelationTypedKey? sourceKey;
 
   const BzRelationship._({
     required this.name,
@@ -52,27 +53,28 @@ class BzRelationship {
 
   const factory BzRelationship.hasOne({
     required String name,
-    String? foreignKey,
-    String? sourceKey,
+    BreezeRelationTypedKey? foreignKey,
+    BreezeRelationTypedKey? sourceKey,
   }) = BzRelationshipHasOne;
 
   const factory BzRelationship.hasMany({
     required String name,
-    String? foreignKey,
-    String? sourceKey,
+    BreezeRelationTypedKey? foreignKey,
+    BreezeRelationTypedKey? sourceKey,
   }) = BzRelationshipHasMany;
 
   const factory BzRelationship.belongsTo({
     required String name,
-    String? foreignKey,
-    String? sourceKey,
+    BreezeRelationTypedKey? foreignKey,
+    BreezeRelationTypedKey? sourceKey,
   }) = BzRelationshipBelongsTo;
 
   const factory BzRelationship.hasManyThrough({
     required String name,
-    required String through,
-    String? foreignKey,
-    String? sourceKey,
+    // required String junction,
+    required Type junction,
+    BreezeRelationTypedKey? foreignKey,
+    BreezeRelationTypedKey? sourceKey,
   }) = BzRelationshipHasManyThrough;
 }
 
@@ -101,11 +103,12 @@ class BzRelationshipBelongsTo extends BzRelationship {
 }
 
 class BzRelationshipHasManyThrough extends BzRelationship {
-  final String through;
+  // final String junction;
+  final Type junction;
 
   const BzRelationshipHasManyThrough({
     required super.name,
-    required this.through,
+    required this.junction,
     super.foreignKey,
     super.sourceKey,
   }) : super._();

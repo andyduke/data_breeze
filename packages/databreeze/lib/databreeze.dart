@@ -3,7 +3,7 @@ library;
 
 export 'src/types.dart';
 export 'src/type_converters.dart';
-export 'src/model_column.dart';
+export 'src/model_column.dart' hide BreezeModelColumnTyped;
 export 'src/model_schema.dart';
 export 'src/relations/model_relation.dart';
 export 'src/model_blueprint.dart';
@@ -14,7 +14,6 @@ export 'src/store_fetch_options.dart';
 export 'src/store_change.dart';
 export 'src/mixins/store_fetch_mixin.dart';
 export 'src/mixins/store_relations_mixin.dart';
-export 'src/mixins/store_has_many_throught_relations_mixin.dart';
 export 'src/store.dart';
 export 'src/json_store.dart';
 

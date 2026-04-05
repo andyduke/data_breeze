@@ -8,7 +8,7 @@ import 'package:databreeze/src/store_fetch_options.dart';
 import 'package:meta/meta.dart';
 
 mixin BreezeStoreRelations on BreezeStore {
-  @protected
+  @internal
   BreezeModelResolvedRelation resolveRelation(
     BreezeModelRelation relation,
     BreezeModelBlueprint blueprint,
@@ -18,26 +18,53 @@ mixin BreezeStoreRelations on BreezeStore {
 
     final BreezeModelResolvedRelation resolved = switch (relation) {
       BreezeModelHasOneRelation oneToOne => BreezeModelResolvedHasOneRelation(
+        type: oneToOne.type,
         name: oneToOne.name,
-        foreignKey: oneToOne.foreignKey ?? '${table}_$pk',
-        sourceKey: oneToOne.sourceKey ?? 'id',
+        foreignKey: BreezeRelationTypedKey(
+          oneToOne.foreignKey?.name ?? '${table}_$pk',
+          oneToOne.foreignKey?.type ?? int,
+        ),
+        sourceKey: BreezeRelationTypedKey(oneToOne.sourceKey?.name ?? 'id', oneToOne.sourceKey?.type ?? int),
+        // foreignKey: oneToOne.foreignKey ?? '${table}_$pk',
+        // sourceKey: oneToOne.sourceKey ?? 'id',
       ),
       BreezeModelHasManyRelation oneToMany => BreezeModelResolvedHasManyRelation(
+        type: oneToMany.type,
         name: oneToMany.name,
-        foreignKey: oneToMany.foreignKey ?? '${table}_$pk',
-        sourceKey: oneToMany.sourceKey ?? 'id',
+        foreignKey: BreezeRelationTypedKey(
+          oneToMany.foreignKey?.name ?? '${table}_$pk',
+          oneToMany.foreignKey?.type ?? int,
+        ),
+        sourceKey: BreezeRelationTypedKey(oneToMany.sourceKey?.name ?? 'id', oneToMany.sourceKey?.type ?? int),
+        // foreignKey: oneToMany.foreignKey ?? '${table}_$pk',
+        // sourceKey: oneToMany.sourceKey ?? 'id',
       ),
       BreezeModelBelongsToRelation manyToOne => BreezeModelResolvedBelongsToRelation(
+        type: manyToOne.type,
         name: manyToOne.name,
-        foreignKey: manyToOne.foreignKey ?? '$pk',
-        sourceKey: manyToOne.sourceKey ?? '${manyToOne.name}_id',
+        foreignKey: BreezeRelationTypedKey(manyToOne.foreignKey?.name ?? '$pk', manyToOne.foreignKey?.type ?? int),
+        sourceKey: BreezeRelationTypedKey(
+          manyToOne.sourceKey?.name ?? '${manyToOne.name}_id',
+          manyToOne.sourceKey?.type ?? int,
+        ),
+        // foreignKey: manyToOne.foreignKey ?? '$pk',
+        // sourceKey: manyToOne.sourceKey ?? '${manyToOne.name}_id',
       ),
       BreezeModelHasManyThroughRelation manyToMany => BreezeModelResolvedHasManyThroughRelation(
+        type: manyToMany.type,
         name: manyToMany.name,
-        through: manyToMany.through,
+        junction: blueprintOf(manyToMany.junction),
         leftPk: pk!,
-        leftKey: manyToMany.foreignKey ?? '${table}_$pk', // TODO: singular table name
-        rightKey: manyToMany.sourceKey ?? '${manyToMany.name}_id', // TODO: singular name
+        leftKey: BreezeRelationTypedKey(
+          manyToMany.foreignKey?.name ?? '${table}_$pk',
+          manyToMany.foreignKey?.type ?? int,
+        ), // TODO: singular table name
+        rightKey: BreezeRelationTypedKey(
+          manyToMany.sourceKey?.name ?? '${manyToMany.name}_id',
+          manyToMany.sourceKey?.type ?? int,
+        ), // TODO: singular name
+        // leftKey: manyToMany.foreignKey ?? '${table}_$pk', // TODO: singular table name
+        // rightKey: manyToMany.sourceKey ?? '${manyToMany.name}_id', // TODO: singular name
       ),
     };
     return resolved;
@@ -63,7 +90,6 @@ mixin BreezeStoreRelations on BreezeStore {
     final result = records;
 
     for (final relation in request.relations) {
-      // final relationInfo = relation.resolve(blueprint);
       final relationInfo = resolveRelation(relation, blueprint);
       final relationBlueprint = blueprintOf(relation.type);
 
@@ -97,25 +123,25 @@ mixin BreezeStoreRelations on BreezeStore {
   ) async {
     final ids = {
       for (final record in records)
-        if (record.containsKey(relation.sourceKey)) record[relation.sourceKey],
+        if (record.containsKey(relation.sourceKey.name)) record[relation.sourceKey.name],
     }.toList(growable: false);
 
     final rows = await fetchAllRecords(
       table: relationBlueprint.name,
       request: BreezeFetchRequest(
-        filter: BreezeField(relation.foreignKey).inside(ids),
+        filter: BreezeField(relation.foreignKey.name).inside(ids),
         // sortBy: sortBy,
       ),
       blueprint: relationBlueprint,
     );
     final relatedRows = Map<dynamic, Map<String, dynamic>>.fromIterable(
       rows,
-      key: (row) => row[relation.sourceKey],
+      key: (row) => row[relation.sourceKey.name],
     );
 
     for (final record in records) {
-      if (record.containsKey(relation.sourceKey)) {
-        record[relation.name] = relatedRows[record[relation.sourceKey]];
+      if (record.containsKey(relation.sourceKey.name)) {
+        record[relation.name] = relatedRows[record[relation.sourceKey.name]];
       }
     }
   }
@@ -128,25 +154,25 @@ mixin BreezeStoreRelations on BreezeStore {
   ) async {
     final ids = {
       for (final record in records)
-        if (record.containsKey(relation.sourceKey)) record[relation.sourceKey],
+        if (record.containsKey(relation.sourceKey.name)) record[relation.sourceKey.name],
     }.toList(growable: false);
 
     final rows = await fetchAllRecords(
       table: relationBlueprint.name,
       request: BreezeFetchRequest(
-        filter: BreezeField(relation.foreignKey).inside(ids),
+        filter: BreezeField(relation.foreignKey.name).inside(ids),
         // sortBy: sortBy,
       ),
       blueprint: relationBlueprint,
     );
     final relatedRows = <dynamic, List<Map<String, dynamic>>>{};
     for (final row in rows) {
-      (relatedRows[row[relation.foreignKey]] ??= []).add(row);
+      (relatedRows[row[relation.foreignKey.name]] ??= []).add(row);
     }
 
     for (final record in records) {
-      if (record.containsKey(relation.sourceKey)) {
-        record[relation.name] = relatedRows[record[relation.sourceKey]];
+      if (record.containsKey(relation.sourceKey.name)) {
+        record[relation.name] = relatedRows[record[relation.sourceKey.name]];
       }
     }
   }
@@ -159,13 +185,13 @@ mixin BreezeStoreRelations on BreezeStore {
   ) async {
     final ids = {
       for (final record in records)
-        if (record.containsKey(relation.sourceKey)) record[relation.sourceKey],
+        if (record.containsKey(relation.sourceKey.name)) record[relation.sourceKey.name],
     }.toList(growable: false);
 
     final rows = await fetchAllRecords(
       table: relationBlueprint.name,
       request: BreezeFetchRequest(
-        filter: BreezeField(relation.foreignKey).inside(ids),
+        filter: BreezeField(relation.foreignKey.name).inside(ids),
         // sortBy: sortBy,
       ),
       blueprint: relationBlueprint,
@@ -176,8 +202,8 @@ mixin BreezeStoreRelations on BreezeStore {
     );
 
     for (final record in records) {
-      if (record.containsKey(relation.sourceKey)) {
-        record[relation.name] = relatedRows[record[relation.sourceKey]];
+      if (record.containsKey(relation.sourceKey.name)) {
+        record[relation.name] = relatedRows[record[relation.sourceKey.name]];
       }
     }
   }
@@ -202,13 +228,13 @@ mixin BreezeStoreRelations on BreezeStore {
 
     // Get the junction list of the main model and the child model
     final junctionRows = await fetchAllRecords(
-      table: relation.through,
+      table: relation.junction.name,
       request: BreezeFetchRequest(
-        filter: BreezeField(relation.foreignKey).inside(ids),
+        filter: BreezeField(relation.foreignKey.name).inside(ids),
         // sortBy: sortBy,
       ),
     );
-    final junctionIds = junctionRows.map((row) => row[relation.sourceKey]).toSet();
+    final junctionIds = junctionRows.map((row) => row[relation.sourceKey.name]).toSet();
 
     // Get a list of child model records for all main models
     final rowsList = await fetchAllRecords(
@@ -228,7 +254,7 @@ mixin BreezeStoreRelations on BreezeStore {
     // { main_id: [ child_id, child_id ] }
     final relatedIds = <dynamic, List<dynamic>>{};
     for (final junctionRow in junctionRows) {
-      (relatedIds[junctionRow[relation.foreignKey]] ??= []).add(junctionRow[relation.sourceKey]);
+      (relatedIds[junctionRow[relation.foreignKey.name]] ??= []).add(junctionRow[relation.sourceKey.name]);
     }
 
     // Collect lists of child model records for the corresponding master models
@@ -347,7 +373,7 @@ mixin BreezeStoreRelations on BreezeStore {
     await saveWithOptions(
       item,
       extraData: {
-        relation.foreignKey: record[blueprint.key],
+        relation.foreignKey.name: record[blueprint.key],
       },
     );
   }
@@ -355,7 +381,7 @@ mixin BreezeStoreRelations on BreezeStore {
   @protected
   Future<void> updateOneToManyRelation(
     Iterable<BreezeModel> items,
-    BreezeModelResolvedHasManyRelation<BreezeBaseModel> relation,
+    BreezeModelResolvedHasManyRelation relation,
     Map<String, dynamic> record,
     BreezeModelBlueprint blueprint,
   ) async {
@@ -364,7 +390,7 @@ mixin BreezeStoreRelations on BreezeStore {
         saveWithOptions(
           item,
           extraData: {
-            relation.foreignKey: record[blueprint.key],
+            relation.foreignKey.name: record[blueprint.key],
           },
         ),
     ];
@@ -375,16 +401,16 @@ mixin BreezeStoreRelations on BreezeStore {
   Future<void> updateManyToOneRelation(
     BreezeModel item,
     Map<String, dynamic> record,
-    BreezeModelResolvedBelongsToRelation<BreezeBaseModel> relation,
+    BreezeModelResolvedBelongsToRelation relation,
   ) async {
     final relatedItem = await save(item);
-    record[relation.sourceKey] = relatedItem.id;
+    record[relation.sourceKey.name] = relatedItem.id;
   }
 
   @protected
   Future<void> updateManyToManyRelation(
     Iterable<BreezeModel> items,
-    BreezeModelResolvedHasManyThroughRelation<BreezeBaseModel> relation,
+    BreezeModelResolvedHasManyThroughRelation relation,
     Map<String, dynamic> record,
     BreezeModelBlueprint blueprint,
     BreezeModelBlueprint relatedBlueprint,
@@ -401,33 +427,33 @@ mixin BreezeStoreRelations on BreezeStore {
     // Synchronizing a junction collection:
 
     // 1. Get a list of key pairs from the junction collection.
-    final junctionItems = await fetchAllRecords(table: relation.through);
+    final junctionItems = await fetchAllRecords(table: relation.junction.name);
 
     // 2. Add new key pairs to it.
     final newJunctions = [
       for (final relatedItem in relatedItems)
-        if (junctionItems.indexWhere((ji) => ji[relation.sourceKey] == relatedItem.id) == -1)
+        if (junctionItems.indexWhere((ji) => ji[relation.sourceKey.name] == relatedItem.id) == -1)
           {
-            relation.foreignKey: record[blueprint.key],
-            relation.sourceKey: relatedItem.id,
+            relation.foreignKey.name: record[blueprint.key],
+            relation.sourceKey.name: relatedItem.id,
           },
     ];
     if (newJunctions.isNotEmpty) {
-      await addRecords(name: relation.through, records: newJunctions);
+      await addRecords(name: relation.junction.name, records: newJunctions);
     }
 
     // 3. Remove keys missing from the relatedItems collection.
     final obsoleteJunctions = [
       for (final junction in junctionItems)
-        if (relatedItems.indexWhere((ri) => ri.id == junction[relation.sourceKey]) == -1) //
-          junction[relation.sourceKey],
+        if (relatedItems.indexWhere((ri) => ri.id == junction[relation.sourceKey.name]) == -1) //
+          junction[relation.sourceKey.name],
     ];
     if (obsoleteJunctions.isNotEmpty) {
       await deleteWhereRecords(
-        name: relation.through,
+        name: relation.junction.name,
         filter:
-            BreezeField(relation.foreignKey).eq(record[blueprint.key]) &
-            BreezeField(relation.sourceKey).inside(obsoleteJunctions),
+            BreezeField(relation.foreignKey.name).eq(record[blueprint.key]) &
+            BreezeField(relation.sourceKey.name).inside(obsoleteJunctions),
       );
     }
 

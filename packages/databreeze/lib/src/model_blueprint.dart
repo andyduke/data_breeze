@@ -7,12 +7,14 @@ import 'package:databreeze/src/types.dart';
 
 typedef BreezeModelBlueprintBuilder<M extends BreezeBaseModel> = M Function(BreezeDataRecord record);
 
-class BreezeModelBlueprint<M extends BreezeBaseModel> extends BreezeModelVersionedSchema {
+class BreezeModelBlueprint<M extends BreezeBaseModel> extends BreezeModelVersionedSchema
+    with BreezeRelationalModelSchema {
   final BreezeModelBlueprintBuilder<M> builder;
 
   @override
   final Set<BreezeBaseTypeConverter> typeConverters;
 
+  @override
   final Set<BreezeModelRelation> relations;
 
   BreezeModelBlueprint({

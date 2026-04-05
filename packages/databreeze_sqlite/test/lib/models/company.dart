@@ -11,7 +11,10 @@ part 'company.g.dart';
 class Company extends BreezeModel<int> with CompanyModel {
   String name;
 
-  @BzRelationship.hasOne(name: 'address', foreignKey: 'company_id')
+  @BzRelationship.hasOne(
+    name: 'address',
+    foreignKey: BreezeRelationTypedKey('company_id', int),
+  )
   CompanyAddress? address;
 
   Company({

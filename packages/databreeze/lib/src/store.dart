@@ -89,6 +89,8 @@ abstract class BreezeStore with BreezeStorageTypeConverters {
     Set<BreezeBaseTypeConverter> typeConverters = const {},
     this.onError,
   }) : blueprints = Map.fromIterable(models, key: (b) => b.type) {
+    // TODO: Loop through all relationships of models from "blueprints" and
+    //  add blueprints of related models to "blueprints" if they are not there yet.
     this.typeConverters = {...typeConverters, ...defaultTypeConverters};
   }
 

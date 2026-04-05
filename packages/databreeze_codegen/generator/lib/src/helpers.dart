@@ -26,6 +26,7 @@ extension ClassElementHelpers on ClassElement {
     //   print('- ${s.element.displayName}');
     // }
 
+    // TODO: Add support for models without a primary key (for example, junction models).
     final model = allSupertypes.firstWhereOrNull((s) => s.element.displayName == 'BreezeModel');
     if (model == null) {
       throw Exception('Class "$displayName" must inherit BreezeModel.');

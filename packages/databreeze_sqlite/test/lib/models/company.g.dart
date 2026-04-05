@@ -20,7 +20,7 @@ mixin CompanyModel {
     relations: {
       BreezeModelRelation<CompanyAddress>.hasOne(
         name: 'address',
-        foreignKey: 'company_id',
+        foreignKey: BreezeRelationTypedKey('company_id', int),
       ),
     },
     builder: CompanyModel.fromRecord,

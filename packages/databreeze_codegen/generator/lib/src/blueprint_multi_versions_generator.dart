@@ -51,6 +51,8 @@ class BlueprintMultiVersionsGenerator extends BlueprintCodeGenerator {
   ) {
     final versions = generateVersionedColumns(fields, schemaVersions);
 
+    // TODO: Add support for models without a primary key (for example, junction models).
+    //  Skip "id" column if not inherited from BreezeModel.
     final output = versions
         .map(
           (v) =>

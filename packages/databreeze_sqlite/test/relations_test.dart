@@ -7,10 +7,13 @@ import 'package:test/test.dart';
 import 'lib/models/actor.dart';
 import 'lib/models/article.dart';
 import 'lib/models/article_tag.dart';
+import 'lib/models/company.dart';
+import 'lib/models/company_address.dart';
 import 'lib/models/item.dart';
 import 'lib/models/item_category.dart';
 import 'lib/models/movie.dart';
 import 'lib/test_store.dart';
+import 'lib/test_utils.dart';
 import 'lib/tests/relations_tests.dart';
 
 final itemsMigration = SqliteMigrations()
@@ -249,6 +252,7 @@ Future<void> main() async {
         models: {
           ActorModel.blueprint,
           MovieModel.blueprint,
+          MovieActorsModel.blueprint,
         },
         migrationStrategy: BreezeSqliteMigrations(manyToManyMigration),
       );
@@ -303,4 +307,49 @@ Future<void> main() async {
     Test1('source data')();
   });
   */
+
+  group('[Sqlite Relations Auto Migration]', () {
+    test('One-to-One', () async {
+      final store = BreezeSqliteStore.inMemory(
+        models: {
+          CompanyModel.blueprint,
+          CompanyAddressModel.blueprint,
+        },
+        log: log,
+        onInit: (db) => db.execute('PRAGMA temp_store=2'),
+        migrationStrategy: BreezeSqliteAutomaticSchemaBasedMigration(
+          log: log,
+        ),
+      );
+
+      await store.database;
+
+      // Ensure that the tables schema version in the database is correct.
+      await expectStoreTablesVersions(
+        store,
+        [
+          (CompanyModel.blueprint.name, CompanyModel.blueprint.latestVersion.version),
+          (CompanyAddressModel.blueprint.name, CompanyAddressModel.blueprint.latestVersion.version),
+        ],
+        log,
+      );
+
+      // Ensure that the tables structure in the database matches the schema.
+      await expectStoreTables(
+        store,
+        {
+          CompanyModel.blueprint.name: [
+            (name: 'id', type: 'INTEGER', notNull: false, defaultValue: null, primaryKey: true),
+            (name: 'name', type: 'TEXT', notNull: true, defaultValue: null, primaryKey: false),
+          ],
+          CompanyAddressModel.blueprint.name: [
+            (name: 'id', type: 'INTEGER', notNull: false, defaultValue: null, primaryKey: true),
+            (name: 'location', type: 'TEXT', notNull: true, defaultValue: null, primaryKey: false),
+            (name: 'company_id', type: 'INTEGER', notNull: false, defaultValue: null, primaryKey: false),
+          ],
+        },
+        log: log,
+      );
+    });
+  });
 }

@@ -2,18 +2,42 @@ import 'package:databreeze/src/model.dart';
 import 'package:databreeze/src/model_blueprint.dart';
 import 'package:meta/meta.dart';
 
+class BreezeRelationTypedKey {
+  final String name;
+
+  final Type type;
+
+  const BreezeRelationTypedKey(
+    this.name,
+    this.type,
+  );
+
+  // static BreezeRelationKey typed<T extends Object>(String key) => BreezeRelationKey(key, T);
+}
+
+class BreezeRelationKey<T> extends BreezeRelationTypedKey {
+  @override
+  Type get type => T;
+
+  const BreezeRelationKey(
+    String name,
+  ) : super(name, T);
+
+  const factory BreezeRelationKey.key(String name) = BreezeRelationKey;
+}
+
 @protected
 sealed class BreezeModelRelation<M extends BreezeBaseModel> {
   /// Column alias
   final String name;
 
   /// Foreign key
-  final String? foreignKey;
+  final BreezeRelationTypedKey? foreignKey;
 
   /// Primary key
   ///
   /// Default: modelBlueprint.key
-  final String? sourceKey;
+  final BreezeRelationTypedKey? sourceKey;
 
   Type get type => M;
 
@@ -25,31 +49,29 @@ sealed class BreezeModelRelation<M extends BreezeBaseModel> {
 
   factory BreezeModelRelation.hasOne({
     required String name,
-    required String? foreignKey,
-    String? sourceKey,
+    required BreezeRelationTypedKey? foreignKey,
+    BreezeRelationTypedKey? sourceKey,
   }) = BreezeModelHasOneRelation;
 
   factory BreezeModelRelation.hasMany({
     required String name,
-    required String? foreignKey,
-    String? sourceKey,
+    required BreezeRelationTypedKey? foreignKey,
+    BreezeRelationTypedKey? sourceKey,
   }) = BreezeModelHasManyRelation;
 
   factory BreezeModelRelation.belongsTo({
     required String name,
-    String? foreignKey,
-    required String? sourceKey,
+    BreezeRelationTypedKey? foreignKey,
+    required BreezeRelationTypedKey? sourceKey,
   }) = BreezeModelBelongsToRelation;
 
   factory BreezeModelRelation.hasManyThrough({
     required String name,
-    required String through,
-    String? foreignKey,
-    String? sourceKey,
+    // required String junction,
+    required Type junction,
+    BreezeRelationTypedKey? foreignKey,
+    BreezeRelationTypedKey? sourceKey,
   }) = BreezeModelHasManyThroughRelation;
-
-  @Deprecated('Use BreezeStoreRelations.resolveRelation instead.')
-  BreezeModelResolvedRelation<M> resolve<P extends BreezeBaseModel>(BreezeModelBlueprint<P> blueprint);
 }
 
 final class BreezeModelHasOneRelation<M extends BreezeBaseModel> extends BreezeModelRelation<M> {
@@ -58,18 +80,6 @@ final class BreezeModelHasOneRelation<M extends BreezeBaseModel> extends BreezeM
     required super.foreignKey,
     super.sourceKey,
   });
-
-  @override
-  BreezeModelResolvedRelation<M> resolve<P extends BreezeBaseModel>(BreezeModelBlueprint<P> blueprint) {
-    final table = blueprint.name;
-    final pk = blueprint.key;
-
-    return BreezeModelResolvedHasOneRelation<M>(
-      name: name,
-      foreignKey: foreignKey ?? '${table}_$pk',
-      sourceKey: sourceKey ?? 'id',
-    );
-  }
 }
 
 final class BreezeModelHasManyRelation<M extends BreezeBaseModel> extends BreezeModelRelation<M> {
@@ -78,18 +88,6 @@ final class BreezeModelHasManyRelation<M extends BreezeBaseModel> extends Breeze
     required super.foreignKey,
     super.sourceKey,
   });
-
-  @override
-  BreezeModelResolvedRelation<M> resolve<P extends BreezeBaseModel>(BreezeModelBlueprint<P> blueprint) {
-    final table = blueprint.name;
-    final pk = blueprint.key;
-
-    return BreezeModelResolvedHasManyRelation(
-      name: name,
-      foreignKey: foreignKey ?? '${table}_$pk',
-      sourceKey: sourceKey ?? 'id',
-    );
-  }
 }
 
 final class BreezeModelBelongsToRelation<M extends BreezeBaseModel> extends BreezeModelRelation<M> {
@@ -98,26 +96,17 @@ final class BreezeModelBelongsToRelation<M extends BreezeBaseModel> extends Bree
     super.foreignKey,
     required super.sourceKey,
   });
-
-  @override
-  BreezeModelResolvedRelation<M> resolve<P extends BreezeBaseModel>(BreezeModelBlueprint<P> blueprint) {
-    final pk = blueprint.key;
-
-    return BreezeModelResolvedBelongsToRelation(
-      name: name,
-      foreignKey: foreignKey ?? '$pk',
-      sourceKey: sourceKey ?? '${name}_id',
-    );
-  }
 }
 
 final class BreezeModelHasManyThroughRelation<M extends BreezeBaseModel> extends BreezeModelRelation<M> {
-  // TODO: Rename to junction
-  final String through;
+  // TODO: The junction collection must be represented by a model
+  //  so that a versioned schema can be described for it.
+  // final String junction;
+  final Type junction;
 
   BreezeModelHasManyThroughRelation({
     required super.name,
-    required this.through,
+    required this.junction,
 
     /// self model key inside intermediate table
     /// '<source>_id'
@@ -127,94 +116,72 @@ final class BreezeModelHasManyThroughRelation<M extends BreezeBaseModel> extends
     /// '<target>_id'
     super.sourceKey,
   });
-
-  @override
-  BreezeModelResolvedRelation<M> resolve<P extends BreezeBaseModel>(BreezeModelBlueprint<P> blueprint) {
-    final table = blueprint.name;
-    final pk = blueprint.key!;
-
-    return BreezeModelResolvedHasManyThroughRelation(
-      name: name,
-      through: through,
-      leftPk: pk,
-      leftKey: foreignKey ?? '${table}_$pk', // TODO: singular table name
-      rightKey: sourceKey ?? '${name}_id', // TODO: singular name
-    );
-  }
-
-  /*
-  BreezeModelHasManyThroughRelation({
-    required super.name,
-    required this.intermediateTable,
-
-    /// self model key inside intermediate table
-    String? foreignKey,
-
-    /// target model key inside intermediate table
-    String? sourceKey,
-  }) : super(
-         foreignKey: foreignKey ?? '<source>_id',
-         sourceKey: sourceKey ?? '<target>_id',
-       );
-  */
 }
 
 // --- Resolved Relation Info
 
-sealed class BreezeModelResolvedRelation<M extends BreezeBaseModel> {
+sealed class BreezeModelResolvedRelation /*<M extends BreezeBaseModel>*/ {
   /// Column alias
   final String name;
 
   /// Foreign key
-  final String foreignKey;
+  final BreezeRelationTypedKey foreignKey;
 
   /// Primary key
-  final String sourceKey;
+  final BreezeRelationTypedKey sourceKey;
 
-  Type get type => M;
+  // Type get type => M;
+  final Type type;
 
   const BreezeModelResolvedRelation({
+    required this.type,
     required this.name,
     required this.foreignKey,
     required this.sourceKey,
   });
 }
 
-final class BreezeModelResolvedHasOneRelation<M extends BreezeBaseModel> extends BreezeModelResolvedRelation<M> {
+final class BreezeModelResolvedHasOneRelation /*<M extends BreezeBaseModel>*/
+    extends BreezeModelResolvedRelation /*<M>*/ {
   const BreezeModelResolvedHasOneRelation({
+    required super.type,
     required super.name,
     required super.foreignKey,
     required super.sourceKey,
   });
 }
 
-final class BreezeModelResolvedHasManyRelation<M extends BreezeBaseModel> extends BreezeModelResolvedRelation<M> {
+final class BreezeModelResolvedHasManyRelation /*<M extends BreezeBaseModel>*/
+    extends BreezeModelResolvedRelation /*<M>*/ {
   const BreezeModelResolvedHasManyRelation({
+    required super.type,
     required super.name,
     required super.foreignKey,
     required super.sourceKey,
   });
 }
 
-final class BreezeModelResolvedBelongsToRelation<M extends BreezeBaseModel> extends BreezeModelResolvedRelation<M> {
+final class BreezeModelResolvedBelongsToRelation /*<M extends BreezeBaseModel>*/
+    extends BreezeModelResolvedRelation /*<M>*/ {
   const BreezeModelResolvedBelongsToRelation({
+    required super.type,
     required super.name,
     required super.foreignKey,
     required super.sourceKey,
   });
 }
 
-final class BreezeModelResolvedHasManyThroughRelation<M extends BreezeBaseModel>
-    extends BreezeModelResolvedRelation<M> {
+final class BreezeModelResolvedHasManyThroughRelation /*<M extends BreezeBaseModel>*/
+    extends BreezeModelResolvedRelation /*<M>*/ {
   final String leftPk;
-  // TODO: rename to junction
-  final String through;
+  final BreezeModelBlueprint junction;
 
   const BreezeModelResolvedHasManyThroughRelation({
+    required super.type,
     required super.name,
-    required this.through,
+    required this.junction,
     required this.leftPk,
-    required String leftKey,
-    required String rightKey,
+    required BreezeRelationTypedKey leftKey,
+    required BreezeRelationTypedKey rightKey,
   }) : super(foreignKey: leftKey, sourceKey: rightKey);
 }

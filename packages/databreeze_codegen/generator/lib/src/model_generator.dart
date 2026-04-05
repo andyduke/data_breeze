@@ -35,6 +35,7 @@ class BreezeModelGenerator extends GeneratorForAnnotation<BzModel> {
     final schemaVersionClass =
         annotation.peek('schemaVersionClass')?.typeValue.getDisplayString() ?? 'BreezeModelSchemaVersion';
 
+    // TODO: Add support for models without a primary key (for example, junction models).
     if (primaryKeyType == null) {
       throw Exception('The model\'s primary key type is not specified in BreezeModel<K>: $className.');
     }
@@ -43,7 +44,7 @@ class BreezeModelGenerator extends GeneratorForAnnotation<BzModel> {
     final fields = _collectFields(element, primaryKey: primaryKey, nameStyle: nameStyle);
 
     // Collect relations
-    final relations = _collectRelations(element, primaryKey: primaryKey, nameStyle: nameStyle);
+    final relations = _collectRelations(element, primaryKey: primaryKey, nameStyle: nameStyle /*, fields: fields*/);
 
     // Collect schema versions
     final schemaVersions = _collectSchemaVersions(element, annotation);
@@ -79,18 +80,22 @@ class BreezeModelGenerator extends GeneratorForAnnotation<BzModel> {
     // Generate code
     final constructorName = (constructor != null && constructor.isNotEmpty) ? '.$constructor' : '';
     final primaryKeyProp = snakeToCamel(primaryKey);
+    final modelFields = fields.where((fi) => !fi.isGenerated);
+
+    // TODO: Add support for models without a primary key (for example, junction models).
+    //  Skip "id" column if not inherited from BreezeModel.
     final output =
         '''
 mixin ${className}Model {
   $blueprint
 
   static $className fromRecord(Map<String, dynamic> map) => $className$constructorName(
-${fields.map((f) => "    ${f.constructorName}: map[${className}Model.${f.name}],").join('\n')}
+${modelFields.map((f) => "    ${f.constructorName}: map[${className}Model.${f.name}],").join('\n')}
 ${relations.map((r) => "    ${r.name}: map['${r.name}'],").join('\n')}
   );
 
   static const $primaryKeyProp = BreezeField('$primaryKey');
-${fields.where((f) => f.columnName != primaryKey).map((f) => "  static const ${f.name} = BreezeField('${f.columnName}');").join('\n')}
+${modelFields.where((f) => f.columnName != primaryKey).map((f) => "  static const ${f.name} = BreezeField('${f.columnName}');").join('\n')}
 
   // ---
 
@@ -99,7 +104,7 @@ ${fields.where((f) => f.columnName != primaryKey).map((f) => "  static const ${f
   BreezeModelBlueprint get schema => ${className}Model.blueprint;
 
   Map<String, dynamic> toRecord() => {
-${fields.map((f) => "    ${className}Model.${f.name}: _self.${f.accessorName},").join('\n')}
+${modelFields.map((f) => "    ${className}Model.${f.name}: _self.${f.accessorName},").join('\n')}
 ${relations.map((r) => "    '${r.name}': _self.${r.name},").join('\n')}
   };
 }
@@ -211,6 +216,7 @@ ${relations.map((r) => "    '${r.name}': _self.${r.name},").join('\n')}
     ClassElement element, {
     required String primaryKey,
     required BzModelNameStyle nameStyle,
+    // TODO: remove this -> required List<FieldInfo> fields,
   }) {
     final result = <RelationInfo>[];
 
@@ -240,13 +246,51 @@ ${relations.map((r) => "    '${r.name}': _self.${r.name},").join('\n')}
         RelationType.belongsTo => field.type.getDisplayString(),
         RelationType.hasManyThrough => field.type.genericTypes.first.getDisplayString(),
       }.replaceFirst('?', '');
-      final relationForeignKey = relationAnnReader.read('foreignKey').literalValue as String?;
-      final relationSourceKey = relationAnnReader.read('sourceKey').literalValue as String?;
-      final relationThrough = relationAnnReader.peek('through')?.literalValue as String?;
+      // final relationForeignKey = relationAnnReader.read('foreignKey').literalValue as String?;
+      // final relationSourceKey = relationAnnReader.read('sourceKey').literalValue as String?;
+      final relationForeignKey = relationAnnReader.peek('foreignKey')?.objectValue;
+      final relationSourceKey = relationAnnReader.peek('sourceKey')?.objectValue;
+      // final relationJunction = relationAnnReader.peek('junction')?.literalValue as String?;
+      final relationJunction = relationAnnReader.peek('junction')?.typeValue.getDisplayString();
 
-      print(
-        '[!] $relationType (${field.type.isDartCoreList ? field.type.genericTypes : '--'}): $relationName<$relationModelType> (foreignKey: $relationForeignKey, sourceKey: $relationSourceKey)',
-      );
+      // print(
+      //   '[!] $relationForeignKey {$relationJunction}',
+      // );
+
+      // print(
+      //   '[!] $relationForeignKey {${relationForeignKey?.type?.element?.displayName}} -> ${relationForeignKey?.type?.genericTypes} || ${relationForeignKey?.getField('type')?.toTypeValue()!.getDisplayString()}',
+      // );
+
+      // TODO: Refactor - extract to method
+      final relationForeignKeyInfo = (relationForeignKey != null /* && relationForeignKey.type.element.displayName*/ )
+          ? switch (relationForeignKey.type?.element?.displayName) {
+              'BreezeRelationTypedKey' => RelationKeyInfo(
+                relationForeignKey.constructorInvocation!.positionalArguments[0].toStringValue()!,
+                relationForeignKey.constructorInvocation!.positionalArguments[1].toTypeValue()!.getDisplayString(),
+                // relationForeignKey.getField('name')!.toStringValue()!,
+                // relationForeignKey.getField('type')!.toTypeValue()!.getDisplayString(),
+              ),
+              'BreezeRelationKey' => RelationKeyInfo(
+                relationForeignKey.constructorInvocation!.positionalArguments.first.toStringValue()!,
+                // relationForeignKey.type!.genericTypes.first.getDisplayString(),
+                relationForeignKey.type!.genericTypes.map((e) => '$e').join('|'),
+              ),
+              _ => null,
+            }
+          : null;
+      final relationSourceKeyInfo = (relationSourceKey != null)
+          ? RelationKeyInfo(
+              // relationSourceKey.getField('name')?.toStringValue() ?? '???',
+              relationSourceKey.constructorInvocation!.positionalArguments.first.toStringValue()!,
+              relationSourceKey.type?.genericTypes.firstOrNull?.getDisplayString() ??
+                  relationSourceKey.constructorInvocation!.positionalArguments[1].toTypeValue()!.getDisplayString(),
+              // relationSourceKey.getField('type')!.toTypeValue()!.getDisplayString(),
+            )
+          : null;
+
+      // print(
+      //   '[!] $relationType (${field.type.isDartCoreList ? field.type.genericTypes : '--'}): $relationName<$relationModelType> (foreignKey: $relationForeignKey [${relationForeignKey?.getField('name')}, ${relationForeignKey?.getField('type')}], sourceKey: $relationSourceKey)',
+      // );
 
       // print(
       //   '[${element.displayName}] Prop: ${field.name}, type: ${field.type.getDisplayString() /*element?.displayName*/}, nullable: ${field.type.nullabilitySuffix}',
@@ -257,13 +301,33 @@ ${relations.map((r) => "    '${r.name}': _self.${r.name},").join('\n')}
           name: relationName,
           relationType: relationType,
           type: relationModelType,
-          foreignKey: relationForeignKey,
-          sourceKey: relationSourceKey,
-          through: relationThrough,
+          foreignKey: relationForeignKeyInfo,
+          sourceKey: relationSourceKeyInfo,
+          junction: relationJunction,
         ),
       );
 
+      /*
       // TODO: Add relation foreign key fields to fields list!
+      switch (relationType) {
+        case RelationType.belongsTo:
+          if (relationSourceKeyInfo != null) {
+            fields.add(
+              FieldInfo(
+                name: relationSourceKeyInfo.name,
+                type: relationSourceKeyInfo.type,
+                columnName: relationSourceKeyInfo.name,
+                isNullable: true,
+                isGenerated: true,
+              ),
+            );
+          }
+          break;
+
+        default:
+        // Do nothing
+      }
+      */
     }
 
     return result;
@@ -337,6 +401,7 @@ ${relations.map((r) => "    '${r.name}': _self.${r.name},").join('\n')}
         final schemaFieldNames = schema.fields.map((f) => f.name).toList(growable: false);
         final fieldNames = fields.map((f) => f.columnName).toList(growable: false);
 
+        // TODO: Add support for models without a primary key (for example, junction models).
         final primaryKeyDetected = schemaFieldNames.contains(primaryKey);
         if (primaryKeyDetected) {
           throw Exception('''The model "$className" schema must not specify a primary key field "$primaryKey".''');

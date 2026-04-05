@@ -12,7 +12,10 @@ class Item extends BreezeModel<int> with ItemModel {
   String name;
 
   // @BzColumn(name: 'category_id')
-  @BzRelationship.belongsTo(name: 'category', sourceKey: 'category_id')
+  @BzRelationship.belongsTo(
+    name: 'category',
+    sourceKey: BreezeRelationTypedKey('category_id', int),
+  )
   ItemCategory? category;
 
   Item({

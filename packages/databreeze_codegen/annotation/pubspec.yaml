@@ -10,6 +10,7 @@ environment:
 
 dependencies:
   meta: ^1.17.0
+  databreeze:
 
 dev_dependencies:
   lints: ^6.1.0

@@ -26,6 +26,7 @@ class BreezeSqliteAutomaticSchemaBasedMigration extends BreezeSchemaMigrationStr
         typeConverters: typeConverters,
         log: log,
       );
+
       await manager.migrate(
         db,
         schemas.toList(growable: false),

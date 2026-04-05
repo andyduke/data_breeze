@@ -20,7 +20,7 @@ mixin ItemModel {
     relations: {
       BreezeModelRelation<ItemCategory>.belongsTo(
         name: 'category',
-        sourceKey: 'category_id',
+        sourceKey: BreezeRelationTypedKey('category_id', int),
       ),
     },
     builder: ItemModel.fromRecord,

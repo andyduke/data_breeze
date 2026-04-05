@@ -23,7 +23,7 @@ mixin ArticleModel {
     relations: {
       BreezeModelRelation<ArticleTag>.hasMany(
         name: 'tags',
-        foreignKey: 'article_id',
+        foreignKey: BreezeRelationTypedKey('article_id', int),
       ),
     },
     builder: ArticleModel.fromRecord,

@@ -45,6 +45,27 @@ Future<void> expectStoreTableRows(
   await expectTableRows(db, sql, params, rows, log: log);
 }
 
+Future<void> expectStoreTablesVersions(
+  BreezeSqliteStore store,
+  Iterable<(String name, int version)> tables,
+  Logger? log,
+) async {
+  for (final tableInfo in tables) {
+    await expectStoreTableRows(
+      store,
+      'SELECT * FROM ${BreezeSqliteMigrationDelegate.migrationsTableName} WHERE table_name = ?',
+      [tableInfo.$1],
+      [
+        [
+          tableInfo.$1,
+          tableInfo.$2,
+        ],
+      ],
+      log: log,
+    );
+  }
+}
+
 // ---
 
 typedef TableColumn = ({String name, String type, bool notNull, dynamic defaultValue, bool primaryKey});
@@ -85,4 +106,15 @@ Future<void> expectStoreTable(
 }) async {
   final db = await store.database;
   await expectTable(db, name, columns, log: log);
+}
+
+Future<void> expectStoreTables(
+  BreezeSqliteStore store,
+  Map<String, List<TableColumn>> tables, {
+  Logger? log,
+}) async {
+  final db = await store.database;
+  for (final MapEntry(key: name, value: columns) in tables.entries) {
+    await expectTable(db, name, columns, log: log);
+  }
 }

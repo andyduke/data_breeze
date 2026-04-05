@@ -1,5 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:databreeze/src/model_column.dart';
+import 'package:databreeze/src/relations/model_relation.dart';
 import 'package:databreeze/src/type_converters.dart';
 
 abstract interface class BreezeBaseModelSchema {
@@ -70,9 +71,7 @@ class BreezeModelSchema implements BreezeBaseModelSchema {
     this.isDeleted = false,
     this.tags = const {},
     this.typeConverters = const {},
-  }) : columns = UnmodifiableMapView(
-         {for (var column in columns) column.name: column},
-       ),
+  }) : columns = {for (var column in columns) column.name: column},
        key = columns.firstWhereOrNull((c) => c.isPrimaryKey)?.name;
 
   @override
@@ -142,4 +141,8 @@ class BreezeModelVersionedSchema implements BreezeBaseModelSchema {
 
   @override
   Set<BreezeBaseTypeConverter> get typeConverters => latestVersion.typeConverters;
+}
+
+mixin BreezeRelationalModelSchema on BreezeBaseModelSchema {
+  abstract final Set<BreezeModelRelation> relations;
 }

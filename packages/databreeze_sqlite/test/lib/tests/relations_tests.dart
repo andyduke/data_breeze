@@ -73,12 +73,12 @@ void relationsGroup(
       RelationTests.manyToMany: [
         (
           label: 'fetchSingle',
-          models: {ActorModel.blueprint, MovieModel.blueprint},
+          models: {ActorModel.blueprint, MovieModel.blueprint, MovieActorsModel.blueprint},
           test: testFetchOneHasManyThroughRelation,
         ),
         (
           label: 'fetchAll',
-          models: {ActorModel.blueprint, MovieModel.blueprint},
+          models: {ActorModel.blueprint, MovieModel.blueprint, MovieActorsModel.blueprint},
           test: testFetchAllHasManyThroughRelation,
         ),
       ],
@@ -102,6 +102,7 @@ void relationsGroup(
           models: {CompanyModel.blueprint, CompanyAddressModel.blueprint},
           test: testUpdateHasOneRelation,
         ),
+        // TODO: Delete
       ],
       RelationTests.oneToMany: [
         (
@@ -114,6 +115,7 @@ void relationsGroup(
           models: {ArticleModel.blueprint, ArticleTagModel.blueprint},
           test: testUpdateHasManyRelation,
         ),
+        // TODO: Delete
       ],
       RelationTests.manyToOne: [
         (
@@ -126,33 +128,21 @@ void relationsGroup(
           models: {ItemModel.blueprint, ItemCategoryModel.blueprint},
           test: testUpdateBelongsToRelation,
         ),
+        // TODO: Delete
       ],
       RelationTests.manyToMany: [
         (
           label: 'Add',
-          models: {ActorModel.blueprint, MovieModel.blueprint},
+          models: {ActorModel.blueprint, MovieModel.blueprint, MovieActorsModel.blueprint},
           test: testAddHasManyThroughRelation,
         ),
         (
           label: 'Update',
-          models: {ActorModel.blueprint, MovieModel.blueprint},
+          models: {ActorModel.blueprint, MovieModel.blueprint, MovieActorsModel.blueprint},
           test: testUpdateHasManyThroughRelation,
         ),
+        // TODO: Delete
       ],
     },
   );
-
-  /*
-  _defineRelationGroup(
-    '$description Update',
-    store: store,
-    relations: relations,
-    tests: {
-      RelationTests.hasOne: testUpdateHasOneRelation,
-      // RelationTests.hasMany: testFetchHasManyRelation,
-      // RelationTests.belongsTo: testFetchBelongsToRelation,
-      // RelationTests.hasManyThrough: testFetchHasManyThroughRelation,
-    },
-  );
-  */
 }

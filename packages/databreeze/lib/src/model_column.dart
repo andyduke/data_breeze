@@ -1,3 +1,5 @@
+import 'package:meta/meta.dart';
+
 class BreezeModelColumn<T> {
   /// Column name in the database
   final String name;
@@ -101,4 +103,23 @@ extension BreezeModelListColumnTyping<T> on BreezeModelColumn<List<T>> {
 @Deprecated('Remove this')
 extension BreezeModelColumnTyping<T> on BreezeModelColumn<T> {
   Type get genericType => T;
+}
+
+@internal
+class BreezeModelColumnTyped extends BreezeModelColumn {
+  @override
+  final Type type;
+
+  @override
+  final bool isNullable;
+
+  const BreezeModelColumnTyped(
+    super.name, {
+    super.prevName,
+    required this.type,
+    this.isNullable = false,
+    super.isPrimaryKey = false,
+    super.isAutoGenerate,
+    super.defaultValue,
+  });
 }

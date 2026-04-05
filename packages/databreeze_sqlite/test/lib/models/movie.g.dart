@@ -20,9 +20,9 @@ mixin MovieModel {
     relations: {
       BreezeModelRelation<Actor>.hasManyThrough(
         name: 'actors',
-        foreignKey: 'movie_id',
-        sourceKey: 'actor_id',
-        through: 'movie_actors',
+        foreignKey: BreezeRelationTypedKey('movie_id', int),
+        sourceKey: BreezeRelationTypedKey('actor_id', int),
+        junction: MovieActors,
       ),
     },
     builder: MovieModel.fromRecord,

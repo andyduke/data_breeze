@@ -21,6 +21,9 @@ class BlueprintSingleVersionGenerator extends BlueprintCodeGenerator {
   @override
   Iterable<String> generate() sync* {
     // TODO: add relation columns generation
+
+    // TODO: Add support for models without a primary key (for example, junction models).
+    //  Skip "id" column if not inherited from BreezeModel.
     final String output =
         '''
   static final blueprint = BreezeModelBlueprint<$className>(

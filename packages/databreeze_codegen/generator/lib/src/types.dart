@@ -26,6 +26,9 @@ class FieldInfo {
 
   String get typeStr => type + (isNullable ? '?' : '');
 
+  // TODO: Remove this
+  final bool isGenerated;
+
   const FieldInfo({
     String? constructorName,
     String? accessorName,
@@ -34,8 +37,16 @@ class FieldInfo {
     required this.isNullable,
     this.columnName,
     this.isPrimaryKey = false,
+    this.isGenerated = false,
   }) : constructorName = constructorName ?? name,
        accessorName = accessorName ?? name;
+}
+
+class RelationKeyInfo {
+  final String name;
+  final String type;
+
+  const RelationKeyInfo(this.name, this.type);
 }
 
 enum RelationType {
@@ -58,11 +69,11 @@ class RelationInfo {
 
   final String type;
 
-  final String? foreignKey;
+  final RelationKeyInfo? foreignKey;
 
-  final String? sourceKey;
+  final RelationKeyInfo? sourceKey;
 
-  final String? through;
+  final String? junction;
 
   const RelationInfo({
     required this.name,
@@ -70,10 +81,10 @@ class RelationInfo {
     required this.type,
     this.foreignKey,
     this.sourceKey,
-    this.through,
+    this.junction,
   }) : assert(
-         relationType != RelationType.hasManyThrough || through != null,
-         'For a hasManyThrough relationship, the linking table must be specified in through.',
+         relationType != RelationType.hasManyThrough || junction != null,
+         'For a hasManyThrough relationship, the linking table must be specified in "junction" parameter.',
        );
 }
 
