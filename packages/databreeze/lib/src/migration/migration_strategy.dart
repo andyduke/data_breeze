@@ -33,9 +33,11 @@ abstract class BreezeSchemaMigrationStrategy<D> extends BreezeMigrationStrategy<
 
   @override
   Future<void> migrate(BreezeStore store, [D? db]) async {
-    // Filter only models with a primary key (ignore view models).
-    Iterable<BreezeModelBlueprint<BreezeModel>> schemes = store.blueprints.values
-        .whereType<BreezeModelBlueprint<BreezeModel>>();
+    // Filter only read-write models (ignore view models).
+    Iterable<BreezeModelBlueprint<BreezeBaseModel>> schemes = store.blueprints.values
+      ..where(
+        (s) => s is! BreezeModelBlueprint<BreezeViewModel>,
+      );
 
     if (filter != null) {
       schemes = schemes.where((blueprint) => filter!(blueprint));
@@ -56,7 +58,7 @@ abstract class BreezeSchemaMigrationStrategy<D> extends BreezeMigrationStrategy<
   ]);
 
   @protected
-  void expandRelationshipKeys(BreezeStoreRelations store, Iterable<BreezeModelBlueprint<BreezeModel>> schemes) {
+  void expandRelationshipKeys(BreezeStoreRelations store, Iterable<BreezeModelBlueprint<BreezeBaseModel>> schemes) {
     // [ModelType] = <BreezeModelColumn>[]
     final Map<Type, List<BreezeModelColumn>> relationshipKeys = {};
 
@@ -90,7 +92,7 @@ abstract class BreezeSchemaMigrationStrategy<D> extends BreezeMigrationStrategy<
             break;
 
           case BreezeModelResolvedBelongsToRelation manyToOne:
-            relationshipKeys[manyToOne.type] = [
+            relationshipKeys[schema.type] = [
               BreezeModelColumnTyped(
                 manyToOne.sourceKey.name,
                 type: manyToOne.sourceKey.type,
@@ -99,13 +101,14 @@ abstract class BreezeSchemaMigrationStrategy<D> extends BreezeMigrationStrategy<
             ];
             break;
 
-          case BreezeModelResolvedHasManyThroughRelation manyToMany:
+          case BreezeModelResolvedHasManyThroughRelation _:
             // Skip because all keys are in the junction schema.
             break;
         }
       }
     }
 
+    // Adding foreign key relationships to collections
     for (final MapEntry(key: model, value: columns) in relationshipKeys.entries) {
       final schema = schemes.firstWhereOrNull((s) => s.type == model);
       if (schema != null) {

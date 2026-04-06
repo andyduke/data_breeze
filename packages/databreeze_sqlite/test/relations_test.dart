@@ -351,5 +351,140 @@ Future<void> main() async {
         log: log,
       );
     });
+
+    test('One-to-Many', () async {
+      final store = BreezeSqliteStore.inMemory(
+        models: {
+          ArticleModel.blueprint,
+          ArticleTagModel.blueprint,
+        },
+        log: log,
+        onInit: (db) => db.execute('PRAGMA temp_store=2'),
+        migrationStrategy: BreezeSqliteAutomaticSchemaBasedMigration(
+          log: log,
+        ),
+      );
+
+      await store.database;
+
+      // Ensure that the tables schema version in the database is correct.
+      await expectStoreTablesVersions(
+        store,
+        [
+          (ArticleModel.blueprint.name, ArticleModel.blueprint.latestVersion.version),
+          (ArticleTagModel.blueprint.name, ArticleTagModel.blueprint.latestVersion.version),
+        ],
+        log,
+      );
+
+      // Ensure that the tables structure in the database matches the schema.
+      await expectStoreTables(
+        store,
+        {
+          ArticleModel.blueprint.name: [
+            (name: 'id', type: 'INTEGER', notNull: false, defaultValue: null, primaryKey: true),
+            (name: 'title', type: 'TEXT', notNull: true, defaultValue: null, primaryKey: false),
+            (name: 'text', type: 'TEXT', notNull: true, defaultValue: null, primaryKey: false),
+          ],
+          ArticleTagModel.blueprint.name: [
+            (name: 'id', type: 'INTEGER', notNull: false, defaultValue: null, primaryKey: true),
+            (name: 'name', type: 'TEXT', notNull: true, defaultValue: null, primaryKey: false),
+            (name: 'article_id', type: 'INTEGER', notNull: false, defaultValue: null, primaryKey: false),
+          ],
+        },
+        log: log,
+      );
+    });
+
+    test('Many-to-One', () async {
+      final store = BreezeSqliteStore.inMemory(
+        models: {
+          ItemModel.blueprint,
+          ItemCategoryModel.blueprint,
+        },
+        log: log,
+        onInit: (db) => db.execute('PRAGMA temp_store=2'),
+        migrationStrategy: BreezeSqliteAutomaticSchemaBasedMigration(
+          log: log,
+        ),
+      );
+
+      await store.database;
+
+      // Ensure that the tables schema version in the database is correct.
+      await expectStoreTablesVersions(
+        store,
+        [
+          (ItemModel.blueprint.name, ItemModel.blueprint.latestVersion.version),
+          (ItemCategoryModel.blueprint.name, ItemCategoryModel.blueprint.latestVersion.version),
+        ],
+        log,
+      );
+
+      // Ensure that the tables structure in the database matches the schema.
+      await expectStoreTables(
+        store,
+        {
+          ItemModel.blueprint.name: [
+            (name: 'id', type: 'INTEGER', notNull: false, defaultValue: null, primaryKey: true),
+            (name: 'name', type: 'TEXT', notNull: true, defaultValue: null, primaryKey: false),
+            (name: 'category_id', type: 'INTEGER', notNull: false, defaultValue: null, primaryKey: false),
+          ],
+          ItemCategoryModel.blueprint.name: [
+            (name: 'id', type: 'INTEGER', notNull: false, defaultValue: null, primaryKey: true),
+            (name: 'name', type: 'TEXT', notNull: true, defaultValue: null, primaryKey: false),
+          ],
+        },
+        log: log,
+      );
+    });
+
+    test('Many-to-Many', () async {
+      final store = BreezeSqliteStore.inMemory(
+        models: {
+          MovieModel.blueprint,
+          ActorModel.blueprint,
+          MovieActorsModel.blueprint,
+        },
+        log: log,
+        onInit: (db) => db.execute('PRAGMA temp_store=2'),
+        migrationStrategy: BreezeSqliteAutomaticSchemaBasedMigration(
+          log: log,
+        ),
+      );
+
+      await store.database;
+
+      // Ensure that the tables schema version in the database is correct.
+      await expectStoreTablesVersions(
+        store,
+        [
+          (MovieModel.blueprint.name, MovieModel.blueprint.latestVersion.version),
+          (ActorModel.blueprint.name, ActorModel.blueprint.latestVersion.version),
+          (MovieActorsModel.blueprint.name, MovieActorsModel.blueprint.latestVersion.version),
+        ],
+        log,
+      );
+
+      // Ensure that the tables structure in the database matches the schema.
+      await expectStoreTables(
+        store,
+        {
+          MovieModel.blueprint.name: [
+            (name: 'id', type: 'INTEGER', notNull: false, defaultValue: null, primaryKey: true),
+            (name: 'title', type: 'TEXT', notNull: true, defaultValue: null, primaryKey: false),
+          ],
+          ActorModel.blueprint.name: [
+            (name: 'id', type: 'INTEGER', notNull: false, defaultValue: null, primaryKey: true),
+            (name: 'name', type: 'TEXT', notNull: true, defaultValue: null, primaryKey: false),
+          ],
+          MovieActorsModel.blueprint.name: [
+            (name: 'movie_id', type: 'INTEGER', notNull: true, defaultValue: null, primaryKey: false),
+            (name: 'actor_id', type: 'INTEGER', notNull: true, defaultValue: null, primaryKey: false),
+          ],
+        },
+        log: log,
+      );
+    });
   });
 }
