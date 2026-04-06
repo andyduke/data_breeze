@@ -102,6 +102,11 @@ void relationsGroup(
           models: {CompanyModel.blueprint, CompanyAddressModel.blueprint},
           test: testUpdateHasOneRelation,
         ),
+        (
+          label: 'Unset',
+          models: {CompanyModel.blueprint, CompanyAddressModel.blueprint},
+          test: testUnsetHasOneRelation,
+        ),
         // TODO: Delete
       ],
       RelationTests.oneToMany: [

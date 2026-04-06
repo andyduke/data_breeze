@@ -351,23 +351,26 @@ class BreezeSqliteStore extends BreezeStore
     // TODO: Add uniqueKeys
     required Map<String, dynamic> record,
   }) async {
-    final hasPrimaryKey = record.containsKey(key) && (record[key] != null);
-    final rawRecord = hasPrimaryKey ? record : ({...record}..remove(key));
+    // final hasPrimaryKey = record.containsKey(key) && (record[key] != null);
+    // final rawRecord = hasPrimaryKey ? record : ({...record}..remove(key));
+    final rawRecord = record;
     final columns = rawRecord.keys;
     final columnsPlaceholders = List.filled(columns.length, '?').join(', ');
     final values = rawRecord.values;
     final updateColumns = columns.where((c) => (c != key));
 
-    await executeSql(
-      'INSERT INTO $name (${columns.join(', ')}) VALUES ($columnsPlaceholders) '
-      'ON CONFLICT($key) DO UPDATE SET ${updateColumns.map((k) => '$k = excluded.$k').join(', ')}',
-      values.toList(growable: false),
-    );
-
-    // await executeSql(
-    //   'UPDATE $name SET ${record.keys.map((k) => '$k = ?').join(', ')} WHERE $key = ?',
-    //   [...record.values, keyValue],
-    // );
+    if (updateColumns.isNotEmpty) {
+      await executeSql(
+        'INSERT INTO $name (${columns.join(', ')}) VALUES ($columnsPlaceholders) '
+        'ON CONFLICT($key) DO UPDATE SET ${updateColumns.map((k) => '$k = excluded.$k').join(', ')}',
+        values.toList(growable: false),
+      );
+    } else {
+      await executeSql(
+        'UPDATE $name SET ${rawRecord.keys.map((k) => '$k = ?').join(', ')} WHERE $key = ?',
+        [...rawRecord.values, keyValue],
+      );
+    }
 
     log?.finest('Updated #$keyValue: $record');
   }

@@ -289,7 +289,7 @@ mixin BreezeStoreRelations on BreezeStore {
 
       switch (relationInfo) {
         case BreezeModelResolvedHasOneRelation oneToOne:
-          if (result.containsKey(oneToOne.name) && result[oneToOne.name] is BreezeModel) {
+          if (result.containsKey(oneToOne.name) && result[oneToOne.name] is BreezeModel?) {
             // Remove from the result, since this value will be
             // processed later in updateRelationsAfterSave.
             result.remove(oneToOne.name);
@@ -305,7 +305,7 @@ mixin BreezeStoreRelations on BreezeStore {
           break;
 
         case BreezeModelResolvedBelongsToRelation manyToOne:
-          if (result.containsKey(manyToOne.name) && result[manyToOne.name] is BreezeModel) {
+          if (result.containsKey(manyToOne.name) && result[manyToOne.name] is BreezeModel?) {
             await updateManyToOneRelation(result[relation.name], result, manyToOne);
             result.remove(manyToOne.name);
           }
@@ -336,9 +336,25 @@ mixin BreezeStoreRelations on BreezeStore {
 
       switch (relationInfo) {
         case BreezeModelResolvedHasOneRelation oneToOne:
-          if (record.containsKey(oneToOne.name) && record[oneToOne.name] is BreezeModel) {
-            final BreezeModel item = record[oneToOne.name];
-            await updateOneToOneRelation(item, relationInfo, record, blueprint);
+          if (record.containsKey(oneToOne.name) && record[oneToOne.name] is BreezeModel?) {
+            final BreezeModel? item = record[oneToOne.name];
+            if (item != null) {
+              await updateOneToOneRelation(item, relationInfo, record, blueprint);
+            } else {
+              // If null is assigned to a relationship, the foreign key in
+              // the related record must be reset.
+
+              // TODO: Add an option to delete a no longer related entry?
+              final relatedBlueprint = blueprintOf(oneToOne.type);
+              await updateRecord(
+                name: relatedBlueprint.name,
+                key: relationInfo.foreignKey.name,
+                keyValue: record[blueprint.key],
+                record: {
+                  relationInfo.foreignKey.name: null,
+                },
+              );
+            }
           }
           break;
 
@@ -399,12 +415,16 @@ mixin BreezeStoreRelations on BreezeStore {
 
   @protected
   Future<void> updateManyToOneRelation(
-    BreezeModel item,
+    BreezeModel? item,
     Map<String, dynamic> record,
     BreezeModelResolvedBelongsToRelation relation,
   ) async {
-    final relatedItem = await save(item);
-    record[relation.sourceKey.name] = relatedItem.id;
+    if (item != null) {
+      final relatedItem = await save(item);
+      record[relation.sourceKey.name] = relatedItem.id;
+    } else {
+      record[relation.sourceKey.name] = null;
+    }
   }
 
   @protected

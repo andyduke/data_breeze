@@ -255,7 +255,7 @@ abstract class BreezeStore with BreezeStorageTypeConverters {
         ),
       );
 
-      record.afterAdd();
+      await record.afterAdd();
     }
     return record;
   }
@@ -284,7 +284,7 @@ abstract class BreezeStore with BreezeStorageTypeConverters {
       };
 
       if (keyValue != null) {
-        record.beforeUpdate();
+        await record.beforeUpdate();
 
         final recordWithoutRelations = await updateRelationsBeforeSave<M>(
           record.schema as BreezeModelBlueprint<M>,
@@ -309,7 +309,7 @@ abstract class BreezeStore with BreezeStorageTypeConverters {
           ),
         );
 
-        record.afterUpdate();
+        await record.afterUpdate();
       }
     }
 
