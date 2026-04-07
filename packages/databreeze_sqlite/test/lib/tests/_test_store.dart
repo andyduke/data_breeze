@@ -44,7 +44,7 @@ abstract mixin class BreezeTestStore implements BreezeStore {
     required String name,
     required String key,
     required dynamic keyValue,
-    required Map<String, dynamic> record,
+    // required Map<String, dynamic> record,
   });
 
   @protected

@@ -15,13 +15,14 @@ import '../models/movie.dart';
 part '_utils.dart';
 part '_test_store.dart';
 part '_test_hasone_fetch.dart';
+part '_test_hasone_update.dart';
+part '_test_hasone_delete.dart';
 part '_test_belongsto_fetch.dart';
+part '_test_belongsto_update.dart';
 part '_test_hasmany_fetch.dart';
+part '_test_hasmany_update.dart';
 part '_test_hasmanythrough_fetch.dart';
 part '_test_hasmanythrough_update.dart';
-part '_test_hasone_update.dart';
-part '_test_hasmany_update.dart';
-part '_test_belongsto_update.dart';
 
 @isTestGroup
 void relationsGroup(
@@ -108,6 +109,11 @@ void relationsGroup(
           test: testUnsetHasOneRelation,
         ),
         // TODO: Delete
+        (
+          label: 'Delete (nullify)',
+          models: {CompanyModel.blueprint, CompanyAddressModel.blueprint},
+          test: testDeleteNullifyHasOneRelation,
+        ),
       ],
       RelationTests.oneToMany: [
         (

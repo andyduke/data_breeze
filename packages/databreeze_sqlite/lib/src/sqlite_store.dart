@@ -376,18 +376,36 @@ class BreezeSqliteStore extends BreezeStore
   }
 
   @override
+  Future<void> bulkUpdateRecords({
+    required String name,
+    required String key,
+    required List<dynamic> keyValues,
+    required Map<String, dynamic> data,
+  }) async {
+    final keyPlaceholders = List.filled(keyValues.length, '?').join(', ');
+
+    await executeSql(
+      'UPDATE $name SET ${data.keys.map((k) => '$k = ?').join(', ')} WHERE $key IN($keyPlaceholders)',
+      [...data.values, ...keyValues],
+    );
+
+    log?.finest('Updated (bulk) #$keyValues: $data');
+  }
+
+  @override
   Future<void> deleteRecord({
     required String name,
     required String key,
     required dynamic keyValue,
-    required Map<String, dynamic> record,
+    // required Map<String, dynamic> record,
   }) async {
     await executeSql(
       'DELETE FROM $name WHERE $key = ?',
       [keyValue],
     );
 
-    log?.finest('Deleted #$keyValue: $record');
+    // log?.finest('Deleted #$keyValue: $record');
+    log?.finest('Deleted #$keyValue');
   }
 
   @override

@@ -331,16 +331,24 @@ abstract class BreezeStore with BreezeStorageTypeConverters {
       if (keyValue != null) {
         record.beforeDelete();
 
+        /*final recordWithoutRelations =*/
         await deleteRelationsBeforeDelete(
+          record.schema as BreezeModelBlueprint<M>,
           rawRecord,
           record.schema.relations,
         );
 
-        await deleteRecord(name: tableName, key: keyName, keyValue: keyValue, record: rawRecord);
+        await deleteRecord(
+          name: tableName,
+          key: keyName,
+          keyValue: keyValue,
+          // record: recordWithoutRelations,
+        );
 
         record.isFrozen = true;
 
         await deleteRelationsAfterDelete(
+          record.schema as BreezeModelBlueprint<M>,
           rawRecord,
           record.schema.relations,
         );
@@ -469,13 +477,15 @@ abstract class BreezeStore with BreezeStorageTypeConverters {
   );
 
   @protected
-  Future<void> deleteRelationsBeforeDelete(
+  Future<Map<String, dynamic>> deleteRelationsBeforeDelete<M extends BreezeBaseModel>(
+    BreezeModelBlueprint<M> blueprint,
     Map<String, dynamic> record,
     Set<BreezeModelRelation> relations,
   );
 
   @protected
-  Future<void> deleteRelationsAfterDelete(
+  Future<void> deleteRelationsAfterDelete<M extends BreezeBaseModel>(
+    BreezeModelBlueprint<M> blueprint,
     Map<String, dynamic> record,
     Set<BreezeModelRelation> relations,
   );
@@ -539,11 +549,19 @@ abstract class BreezeStore with BreezeStorageTypeConverters {
   });
 
   @protected
+  Future<void> bulkUpdateRecords({
+    required String name,
+    required String key,
+    required List<dynamic> keyValues,
+    required Map<String, dynamic> data,
+  });
+
+  @protected
   Future<void> deleteRecord({
     required String name,
     required String key,
     required dynamic keyValue,
-    required Map<String, dynamic> record,
+    // required Map<String, dynamic> record,
   });
 
   @protected

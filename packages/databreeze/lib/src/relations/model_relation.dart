@@ -26,6 +26,11 @@ class BreezeRelationKey<T> extends BreezeRelationTypedKey {
   const factory BreezeRelationKey.key(String name) = BreezeRelationKey;
 }
 
+enum BreezeRelationshipDeleteRule {
+  nullify,
+  cascade,
+}
+
 @protected
 sealed class BreezeModelRelation<M extends BreezeBaseModel> {
   /// Column alias
@@ -39,30 +44,38 @@ sealed class BreezeModelRelation<M extends BreezeBaseModel> {
   /// Default: modelBlueprint.key
   final BreezeRelationTypedKey? sourceKey;
 
+  /// The rule to apply when you delete the
+  /// relationship's owning model.
+  final BreezeRelationshipDeleteRule deleteRule;
+
   Type get type => M;
 
   const BreezeModelRelation({
     required this.name,
     required this.foreignKey,
     this.sourceKey,
+    this.deleteRule = BreezeRelationshipDeleteRule.nullify,
   });
 
   factory BreezeModelRelation.hasOne({
     required String name,
     required BreezeRelationTypedKey? foreignKey,
     BreezeRelationTypedKey? sourceKey,
+    BreezeRelationshipDeleteRule deleteRule,
   }) = BreezeModelHasOneRelation;
 
   factory BreezeModelRelation.hasMany({
     required String name,
     required BreezeRelationTypedKey? foreignKey,
     BreezeRelationTypedKey? sourceKey,
+    BreezeRelationshipDeleteRule deleteRule,
   }) = BreezeModelHasManyRelation;
 
   factory BreezeModelRelation.belongsTo({
     required String name,
     BreezeRelationTypedKey? foreignKey,
     required BreezeRelationTypedKey? sourceKey,
+    BreezeRelationshipDeleteRule deleteRule,
   }) = BreezeModelBelongsToRelation;
 
   factory BreezeModelRelation.hasManyThrough({
@@ -79,6 +92,7 @@ final class BreezeModelHasOneRelation<M extends BreezeBaseModel> extends BreezeM
     required super.name,
     required super.foreignKey,
     super.sourceKey,
+    super.deleteRule,
   });
 }
 
@@ -87,6 +101,7 @@ final class BreezeModelHasManyRelation<M extends BreezeBaseModel> extends Breeze
     required super.name,
     required super.foreignKey,
     super.sourceKey,
+    super.deleteRule,
   });
 }
 
@@ -95,6 +110,7 @@ final class BreezeModelBelongsToRelation<M extends BreezeBaseModel> extends Bree
     required super.name,
     super.foreignKey,
     required super.sourceKey,
+    super.deleteRule,
   });
 }
 
@@ -130,6 +146,8 @@ sealed class BreezeModelResolvedRelation /*<M extends BreezeBaseModel>*/ {
   /// Primary key
   final BreezeRelationTypedKey sourceKey;
 
+  final BreezeRelationshipDeleteRule deleteRule;
+
   // Type get type => M;
   final Type type;
 
@@ -138,6 +156,7 @@ sealed class BreezeModelResolvedRelation /*<M extends BreezeBaseModel>*/ {
     required this.name,
     required this.foreignKey,
     required this.sourceKey,
+    required this.deleteRule,
   });
 }
 
@@ -148,6 +167,7 @@ final class BreezeModelResolvedHasOneRelation /*<M extends BreezeBaseModel>*/
     required super.name,
     required super.foreignKey,
     required super.sourceKey,
+    required super.deleteRule,
   });
 }
 
@@ -158,6 +178,7 @@ final class BreezeModelResolvedHasManyRelation /*<M extends BreezeBaseModel>*/
     required super.name,
     required super.foreignKey,
     required super.sourceKey,
+    required super.deleteRule,
   });
 }
 
@@ -168,6 +189,7 @@ final class BreezeModelResolvedBelongsToRelation /*<M extends BreezeBaseModel>*/
     required super.name,
     required super.foreignKey,
     required super.sourceKey,
+    required super.deleteRule,
   });
 }
 
@@ -183,5 +205,5 @@ final class BreezeModelResolvedHasManyThroughRelation /*<M extends BreezeBaseMod
     required this.leftPk,
     required BreezeRelationTypedKey leftKey,
     required BreezeRelationTypedKey rightKey,
-  }) : super(foreignKey: leftKey, sourceKey: rightKey);
+  }) : super(foreignKey: leftKey, sourceKey: rightKey, deleteRule: BreezeRelationshipDeleteRule.nullify);
 }

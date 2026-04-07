@@ -258,9 +258,40 @@ class BreezeJsonStore extends BreezeStore
       throw exception;
     }
 
-    records[name]![keyValue] = record;
+    records[name]![keyValue] = {
+      ...?records[name]![keyValue],
+      ...record,
+    };
 
     log?.finest('Update #$keyValue: $record');
+  }
+
+  @override
+  Future<void> bulkUpdateRecords({
+    required String name,
+    required String key,
+    required List<dynamic> keyValues,
+    required Map<String, dynamic> data,
+  }) async {
+    if (simulateLatency) {
+      // Simulate latency
+      await Future.delayed(_latency);
+    }
+
+    if (!records.containsKey(name)) {
+      final exception = Exception('Table "$name" not found.');
+      onError?.call(exception, StackTrace.current);
+      throw exception;
+    }
+
+    for (final keyValue in keyValues) {
+      records[name]![keyValue] = {
+        ...?records[name]![keyValue],
+        ...data,
+      };
+    }
+
+    log?.finest('Update (bulk) #$keyValues: $data');
   }
 
   @override
@@ -268,7 +299,7 @@ class BreezeJsonStore extends BreezeStore
     required String name,
     required String key,
     required dynamic keyValue,
-    required Map<String, dynamic> record,
+    // required Map<String, dynamic> record,
   }) async {
     if (simulateLatency) {
       // Simulate latency
@@ -283,7 +314,8 @@ class BreezeJsonStore extends BreezeStore
 
     records[name]!.remove(keyValue);
 
-    log?.finest('Delete #$keyValue: $record');
+    // log?.finest('Delete #$keyValue: $record');
+    log?.finest('Delete #$keyValue');
   }
 
   @override
