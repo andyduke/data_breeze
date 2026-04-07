@@ -41,9 +41,14 @@ class BzColumn {
 
 @Target({TargetKind.field})
 class BzRelationship {
+  // TODO: Optional, if omited -> get from class prop name
   final String name;
+
+  // TODO: Rename to referenceKey
   final BreezeRelationTypedKey? foreignKey;
+
   final BreezeRelationTypedKey? sourceKey;
+
   final BreezeRelationshipDeleteRule deleteRule;
 
   const BzRelationship._({

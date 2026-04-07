@@ -36,6 +36,7 @@ sealed class BreezeModelRelation<M extends BreezeBaseModel> {
   /// Column alias
   final String name;
 
+  // TODO: Rename to referenceKey
   /// Foreign key
   final BreezeRelationTypedKey? foreignKey;
 
