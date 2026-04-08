@@ -60,14 +60,14 @@ sealed class BreezeModelRelation<M extends BreezeBaseModel> {
 
   factory BreezeModelRelation.hasOne({
     required String name,
-    required BreezeRelationTypedKey? foreignKey,
+    BreezeRelationTypedKey? foreignKey,
     BreezeRelationTypedKey? sourceKey,
     BreezeRelationshipDeleteRule deleteRule,
   }) = BreezeModelHasOneRelation;
 
   factory BreezeModelRelation.hasMany({
     required String name,
-    required BreezeRelationTypedKey? foreignKey,
+    BreezeRelationTypedKey? foreignKey,
     BreezeRelationTypedKey? sourceKey,
     BreezeRelationshipDeleteRule deleteRule,
   }) = BreezeModelHasManyRelation;
@@ -75,7 +75,7 @@ sealed class BreezeModelRelation<M extends BreezeBaseModel> {
   factory BreezeModelRelation.belongsTo({
     required String name,
     BreezeRelationTypedKey? foreignKey,
-    required BreezeRelationTypedKey? sourceKey,
+    BreezeRelationTypedKey? sourceKey,
     BreezeRelationshipDeleteRule deleteRule,
   }) = BreezeModelBelongsToRelation;
 
@@ -91,7 +91,7 @@ sealed class BreezeModelRelation<M extends BreezeBaseModel> {
 final class BreezeModelHasOneRelation<M extends BreezeBaseModel> extends BreezeModelRelation<M> {
   BreezeModelHasOneRelation({
     required super.name,
-    required super.foreignKey,
+    super.foreignKey,
     super.sourceKey,
     super.deleteRule,
   });
@@ -100,7 +100,7 @@ final class BreezeModelHasOneRelation<M extends BreezeBaseModel> extends BreezeM
 final class BreezeModelHasManyRelation<M extends BreezeBaseModel> extends BreezeModelRelation<M> {
   BreezeModelHasManyRelation({
     required super.name,
-    required super.foreignKey,
+    super.foreignKey,
     super.sourceKey,
     super.deleteRule,
   });
@@ -110,7 +110,7 @@ final class BreezeModelBelongsToRelation<M extends BreezeBaseModel> extends Bree
   BreezeModelBelongsToRelation({
     required super.name,
     super.foreignKey,
-    required super.sourceKey,
+    super.sourceKey,
     super.deleteRule,
   });
 }

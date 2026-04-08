@@ -21,7 +21,7 @@ mixin BreezeStoreRelations on BreezeStore {
         type: oneToOne.type,
         name: oneToOne.name,
         foreignKey: BreezeRelationTypedKey(
-          oneToOne.foreignKey?.name ?? '${table}_$pk',
+          oneToOne.foreignKey?.name ?? '${table}_$pk', // TODO: singular ${table}
           oneToOne.foreignKey?.type ?? int,
         ),
         sourceKey: BreezeRelationTypedKey(
@@ -34,7 +34,7 @@ mixin BreezeStoreRelations on BreezeStore {
         type: oneToMany.type,
         name: oneToMany.name,
         foreignKey: BreezeRelationTypedKey(
-          oneToMany.foreignKey?.name ?? '${table}_$pk',
+          oneToMany.foreignKey?.name ?? '${table}_$pk', // TODO: singular ${table}
           oneToMany.foreignKey?.type ?? int,
         ),
         sourceKey: BreezeRelationTypedKey(
@@ -51,7 +51,7 @@ mixin BreezeStoreRelations on BreezeStore {
           manyToOne.foreignKey?.type ?? int,
         ),
         sourceKey: BreezeRelationTypedKey(
-          manyToOne.sourceKey?.name ?? '${manyToOne.name}_id',
+          manyToOne.sourceKey?.name ?? '${manyToOne.name}_id', // TODO: singular ${manyToOne.name}
           manyToOne.sourceKey?.type ?? int,
         ),
         deleteRule: relation.deleteRule,
@@ -62,15 +62,13 @@ mixin BreezeStoreRelations on BreezeStore {
         junction: blueprintOf(manyToMany.junction),
         leftPk: pk!,
         leftKey: BreezeRelationTypedKey(
-          manyToMany.foreignKey?.name ?? '${table}_$pk',
+          manyToMany.foreignKey?.name ?? '${table}_$pk', // TODO: singular ${table}
           manyToMany.foreignKey?.type ?? int,
-        ), // TODO: singular table name
+        ),
         rightKey: BreezeRelationTypedKey(
-          manyToMany.sourceKey?.name ?? '${manyToMany.name}_id',
+          manyToMany.sourceKey?.name ?? '${manyToMany.name}_id', // TODO: singular ${manyToMany.name}
           manyToMany.sourceKey?.type ?? int,
-        ), // TODO: singular name
-        // leftKey: manyToMany.foreignKey ?? '${table}_$pk', // TODO: singular table name
-        // rightKey: manyToMany.sourceKey ?? '${manyToMany.name}_id', // TODO: singular name
+        ),
       ),
     };
     return resolved;
@@ -345,7 +343,7 @@ mixin BreezeStoreRelations on BreezeStore {
           if (record.containsKey(oneToOne.name) && record[oneToOne.name] is BreezeModel?) {
             final BreezeModel? item = record[oneToOne.name];
             if (item != null) {
-              await updateOneToOneRelation(item, oneToOne, record, blueprint);
+              await updateOneToOneRelation(item, oneToOne, record);
             } else {
               // If null is assigned to a relationship, the foreign key in
               // the related record must be reset.
@@ -356,7 +354,6 @@ mixin BreezeStoreRelations on BreezeStore {
                   await nullifyOneToOneRelation(
                     oneToOne,
                     record,
-                    blueprint,
                     relatedBlueprint,
                   );
                   break;
@@ -364,8 +361,7 @@ mixin BreezeStoreRelations on BreezeStore {
                 case BreezeRelationshipDeleteRule.cascade:
                   await deleteOneToOneRelation(
                     oneToOne,
-                    record[blueprint.key /* TODO: oneToOne.sourceKey.name */],
-                    blueprint,
+                    record[oneToOne.sourceKey.name],
                     relatedBlueprint,
                   );
                   break;
@@ -377,7 +373,7 @@ mixin BreezeStoreRelations on BreezeStore {
         case BreezeModelResolvedHasManyRelation oneToMany:
           if (record.containsKey(oneToMany.name) && record[oneToMany.name] is Iterable<BreezeModel>) {
             final Iterable<BreezeModel> items = record[oneToMany.name];
-            await updateOneToManyRelation(items, relationInfo, record, blueprint);
+            await updateOneToManyRelation(items, relationInfo, record);
           }
           break;
 
@@ -400,13 +396,11 @@ mixin BreezeStoreRelations on BreezeStore {
     BreezeModel item,
     BreezeModelResolvedHasOneRelation relation,
     Map<String, dynamic> record,
-    // TODO: Remove blueprint?
-    BreezeModelBlueprint blueprint,
   ) async {
     await saveWithOptions(
       item,
       extraData: {
-        relation.foreignKey.name: record[blueprint.key /* TODO: relation.sourceKey.name */],
+        relation.foreignKey.name: record[relation.sourceKey.name],
       },
     );
   }
@@ -416,15 +410,13 @@ mixin BreezeStoreRelations on BreezeStore {
     Iterable<BreezeModel> items,
     BreezeModelResolvedHasManyRelation relation,
     Map<String, dynamic> record,
-    // TODO: Remove blueprint?
-    BreezeModelBlueprint blueprint,
   ) async {
     final futures = [
       for (final item in items)
         saveWithOptions(
           item,
           extraData: {
-            relation.foreignKey.name: record[blueprint.key /* TODO: relation.sourceKey.name */],
+            relation.foreignKey.name: record[relation.sourceKey.name],
           },
         ),
     ];
@@ -507,13 +499,14 @@ mixin BreezeStoreRelations on BreezeStore {
   }
 
   @override
-  Future<Map<String, dynamic>> deleteRelationsBeforeDelete<M extends BreezeBaseModel>(
+  Future<void> deleteRelationsBeforeDelete<M extends BreezeBaseModel>(
     BreezeModelBlueprint<M> blueprint,
     Map<String, dynamic> record,
     Set<BreezeModelRelation> relations,
   ) async {
-    final result = {...record};
+    // final result = {...record};
 
+    /*
     for (final relation in relations) {
       final relationInfo = resolveRelation(relation, blueprint);
 
@@ -551,8 +544,9 @@ mixin BreezeStoreRelations on BreezeStore {
           break;
       }
     }
+    */
 
-    return result;
+    // return result;
   }
 
   @override
@@ -566,60 +560,51 @@ mixin BreezeStoreRelations on BreezeStore {
 
       switch (relationInfo) {
         case BreezeModelResolvedHasOneRelation oneToOne:
-          if (record.containsKey(oneToOne.name) && record[oneToOne.name] is BreezeModel?) {
-            final BreezeModel? item = record[oneToOne.name];
-            if (item != null && !item.isNew) {
-              final relatedBlueprint = blueprintOf(oneToOne.type);
-              switch (oneToOne.deleteRule) {
-                case BreezeRelationshipDeleteRule.nullify:
-                  await nullifyOneToOneRelation(oneToOne, record, blueprint, relatedBlueprint);
-                  break;
+          final relatedBlueprint = blueprintOf(oneToOne.type);
+          switch (oneToOne.deleteRule) {
+            case BreezeRelationshipDeleteRule.nullify:
+              await nullifyOneToOneRelation(
+                oneToOne,
+                record,
+                relatedBlueprint,
+              );
+              break;
 
-                case BreezeRelationshipDeleteRule.cascade:
-                  await deleteOneToOneRelation(
-                    oneToOne,
-                    record[blueprint.key /* TODO: relation.sourceKey.name */],
-                    blueprint,
-                    relatedBlueprint,
-                  );
-                  break;
-              }
-            }
+            case BreezeRelationshipDeleteRule.cascade:
+              await deleteOneToOneRelation(
+                oneToOne,
+                record[oneToOne.sourceKey.name],
+                relatedBlueprint,
+              );
+              break;
           }
           break;
 
         case BreezeModelResolvedHasManyRelation oneToMany:
-          if (record.containsKey(oneToMany.name) && record[oneToMany.name] is Iterable<BreezeModel>) {
-            final Iterable<BreezeModel> items = record[oneToMany.name];
-            if (items.isNotEmpty) {
-              final relatedBlueprint = blueprintOf(oneToMany.type);
-              switch (oneToMany.deleteRule) {
-                case BreezeRelationshipDeleteRule.nullify:
-                  await nullifyOneToManyRelation(oneToMany, items, blueprint, relatedBlueprint);
-                  break;
+          final relatedBlueprint = blueprintOf(oneToMany.type);
+          switch (oneToMany.deleteRule) {
+            case BreezeRelationshipDeleteRule.nullify:
+              await nullifyOneToManyRelation(
+                oneToMany,
+                record[oneToMany.sourceKey.name],
+                relatedBlueprint,
+              );
+              break;
 
-                case BreezeRelationshipDeleteRule.cascade:
-                  // await Future.wait([
-                  //   for (final item in items) delete(item),
-                  // ]);
-                  await deleteOneToManyRelation(
-                    oneToMany,
-                    record[blueprint.key /* TODO: relation.sourceKey.name */],
-                    blueprint,
-                    relatedBlueprint,
-                  );
-                  break;
-              }
-            }
+            case BreezeRelationshipDeleteRule.cascade:
+              await deleteOneToManyRelation(
+                oneToMany,
+                record[oneToMany.sourceKey.name],
+                relatedBlueprint,
+              );
+              break;
           }
           break;
 
         case BreezeModelResolvedHasManyThroughRelation manyToMany:
-          if (record.containsKey(manyToMany.name)) {
-            final relatedBlueprint = blueprintOf(relation.type);
-            final recordId = record[blueprint.key];
-            await deleteManyToManyRelation(manyToMany, recordId, blueprint, relatedBlueprint);
-          }
+          final relatedBlueprint = blueprintOf(relation.type);
+          final recordId = record[blueprint.key];
+          await deleteManyToManyRelation(manyToMany, recordId, relatedBlueprint);
           break;
 
         default:
@@ -632,14 +617,12 @@ mixin BreezeStoreRelations on BreezeStore {
   Future<void> nullifyOneToOneRelation(
     BreezeModelResolvedHasOneRelation relation,
     Map<String, dynamic> record,
-    // TODO: Remove blueprint?
-    BreezeModelBlueprint blueprint,
     BreezeModelBlueprint relatedBlueprint,
   ) async {
     await updateRecord(
       name: relatedBlueprint.name,
       key: relation.foreignKey.name,
-      keyValue: record[blueprint.key /* TODO: relation.sourceKey.name */],
+      keyValue: record[relation.sourceKey.name],
       record: {
         relation.foreignKey.name: null,
       },
@@ -650,7 +633,6 @@ mixin BreezeStoreRelations on BreezeStore {
   Future<void> deleteOneToOneRelation(
     BreezeModelResolvedHasOneRelation relation,
     dynamic keyValue,
-    BreezeModelBlueprint blueprint,
     BreezeModelBlueprint relatedBlueprint,
   ) async {
     await deleteRecord(
@@ -663,14 +645,13 @@ mixin BreezeStoreRelations on BreezeStore {
   @protected
   Future<void> nullifyOneToManyRelation(
     BreezeModelResolvedHasManyRelation relation,
-    Iterable<BreezeModel> items,
-    BreezeModelBlueprint blueprint,
+    dynamic keyValue,
     BreezeModelBlueprint relatedBlueprint,
   ) async {
     await bulkUpdateRecords(
       name: relatedBlueprint.name,
       key: relation.foreignKey.name,
-      keyValues: items.map((item) => item.id).toList(growable: false),
+      keyValues: [keyValue],
       data: {
         relation.foreignKey.name: null,
       },
@@ -681,7 +662,6 @@ mixin BreezeStoreRelations on BreezeStore {
   Future<void> deleteOneToManyRelation(
     BreezeModelResolvedHasManyRelation relation,
     dynamic keyValue,
-    BreezeModelBlueprint blueprint,
     BreezeModelBlueprint relatedBlueprint,
   ) async {
     await deleteWhereRecords(
@@ -694,7 +674,6 @@ mixin BreezeStoreRelations on BreezeStore {
   Future<void> deleteManyToManyRelation(
     BreezeModelResolvedHasManyThroughRelation relation,
     dynamic keyValue,
-    BreezeModelBlueprint blueprint,
     BreezeModelBlueprint relatedBlueprint,
   ) async {
     await deleteWhereRecords(

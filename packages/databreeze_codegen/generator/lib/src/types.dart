@@ -1,3 +1,4 @@
+import 'package:databreeze/databreeze.dart';
 import 'package:databreeze_generator/src/helpers.dart';
 import 'package:databreeze_generator/src/utils.dart';
 
@@ -75,6 +76,8 @@ class RelationInfo {
 
   final String? junction;
 
+  final BreezeRelationshipDeleteRule? deleteRule;
+
   const RelationInfo({
     required this.name,
     required this.relationType,
@@ -82,6 +85,7 @@ class RelationInfo {
     this.foreignKey,
     this.sourceKey,
     this.junction,
+    this.deleteRule,
   }) : assert(
          relationType != RelationType.hasManyThrough || junction != null,
          'For a hasManyThrough relationship, the linking table must be specified in "junction" parameter.',

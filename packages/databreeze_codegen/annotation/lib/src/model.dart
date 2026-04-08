@@ -49,34 +49,34 @@ class BzRelationship {
 
   final BreezeRelationTypedKey? sourceKey;
 
-  final BreezeRelationshipDeleteRule deleteRule;
+  final BreezeRelationshipDeleteRule? deleteRule;
 
   const BzRelationship._({
     required this.name,
     this.foreignKey,
     this.sourceKey,
-    this.deleteRule = BreezeRelationshipDeleteRule.nullify,
+    this.deleteRule,
   });
 
   const factory BzRelationship.hasOne({
     required String name,
     BreezeRelationTypedKey? foreignKey,
     BreezeRelationTypedKey? sourceKey,
-    BreezeRelationshipDeleteRule deleteRule,
+    BreezeRelationshipDeleteRule? deleteRule,
   }) = BzRelationshipHasOne;
 
   const factory BzRelationship.hasMany({
     required String name,
     BreezeRelationTypedKey? foreignKey,
     BreezeRelationTypedKey? sourceKey,
-    BreezeRelationshipDeleteRule deleteRule,
+    BreezeRelationshipDeleteRule? deleteRule,
   }) = BzRelationshipHasMany;
 
   const factory BzRelationship.belongsTo({
     required String name,
     BreezeRelationTypedKey? foreignKey,
     BreezeRelationTypedKey? sourceKey,
-    BreezeRelationshipDeleteRule deleteRule,
+    BreezeRelationshipDeleteRule? deleteRule,
   }) = BzRelationshipBelongsTo;
 
   const factory BzRelationship.hasManyThrough({

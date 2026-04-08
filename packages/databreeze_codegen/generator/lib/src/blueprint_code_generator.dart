@@ -22,6 +22,10 @@ abstract class BlueprintCodeGenerator extends CodeGenerator {
       result.writeln("  junction: ${relation.junction},");
     }
 
+    if (relation.relationType != RelationType.hasManyThrough && relation.deleteRule != null) {
+      result.writeln("  deleteRule: ${relation.deleteRule},");
+    }
+
     result.write('''),
 }
 ''');

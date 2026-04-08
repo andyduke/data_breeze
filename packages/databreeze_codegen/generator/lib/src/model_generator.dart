@@ -2,6 +2,7 @@ import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/nullability_suffix.dart';
 import 'package:build/build.dart';
 import 'package:collection/collection.dart';
+import 'package:databreeze/databreeze.dart';
 import 'package:databreeze_annotation/databreeze_annotation.dart';
 import 'package:databreeze_generator/src/blueprint_generator.dart';
 import 'package:databreeze_generator/src/blueprint_multi_versions_generator.dart';
@@ -252,6 +253,13 @@ ${relations.map((r) => "    '${r.name}': _self.${r.name},").join('\n')}
       final relationSourceKey = relationAnnReader.peek('sourceKey')?.objectValue;
       // final relationJunction = relationAnnReader.peek('junction')?.literalValue as String?;
       final relationJunction = relationAnnReader.peek('junction')?.typeValue.getDisplayString();
+      final deleteRule = BreezeRelationshipDeleteRuleUtils.fromString(
+        relationAnnReader.peek('deleteRule')?.revive().accessor,
+      );
+
+      // print(
+      //   '[!] ${element.name}.$relationForeignKey {$deleteRule}',
+      // );
 
       // print(
       //   '[!] $relationForeignKey {$relationJunction}',
@@ -304,6 +312,7 @@ ${relations.map((r) => "    '${r.name}': _self.${r.name},").join('\n')}
           foreignKey: relationForeignKeyInfo,
           sourceKey: relationSourceKeyInfo,
           junction: relationJunction,
+          deleteRule: deleteRule,
         ),
       );
 
@@ -434,6 +443,21 @@ extension BzModelNameStyleUtils on BzModelNameStyle {
     if (value != null) {
       final valueName = value.split('.').last;
       final result = BzModelNameStyle.values.firstWhereOrNull((v) => v.name == valueName);
+      return result ?? defaultValue;
+    } else {
+      return defaultValue;
+    }
+  }
+}
+
+extension BreezeRelationshipDeleteRuleUtils on BreezeRelationshipDeleteRule {
+  static BreezeRelationshipDeleteRule? fromString(
+    String? value, {
+    BreezeRelationshipDeleteRule? defaultValue,
+  }) {
+    if (value != null) {
+      final valueName = value.split('.').last;
+      final result = BreezeRelationshipDeleteRule.values.firstWhereOrNull((v) => v.name == valueName);
       return result ?? defaultValue;
     } else {
       return defaultValue;

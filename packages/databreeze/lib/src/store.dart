@@ -331,7 +331,6 @@ abstract class BreezeStore with BreezeStorageTypeConverters {
       if (keyValue != null) {
         record.beforeDelete();
 
-        /*final recordWithoutRelations =*/
         await deleteRelationsBeforeDelete(
           record.schema as BreezeModelBlueprint<M>,
           rawRecord,
@@ -342,7 +341,6 @@ abstract class BreezeStore with BreezeStorageTypeConverters {
           name: tableName,
           key: keyName,
           keyValue: keyValue,
-          // record: recordWithoutRelations,
         );
 
         record.isFrozen = true;
@@ -477,7 +475,7 @@ abstract class BreezeStore with BreezeStorageTypeConverters {
   );
 
   @protected
-  Future<Map<String, dynamic>> deleteRelationsBeforeDelete<M extends BreezeBaseModel>(
+  Future<void> deleteRelationsBeforeDelete<M extends BreezeBaseModel>(
     BreezeModelBlueprint<M> blueprint,
     Map<String, dynamic> record,
     Set<BreezeModelRelation> relations,

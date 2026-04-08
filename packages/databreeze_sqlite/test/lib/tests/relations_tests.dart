@@ -8,9 +8,13 @@ import '../models/company_address.dart';
 import '../models/article.dart';
 import '../models/article_tag.dart';
 import '../models/company.dart';
+import '../models/department.dart';
+import '../models/employee.dart';
 import '../models/item.dart';
 import '../models/item_category.dart';
 import '../models/movie.dart';
+import '../models/person.dart';
+import '../models/person_passport.dart';
 
 part '_utils.dart';
 part '_test_store.dart';
@@ -21,6 +25,7 @@ part '_test_belongsto_fetch.dart';
 part '_test_belongsto_update.dart';
 part '_test_hasmany_fetch.dart';
 part '_test_hasmany_update.dart';
+part '_test_hasmany_delete.dart';
 part '_test_hasmanythrough_fetch.dart';
 part '_test_hasmanythrough_update.dart';
 
@@ -108,11 +113,15 @@ void relationsGroup(
           models: {CompanyModel.blueprint, CompanyAddressModel.blueprint},
           test: testUnsetHasOneRelation,
         ),
-        // TODO: Delete
         (
           label: 'Delete (nullify)',
           models: {CompanyModel.blueprint, CompanyAddressModel.blueprint},
           test: testDeleteNullifyHasOneRelation,
+        ),
+        (
+          label: 'Delete (cascade)',
+          models: {PersonModel.blueprint, PersonPassportModel.blueprint},
+          test: testDeleteCascadeHasOneRelation,
         ),
       ],
       RelationTests.oneToMany: [
@@ -127,6 +136,16 @@ void relationsGroup(
           test: testUpdateHasManyRelation,
         ),
         // TODO: Delete
+        (
+          label: 'Delete (nullify)',
+          models: {ArticleModel.blueprint, ArticleTagModel.blueprint},
+          test: testDeleteNullifyHasManyRelation,
+        ),
+        (
+          label: 'Delete (cascade)',
+          models: {DepartmentModel.blueprint, EmployeeModel.blueprint},
+          test: testDeleteCascadeHasManyRelation,
+        ),
       ],
       RelationTests.manyToOne: [
         (

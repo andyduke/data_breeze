@@ -385,7 +385,7 @@ class BreezeSqliteStore extends BreezeStore
     final keyPlaceholders = List.filled(keyValues.length, '?').join(', ');
 
     await executeSql(
-      'UPDATE $name SET ${data.keys.map((k) => '$k = ?').join(', ')} WHERE $key IN($keyPlaceholders)',
+      'UPDATE $name SET ${data.keys.map((k) => '$k = ?').join(', ')} WHERE $key IN ($keyPlaceholders)',
       [...data.values, ...keyValues],
     );
 
