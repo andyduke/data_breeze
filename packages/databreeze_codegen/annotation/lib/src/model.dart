@@ -76,7 +76,6 @@ class BzRelationship {
     required String name,
     BreezeRelationTypedKey? foreignKey,
     BreezeRelationTypedKey? sourceKey,
-    BreezeRelationshipDeleteRule? deleteRule,
   }) = BzRelationshipBelongsTo;
 
   const factory BzRelationship.hasManyThrough({
@@ -111,7 +110,6 @@ class BzRelationshipBelongsTo extends BzRelationship {
     required super.name,
     super.foreignKey,
     super.sourceKey,
-    super.deleteRule,
   }) : super._();
 }
 

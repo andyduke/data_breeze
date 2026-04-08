@@ -23,11 +23,13 @@ part '_test_hasone_update.dart';
 part '_test_hasone_delete.dart';
 part '_test_belongsto_fetch.dart';
 part '_test_belongsto_update.dart';
+part '_test_belongsto_delete.dart';
 part '_test_hasmany_fetch.dart';
 part '_test_hasmany_update.dart';
 part '_test_hasmany_delete.dart';
 part '_test_hasmanythrough_fetch.dart';
 part '_test_hasmanythrough_update.dart';
+part '_test_hasmanythrough_delete.dart';
 
 @isTestGroup
 void relationsGroup(
@@ -135,7 +137,6 @@ void relationsGroup(
           models: {ArticleModel.blueprint, ArticleTagModel.blueprint},
           test: testUpdateHasManyRelation,
         ),
-        // TODO: Delete
         (
           label: 'Delete (nullify)',
           models: {ArticleModel.blueprint, ArticleTagModel.blueprint},
@@ -158,7 +159,11 @@ void relationsGroup(
           models: {ItemModel.blueprint, ItemCategoryModel.blueprint},
           test: testUpdateBelongsToRelation,
         ),
-        // TODO: Delete
+        (
+          label: 'Delete',
+          models: {ItemModel.blueprint, ItemCategoryModel.blueprint},
+          test: testDeleteBelongsToRelation,
+        ),
       ],
       RelationTests.manyToMany: [
         (
@@ -171,7 +176,11 @@ void relationsGroup(
           models: {ActorModel.blueprint, MovieModel.blueprint, MovieActorsModel.blueprint},
           test: testUpdateHasManyThroughRelation,
         ),
-        // TODO: Delete
+        (
+          label: 'Delete',
+          models: {ActorModel.blueprint, MovieModel.blueprint, MovieActorsModel.blueprint},
+          test: testDeleteHasManyThroughRelation,
+        ),
       ],
     },
   );

@@ -76,7 +76,6 @@ sealed class BreezeModelRelation<M extends BreezeBaseModel> {
     required String name,
     BreezeRelationTypedKey? foreignKey,
     BreezeRelationTypedKey? sourceKey,
-    BreezeRelationshipDeleteRule deleteRule,
   }) = BreezeModelBelongsToRelation;
 
   factory BreezeModelRelation.hasManyThrough({
@@ -111,7 +110,6 @@ final class BreezeModelBelongsToRelation<M extends BreezeBaseModel> extends Bree
     required super.name,
     super.foreignKey,
     super.sourceKey,
-    super.deleteRule,
   });
 }
 

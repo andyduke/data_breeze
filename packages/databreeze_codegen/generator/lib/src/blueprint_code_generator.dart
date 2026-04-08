@@ -18,11 +18,13 @@ abstract class BlueprintCodeGenerator extends CodeGenerator {
         "  sourceKey: BreezeRelationTypedKey('${relation.sourceKey!.name}', ${relation.sourceKey!.type}),",
       );
     }
-    if (relation.relationType == RelationType.hasManyThrough && relation.junction != null) {
+    if (relation.relationType == RelationType.hasManyThrough && (relation.junction != null)) {
       result.writeln("  junction: ${relation.junction},");
     }
 
-    if (relation.relationType != RelationType.hasManyThrough && relation.deleteRule != null) {
+    if ((relation.relationType != RelationType.belongsTo) &&
+        (relation.relationType != RelationType.hasManyThrough) &&
+        (relation.deleteRule != null)) {
       result.writeln("  deleteRule: ${relation.deleteRule},");
     }
 
