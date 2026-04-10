@@ -285,4 +285,16 @@ Future<void> main() async {
       });
     }
   });
+
+  group('Table\'s perspective transformations', () {
+    test('ClassName to collection_name', () {
+      final actual = Plurals.classNameToCollectionName('ArticleTag');
+      expect(actual, 'article_tags');
+    });
+
+    test('Foreign key based on collection_name', () {
+      final actual = '${Plurals.singularize('customers')}_id';
+      expect(actual, 'customer_id');
+    });
+  });
 }

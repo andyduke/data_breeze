@@ -1,4 +1,25 @@
 abstract class Plurals {
+  static String classNameToCollectionName(String className) => pluralize(camelToSnake(className));
+
+  static String camelToSnake(String input) {
+    return input
+        .replaceAllMapped(
+          RegExp(r'(?<=[a-z])[A-Z]'),
+          (m) => '_${m.group(0)!.toLowerCase()}',
+        )
+        .toLowerCase();
+  }
+
+  static String snakeToCamel(String input) {
+    if (!input.contains(RegExp(r'(_|-)+'))) {
+      return input;
+    }
+    return input.toLowerCase().replaceAllMapped(
+      RegExp(r'(_|-)+([a-z])'),
+      (Match m) => m[2]!.toUpperCase(),
+    );
+  }
+
   /// Pluralize a word.
   static String pluralize(String word) => _replaceWord(
     _irregularSingles,
@@ -19,7 +40,8 @@ abstract class Plurals {
   ///
   /// [replaceMap]  map of words to be replaced
   /// [keepMap]     map of words to keep intact
-  /// [rules]       List of rules to use for sanitization
+  /// [rules]       List of rules to use for transformation
+  /// [word]        a word to update
   ///
   /// Returns a function that accepts a word and returns the updated word
   static String _replaceWord(
@@ -28,7 +50,7 @@ abstract class Plurals {
     Map<RegExp, String> rules,
     String word,
   ) {
-    // Get the correct token and case restoration functions.
+    // Getting a token from a word without regard to case.
     final token = word.toLowerCase();
 
     // Check against the keep object map.
@@ -45,7 +67,7 @@ abstract class Plurals {
     return _applyRules(token, word, rules);
   }
 
-  /// Sanitize a word by passing in the word and sanitization rules.
+  /// Applying word transformation according to a list of rules.
   static String _applyRules(String token, String word, Map<RegExp, String> rules) {
     // Empty string or doesn't need fixing.
     if (token.isEmpty || _uncountables.contains(token)) {
@@ -70,8 +92,8 @@ abstract class Plurals {
     final regex = rule.key;
     //print('regex: $regex');
 
-    // Use the first element of the rule as a RegExp to match in the word.
-    // The second element of the rule is used as a string to replace the match.
+    // Use the key from the rule as a RegExp to match in the word.
+    // The value from the rule is used as a string to replace the match.
     return word.replaceFirstMapped(regex, (match) {
       // Interpolate the replacement string using arguments from the match.
 
@@ -302,7 +324,6 @@ abstract class Plurals {
     'machinery',
     'mackerel',
     'mail',
-    // 'media',
     'means',
     'mews',
     'milk',
