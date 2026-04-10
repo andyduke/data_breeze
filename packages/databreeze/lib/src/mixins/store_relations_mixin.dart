@@ -503,51 +503,7 @@ mixin BreezeStoreRelations on BreezeStore {
     BreezeModelBlueprint<M> blueprint,
     Map<String, dynamic> record,
     Set<BreezeModelRelation> relations,
-  ) async {
-    // final result = {...record};
-
-    /*
-    for (final relation in relations) {
-      final relationInfo = resolveRelation(relation, blueprint);
-
-      switch (relationInfo) {
-        case BreezeModelResolvedHasOneRelation oneToOne:
-          if (result.containsKey(oneToOne.name) && result[oneToOne.name] is BreezeModel?) {
-            // Remove from the result, since this value will be
-            // processed later in deleteRelationsAfterDelete.
-            result.remove(oneToOne.name);
-          }
-          break;
-
-        case BreezeModelResolvedHasManyRelation oneToMany:
-          if (result.containsKey(oneToMany.name) && result[oneToMany.name] is Iterable<BreezeModel>) {
-            // Remove from the result, since this value will be
-            // processed later in deleteRelationsAfterDelete.
-            result.remove(oneToMany.name);
-          }
-          break;
-
-        case BreezeModelResolvedBelongsToRelation manyToOne:
-          if (result.containsKey(manyToOne.name) && result[manyToOne.name] is BreezeModel?) {
-            // Remove from the result, since this value will be
-            // processed later in deleteRelationsAfterDelete.
-            result.remove(manyToOne.name);
-          }
-          break;
-
-        case BreezeModelResolvedHasManyThroughRelation manyToMany:
-          if (result.containsKey(manyToMany.name) && result[manyToMany.name] is Iterable<BreezeModel>) {
-            // Remove from the result, since this value will be
-            // processed later in deleteRelationsAfterDelete.
-            result.remove(manyToMany.name);
-          }
-          break;
-      }
-    }
-    */
-
-    // return result;
-  }
+  ) async {}
 
   @override
   Future<void> deleteRelationsAfterDelete<M extends BreezeBaseModel>(
