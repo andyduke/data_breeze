@@ -1,5 +1,21 @@
 abstract class Plurals {
-  static String classNameToCollectionName(String className) => pluralize(camelToSnake(className));
+  static String classNameToCollectionName(String className) {
+    final name = camelToSnake(className);
+    final nameParts = name.split('_');
+
+    late final List<String> namePrefix;
+    late String nameSuffix;
+
+    if (nameParts.length > 1) {
+      namePrefix = nameParts.sublist(0, nameParts.length - 1);
+      nameSuffix = nameParts.last;
+    } else {
+      namePrefix = [];
+      nameSuffix = name;
+    }
+
+    return [...namePrefix, pluralize(nameSuffix)].join('_');
+  }
 
   static String camelToSnake(String input) {
     return input

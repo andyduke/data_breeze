@@ -292,6 +292,16 @@ Future<void> main() async {
       expect(actual, 'article_tags');
     });
 
+    test('ClassName to collection_name (single word)', () {
+      final actual = Plurals.classNameToCollectionName('Order');
+      expect(actual, 'orders');
+    });
+
+    test('ClassName to collection_name (multiple words)', () {
+      final actual = Plurals.classNameToCollectionName('OrderDetailItem');
+      expect(actual, 'order_detail_items');
+    });
+
     test('Foreign key based on collection_name', () {
       final actual = '${Plurals.singularize('customers')}_id';
       expect(actual, 'customer_id');
