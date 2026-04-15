@@ -17,5 +17,7 @@ export 'src/mixins/store_relations_mixin.dart';
 export 'src/store.dart';
 export 'src/json_store.dart';
 
+export 'src/utils/plurals.dart';
+
 export 'src/migration/migration_strategy.dart';
 export 'src/migration/migration_manager.dart';

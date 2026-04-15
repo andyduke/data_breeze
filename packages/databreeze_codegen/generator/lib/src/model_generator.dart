@@ -24,11 +24,8 @@ class BreezeModelGenerator extends GeneratorForAnnotation<BzModel> {
     final ClassElement classElement = element;
     final className = classElement.name!;
     final modelName = annotation.peek('name')?.stringValue;
-    final tableName =
-        modelName ??
-        camelToSnake(
-          className,
-        ); // TODO: plural - https://github.com/ivofernandes/pluralize/blob/main/lib/src/pluralize.dart
+    // final tableName = modelName ?? camelToSnake(className);
+    final tableName = modelName ?? Plurals.classNameToCollectionName(className);
     final primaryKey = annotation.peek('primaryKey')?.stringValue ?? 'id';
     final primaryKeyType = classElement.modelKeyType;
     final constructor = annotation.peek('constructor')?.stringValue;
@@ -285,7 +282,7 @@ ${relations.map((r) => "    '${r.name}': _self.${r.name},").join('\n')}
               ),
               _ => null,
             }
-          : null;
+          : null /* TODO: auto generate reference definition */;
       final relationSourceKeyInfo = (relationSourceKey != null)
           ? RelationKeyInfo(
               // relationSourceKey.getField('name')?.toStringValue() ?? '???',
@@ -294,7 +291,7 @@ ${relations.map((r) => "    '${r.name}': _self.${r.name},").join('\n')}
                   relationSourceKey.constructorInvocation!.positionalArguments[1].toTypeValue()!.getDisplayString(),
               // relationSourceKey.getField('type')!.toTypeValue()!.getDisplayString(),
             )
-          : null;
+          : null /* TODO: auto generate reference definition */;
 
       // print(
       //   '[!] $relationType (${field.type.isDartCoreList ? field.type.genericTypes : '--'}): $relationName<$relationModelType> (foreignKey: $relationForeignKey [${relationForeignKey?.getField('name')}, ${relationForeignKey?.getField('type')}], sourceKey: $relationSourceKey)',
